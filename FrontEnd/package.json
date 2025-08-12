@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "@types/node-fetch": "^2.6.13"
+  }
+}
