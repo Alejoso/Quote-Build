@@ -8,6 +8,12 @@ export async function getProyectosMock(): Promise<string[]> {
     { nombre: "Remodelación de Oficina" },
     { nombre: "Parque Industrial" },
     { nombre: "Escuela Primaria" }, 
+    {nombre: "Casa75"},
+    { nombre: "Construcción de Puente" },
+    { nombre: "Edificio Residencial" },
+    { nombre: "Remodelación de Oficina" },
+    { nombre: "Parque Industrial" },
+    { nombre: "Escuela Primaria" }, 
     {nombre: "Casa75"}
     
   ];
