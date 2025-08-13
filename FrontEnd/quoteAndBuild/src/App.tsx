@@ -1,46 +1,41 @@
-import {useEffect} from "react";
-import Button from "./components/materialList";
-import { Routes, Route, Link } from 'react-router-dom'
-import MaterialList from './components/materialList'
+import { Routes, Route, Link } from "react-router-dom";
+import MaterialList from "./components/materialList";
+import AppStyles from "./App.module.css";
+import PhaseTable from "./components/PhaseTable/phaseTable";
 
 function App() {
+  const phasesData = [
+    { phase: "Planificación", status: "En progreso" },
+    { phase: "Diseño", status: "Completado" },
+    { phase: "Desarrollo", status: "Pendiente" },
+  ];
 
-  async function fetchMaterials() {
-    try 
-    {
-      const response = await fetch('http://127.0.0.1:8000/api/material/');
-      if (!response.ok)
-      {
-        throw new Error(`Http error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(data); 
-    } catch (error)
-    {
-      console.error('Error fetching: ' , error); 
-    }
-  }
-
-  useEffect(() => {
-    fetchMaterials();
-  }, []);
+  const handleDelete = (index: number) => {
+    console.log("Eliminar fila:", index);
+    // Aquí iría la lógica para eliminar de la base de datos o del estado
+  };
 
   return (
-    <>      
+    <div className={AppStyles.AppContainer}>
+      <nav className="app-nav">
+        <Link to="/">Inicio</Link> | 
+        <Link to="/materiales">Materiales</Link> | 
+        <Link to="/project">Proyectos</Link> | 
+        <Link to="/phase">Fases</Link>
+      </nav>
 
-      <div>
-        <nav>
-          <Link to="/">Inicio</Link> | <Link to="/materiales">Materiales</Link> | <Link to="/otra">Otra Vista</Link>
-        </nav>
+      <h1>Gloria</h1>
 
-        <Routes>
-          <Route path="/" element={<h1>Bienvenido a la página de inicio</h1>} />
-          <Route path="/materiales" element={<MaterialList label={"AlejitoPingo"} />} />
-        </Routes>
-      </div>
-    </>
-  )
+      <Routes>
+        <Route path="/" element={null} />
+        <Route path="/materiales" element={<MaterialList label="AlejitoPingo" />} />
+        <Route
+          path="/phase"
+          element={<PhaseTable data={phasesData} onDelete={handleDelete} />}
+        />
+      </Routes>
+    </div>
+  );
 }
 
-export default App
+export default App;
