@@ -3,8 +3,13 @@ import { getProyectosMock } from "../../services/projectService";
 import ProjectElement from "../elementTable/elementTable";
 import DynamicBox from "../dynamicBox/dynamicBox";
 
+type Proyecto = {
+  ProjectId: number;
+  Name: string;
+};
+
 function ProjectList() {
-  const [proyectos, setProyectos] = useState<string[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
 
   useEffect(() => {
     getProyectosMock().then(setProyectos);
@@ -12,8 +17,11 @@ function ProjectList() {
 
   return (
     <DynamicBox itemsCount={proyectos.length} itemHeight={60}>
-      {proyectos.map((nombre, index) => (
-        <ProjectElement key={index} textValue={nombre} />
+      {proyectos.map((proyecto) => (
+        <ProjectElement
+          key={proyecto.ProjectId}
+          textValue={proyecto.Name}
+        />
       ))}
     </DynamicBox>
   );
