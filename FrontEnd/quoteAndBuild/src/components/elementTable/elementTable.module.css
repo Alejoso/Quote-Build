@@ -1,0 +1,30 @@
+.ProjectElement {
+  background-color: #EAE2E2;
+  width: 500px;
+  height: 50px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center; /* centra verticalmente */
+  justify-content: space-between; /* texto a la izquierda, botón a la derecha */
+  padding: 0 12px; /* espacio lateral */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ProjectItem {
+  font-family: 'Latif', sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+}
+
+.trashButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.trashImage {
+  width: 24px;
+  height: 24px;
+}
