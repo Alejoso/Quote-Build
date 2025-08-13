@@ -31,7 +31,7 @@ const PhaseTable: React.FC<PhaseTableProps> = ({ data, onDelete }) => {
                 className={styles.deleteButton}
                 onClick={() => onDelete(index)}
               >
-                🗑
+                <img src="/home/simonsloan/Universidad/Semestre4/ProyectoIntegrador1/QuoteAndBuild/Proyecto/Quote-Build/FrontEnd/quoteAndBuild/public/TrashImage.jpeg"></img>
               </button>
             </td>
           </tr>
