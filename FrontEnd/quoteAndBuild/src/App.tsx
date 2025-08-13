@@ -1,23 +1,26 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import Home from "./pages/home";
-import NuevaCotizacion from "./pages/nuevaCotizacion";
+import NuevoProyecto from "./pages/nuevoProyecto";
+import NavBar from './components/NavBar';
 
 function App() {
 
   return (
-    <>      
+    <div className="w-screen h-screen overflow-x-hidden overflow-y-auto">
 
-      <div>
-          {/* Aquí definimos las rutas */}
-          <Routes>
-            <Route path="/" element={<Home/>} />
-            <Route path="/nuevaCotizacion" element={<NuevaCotizacion/>} />
-            <Route path="/contact" element={<h1>Ñañañaña</h1>} />
-          </Routes>
+    <NavBar />
+
+      <div className="w-full">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/nuevoProyecto" element={<NuevoProyecto/>} />
+          <Route path="/contact" element={<h1>Ñañañaña</h1>} />
+        </Routes>
       </div>
+
       
-    </>
-  )
+    </div>
+  );
 }
 
 export default App

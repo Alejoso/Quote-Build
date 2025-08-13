@@ -5,7 +5,13 @@ module.exports = {
     "./public/index.html"
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        naranja: '#F59723',
+        naranjaHover: '#DB8621', 
+        negroClaro: '#1C1B1B',
+      }
+    },
   },
   plugins: [],
 }
