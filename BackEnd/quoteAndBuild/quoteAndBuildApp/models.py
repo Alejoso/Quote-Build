@@ -41,11 +41,7 @@ class Project(models.Model):
     project_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=160)
-<<<<<<< HEAD
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
-=======
-    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
->>>>>>> 5fb0dbf51791ca176c94ac2d37338c01eae3ffe8
 
     def __str__(self):
         return f"{self.name} ({self.location})"
@@ -87,11 +83,7 @@ class Phase(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='phases')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-<<<<<<< HEAD
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
-=======
-    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
->>>>>>> 5fb0dbf51791ca176c94ac2d37338c01eae3ffe8
 
     def __str__(self):
         return f"{self.name} ({self.project_id})"
@@ -120,11 +112,7 @@ class Quotes(models.Model):
     quote_date = models.DateField()
     description = models.TextField(blank=True, null=True)
     is_first_quote = models.BooleanField()
-<<<<<<< HEAD
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
-=======
-    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
->>>>>>> 5fb0dbf51791ca176c94ac2d37338c01eae3ffe8
 
     def __str__(self):
         return f"Quote {self.quote_id} for {self.phase_id} - {self.phase_id}"
