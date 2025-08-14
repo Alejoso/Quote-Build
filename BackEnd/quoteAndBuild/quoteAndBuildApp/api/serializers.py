@@ -1,12 +1,36 @@
 from rest_framework import serializers
 from quoteAndBuildApp.models import Material , Project, Phase, Quotes, QuoteSupplierMaterial, SupplierMaterial
 
+class MaterialListSerializer(serializers.ModelSerializer):
+    supplierMaterialId = serializers.IntegerField(source='supplier_material_id', read_only=True)
+    materialId         = serializers.IntegerField(source='material_id.material_id', read_only=True)
+    name               = serializers.CharField(source='material_id.name', read_only=True)
+    price              = serializers.DecimalField(source='actual_price', max_digits=30, decimal_places=2)
+    category           = serializers.CharField(source='material_id.category', read_only=True)
+    unitOfMeasure      = serializers.CharField(source='unit_of_measure', read_only=True)
+    supplier           = serializers.SerializerMethodField()
 
-class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Material
-        fields = '__all__'
+        model  = SupplierMaterial
+        fields = (
+            'supplierMaterialId',
+            'materialId',
+            'name',
+            'price',
+            'category',
+            'unitOfMeasure',
+            'supplier',
+        )
 
+    def get_supplier(self, obj):
+        s = obj.nit  # FK a Supplier
+        return {"name": s.name, "location": s.location, "nit": s.nit}
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = '__all__'
+        
 # serializers.py
 from decimal import Decimal
 from typing import Any, Dict, List

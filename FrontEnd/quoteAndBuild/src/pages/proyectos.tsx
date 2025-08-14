@@ -6,7 +6,7 @@ export default function ProjectsPage() {
     const [projects, setProjects] = useState<string[]>([]);
 
     useEffect(() => {
-        fetch('http://localhost:8000/api/projects/')
+        fetch('http://localhost:8000/api/project/')
             .then(res => res.json())
             .then(data => {
                 // Asumiendo que cada proyecto tiene un campo 'name'

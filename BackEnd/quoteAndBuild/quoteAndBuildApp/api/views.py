@@ -1,10 +1,12 @@
 from rest_framework import viewsets
-from quoteAndBuildApp.models import Material, Project
-from quoteAndBuildApp.api.serializers import MaterialSerializer, ProjectSerializer
+from quoteAndBuildApp.models import Material, Project ,SupplierMaterial
+from quoteAndBuildApp.api.serializers import MaterialListSerializer, ProjectSerializer
 
-class MaterialViewSet(viewsets.ModelViewSet):
-    queryset = Material.objects.all()
-    serializer_class = MaterialSerializer
+from .serializers import MaterialListSerializer
+
+class MaterialViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SupplierMaterial.objects.select_related('material_id', 'nit').order_by('material_id__name')
+    serializer_class = MaterialListSerializer
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
