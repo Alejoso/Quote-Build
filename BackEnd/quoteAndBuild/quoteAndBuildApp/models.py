@@ -41,9 +41,31 @@ class Project(models.Model):
     project_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=160)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.location})"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_total_price()
+
+    def delete(self, *args, **kwargs):
+        # Store reference to the project before deletion
+        super().delete(*args, **kwargs)
+        self.update_total_price()
+
+    def update_total_price(self):
+        if self.pk is None:
+            return
+        
+        total = self.phases.aggregate(
+            total_price=models.Sum('total_price')
+        )['total_price'] or 0
+
+        self.total_price = total
+
+        Project.objects.filter(pk=self.pk).update(total_price=total)
 
 class ClientProject(models.Model):
     cedula = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
@@ -81,6 +103,8 @@ class Phase(models.Model):
         Phase.objects.filter(pk=self.pk).update(total_price=total)
 
         self.total_price = total
+
+        self.project_id.update_total_price()  # Update the project total
     
 class Quotes(models.Model):
     quote_id = models.AutoField(primary_key=True)
