@@ -4,20 +4,19 @@ It is a software for the administrative staff of the company OCIRAGA23 SAS who h
 
 # SetUp guide
 Backend
-'''bash
+```bash
 python3 -m venv venv
 source ./venv/bin/activate
 pip install -r requirements.txt
 cd Quote-Build/BackEnd/quoteAndBuild
-
-'''
+```
 
 Frontend
-'''bash
+```bash
 cd FrontEnd/quoteAndBuild
 npm install
 
 npm run dev
-'''
+```
 
 
