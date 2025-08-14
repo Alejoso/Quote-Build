@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.db.models import Sum
 
 class Client(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
@@ -70,10 +71,26 @@ class Quotes(models.Model):
     quote_date = models.DateField()
     description = models.TextField(blank=True, null=True)
     is_first_quote = models.BooleanField()
+    total_price = models.DecimalFiels(null=True)
 
     def __str__(self):
         return f"Quote {self.quote_id} for {self.project_id} - {self.phase_id}"
     
+    def save(self, *args, **kwargs):
+        # First save the Quotes instance to ensure it has a primary key
+        super().save(*args, **kwargs)
+        
+        # Calculate the total_price by summing all related QuoteSupplierMaterial subtotals
+        total = self.supplier_materials.aggregate(
+            total_price=models.Sum('subtotal')
+        )['total_price'] or 0
+        
+        # Update the total_price field
+        self.total_price = total
+        
+        # Save again to update the total_price
+        super().save(update_fields=['total_price'])
+
 class PhaseInterval(models.Model):
     interval_id = models.AutoField(primary_key=True)
     phase_id = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='intervals')
@@ -151,6 +168,10 @@ class QuoteSupplierMaterial(models.Model):
 
     def __str__(self):
         return f"{self.supplier_material_id} for {self.quote_id} - Quantity: {self.quantity}"
+
+    def save(self, *args, **kwargs): # Override save so as to calculate subtotal automatically (subtotal = quantity * unit_price)
+        self.subtotal = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
     
 class Worker(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
