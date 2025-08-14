@@ -8,6 +8,9 @@ function App() {
     { phase: "Planificación", status: "En progreso" },
     { phase: "Diseño", status: "Completado" },
     { phase: "Desarrollo", status: "Pendiente" },
+    { phase: "Planificación", status: "En progreso" },
+    { phase: "Diseño", status: "Completado" },
+    { phase: "Desarrollo", status: "Pendiente" },
   ];
 
   const handleDelete = (index: number) => {
