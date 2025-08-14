@@ -71,25 +71,30 @@ class Quotes(models.Model):
     quote_date = models.DateField()
     description = models.TextField(blank=True, null=True)
     is_first_quote = models.BooleanField()
-    total_price = models.DecimalFiels(null=True)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 
     def __str__(self):
-        return f"Quote {self.quote_id} for {self.project_id} - {self.phase_id}"
+        return f"Quote {self.quote_id} for {self.phase_id} - {self.phase_id}"
     
     def save(self, *args, **kwargs):
-        # First save the Quotes instance to ensure it has a primary key
+        self.update_total_price()  # Ensure total_price is updated before saving
         super().save(*args, **kwargs)
-        
-        # Calculate the total_price by summing all related QuoteSupplierMaterial subtotals
+
+    def update_total_price(self):
+         # Calculate the total_price by summing all related QuoteSupplierMaterial subtotals
         total = self.supplier_materials.aggregate(
             total_price=models.Sum('subtotal')
         )['total_price'] or 0
         
+        # Use direct database update to avoid triggering save() again
+        Quotes.objects.filter(pk=self.pk).update(total_price=total)
+
         # Update the total_price field
         self.total_price = total
-        
-        # Save again to update the total_price
-        super().save(update_fields=['total_price'])
+    
+    @property
+    def project_id(self):
+        return self.phase_id.project_id.project_id
 
 class PhaseInterval(models.Model):
     interval_id = models.AutoField(primary_key=True)
@@ -172,6 +177,13 @@ class QuoteSupplierMaterial(models.Model):
     def save(self, *args, **kwargs): # Override save so as to calculate subtotal automatically (subtotal = quantity * unit_price)
         self.subtotal = self.quantity * self.unit_price
         super().save(*args, **kwargs)
+        self.quote_id.update_total_price()  # Update the quote total after saving
+
+    def delete(self, *args, **kwargs):
+        quote = self.quote_id  # Store reference before deletion
+        super().delete(*args, **kwargs)
+        # Update quote total after deletion
+        self.quote_id.update_total_price()  # Update the quote total after deleting
     
 class Worker(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
