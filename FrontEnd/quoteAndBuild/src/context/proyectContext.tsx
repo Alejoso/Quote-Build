@@ -2,20 +2,20 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
 export interface CotizacionMaterialFE {
-    supplier_material_id: number;
-    cantidad: number;           // antes string
-    precioUnitario: number;     // antes string
-    subtotal?: number | null;   // antes string | null
-  }
-  
-  export interface CotizacionFE {
-    id?: number;
-    descripcion: string;
-    fecha: string;              // YYYY-MM-DD
-    esPrimera: boolean;
-    total?: number | null;      // antes string | null
-    materiales: CotizacionMaterialFE[];
-  }
+  supplier_material_id: number;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal?: number | null;
+}
+
+export interface CotizacionFE {
+  id?: number;
+  descripcion: string;
+  fecha: string;            // YYYY-MM-DD
+  esPrimera: boolean;
+  total?: number | null;    // número (o null)
+  materiales: CotizacionMaterialFE[];
+}
   
   export interface FaseFE {
     id?: number | string;
@@ -73,14 +73,22 @@ interface ProyectoContextType {
 
   addFase: () => void;
   updateFase: (index: number, campo: "nombre" | "descripcion", valor: string) => void;
-  addCotizacion: (
-    faseId: string | number,
-    data: Pick<CotizacionFE, "descripcion" | "fecha" | "esPrimera" | "total">
-  ) => void;
 
+  
   hydrateFromDjango: (json: ProjectJSON) => void;
   toDjangoJSON: () => ProjectJSON;
   resetProyecto: () => void;
+
+  addCotizacion: (
+    faseId: string | number,
+    data: {
+      descripcion?: string | null;
+      fecha: string;
+      esPrimera?: boolean;
+      total?: number | null;
+      materiales?: CotizacionMaterialFE[];
+    }
+  ) => void;
 
   // NUEVO: selectores de totales + formato
   getQuoteTotalNum: (q: CotizacionFE) => number;
@@ -92,27 +100,6 @@ interface ProyectoContextType {
 const ProyectoContext = createContext<ProyectoContextType | undefined>(undefined);
 
 const emptyProyecto: ProyectoFE = { nombre: "", lugar: "", total: null, fases: [] };
-
-/** ====== Helpers de dinero (strings <-> centavos) ====== */
-function strToCents(x?: string | null): number {
-  if (!x || x.trim() === "") return 0;
-  const neg = x.startsWith("-");
-  const s = x.replace(/[^0-9.]/g, "");
-  const [int = "0", dec = ""] = s.split(".");
-  const cents = Number(int) * 100 + Number((dec + "00").slice(0, 2));
-  return neg ? -cents : cents;
-}
-function centsToStr(cents: number): string {
-  const sign = cents < 0 ? "-" : "";
-  const abs = Math.abs(cents);
-  const int = Math.floor(abs / 100);
-  const dec = String(abs % 100).padStart(2, "0");
-  return `${sign}${int}.${dec}`;
-}
-function formatCOP(amountStr: string): string {
-  const n = Number(amountStr || "0");
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(n);
-}
 
 /** ====== Normalización (Django -> Front) ====== */
 type DecStr = string | null | undefined;
@@ -201,32 +188,34 @@ export function ProyectoProvider({ children }: { children: ReactNode }) {
   
   const addCotizacion = (
     faseId: string | number,
-    data: { descripcion?: string | null; fecha: string; esPrimera?: boolean; total?: number | null }
+    data: {
+      descripcion?: string | null;
+      fecha: string;
+      esPrimera?: boolean;
+      total?: number | null;
+      materiales?: CotizacionMaterialFE[];   // <-- NUEVO
+    }
   ) => {
     setProyecto(prev => ({
       ...prev,
       fases: prev.fases.map((f, i) => {
-        const match = String(f.id ?? i) === String(faseId); // <-- clave
+        const match = String(f.id ?? i) === String(faseId); // id o índice (fallback)
         if (!match) return f;
   
         const nextNum = f.cotizaciones.length + 1;
         const desc = (data.descripcion ?? "").trim() || `Cuota ${nextNum}`;
         const esPrimeraFinal = data.esPrimera ?? true;
   
-        return {
-          ...f,
-          cotizaciones: [
-            ...f.cotizaciones,
-            {
-              id: undefined,
-              descripcion: desc,
-              fecha: data.fecha,
-              esPrimera: esPrimeraFinal,
-              total: data.total ?? null,
-              materiales: [],
-            },
-          ],
+        const nueva: CotizacionFE = {
+          id: undefined,
+          descripcion: desc,
+          fecha: data.fecha,
+          esPrimera: esPrimeraFinal,
+          total: data.total ?? null,
+          materiales: data.materiales ?? [],   // <-- guardamos materiales
         };
+  
+        return { ...f, cotizaciones: [...f.cotizaciones, nueva] };
       }),
     }));
   };

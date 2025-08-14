@@ -46,7 +46,7 @@ export default function NuevoProyecto() {
       });
 
       // 3) POST a Django (ajusta ENDPOINT)
-      const ENDPOINT = "htt"; // <-- cámbialo a tu ruta real
+      const ENDPOINT = "http://127.0.0.1:8000/api/insertNewProject/"; // <-- cámbialo a tu ruta real
       console.log("PAYLOAD →", payload);
 
       const res = await fetch(ENDPOINT, {

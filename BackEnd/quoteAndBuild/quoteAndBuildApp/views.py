@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from quoteAndBuildApp.models import SupplierMaterial
+from quoteAndBuildApp.api.serializers import MaterialSerializer
 
-# Create your views here.
+class MaterialViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SupplierMaterial.objects.select_related('material_id', 'nit')
+    serializer_class = MaterialSerializer
