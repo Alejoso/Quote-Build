@@ -5,7 +5,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-100">
+    <div className="w-screen flex flex-col items-center justify-start pt-10 pb-20 bg-gray-100 space-y-6 px-4">
       {/* Contenedor del título + imagen */}
       <div className="flex items-center mb-12 space-x-4">
         <h1 className="text-6xl font-bold text-gray-800">Quote&amp;Build</h1>
