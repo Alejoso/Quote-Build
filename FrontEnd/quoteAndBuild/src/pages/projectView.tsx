@@ -1,27 +1,52 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import ProjectHeader from '../components/projectHeader';
-import PhaseTable from '../components/phaseTable';
+import MaterialTable from '../components/materialTable';
 
-interface Phase {
-  phase: string;
-  status: string;
+interface Material {
+  materialId: number;
+  name: string;
+  price: number;
+  category: string;
+  unitOfMeasure: string;
+  supplier: {
+    name: string;
+    location: string;
+    nit: number;
+  };
 }
 
 const ProjectView: React.FC = () => {
-  const [phases, setPhases] = useState<Phase[]>([
-    { phase: 'Fase 1', status: 'Completada' },
-    { phase: 'Fase 2', status: 'En progreso' },
-    { phase: 'Fase 3', status: 'Pendiente' },
-  ]);
+  const [materials, setMaterials] = useState<Material[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
+  // ✅ Obtiene los materiales desde Django
+  useEffect(() => {
+    axios.get<Material[]>('http://localhost:8000/api/material/')
+      .then((res) => {
+        setMaterials(res.data);
+      })
+      .catch((err) => {
+        console.error('Error fetching materials:', err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  // ❌ Simula eliminación en el estado local (no borra en la BD todavía)
   const handleDelete = (index: number) => {
-    setPhases((prev) => prev.filter((_, i) => i !== index));
+    setMaterials((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="p-6 space-y-6">
-      <ProjectHeader projectName="Gestor de Proyecto XYZ" />
-      <PhaseTable data={phases} onDelete={handleDelete} />
+      <ProjectHeader projectName="Tabla de materiales" />
+      {loading ? (
+        <p className="text-center text-white">Cargando materiales...</p>
+      ) : (
+        <MaterialTable data={materials} onDelete={handleDelete} />
+      )}
     </div>
   );
 };
