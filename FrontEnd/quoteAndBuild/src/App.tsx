@@ -4,6 +4,8 @@ import NuevoProyecto from "./pages/nuevoProyecto";
 import NavBar from './components/NavBar';
 import Proyectos from "./pages/proyectos";
 import NuevaCotizacion from './pages/nuevaCotizacion';
+import ProjectsPage from "./pages/proyectos";
+import ProjectDetailPage from "./pages/projectDetailPage";
 
   
 
@@ -24,9 +26,9 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/nuevoProyecto" element={<NuevoProyecto />} />
           <Route path="/fase/:faseId/nueva-cotizacion" element={<NuevaCotizacion />} />
-          <Route path="/nuevoProyecto" element={<NuevoProyecto/>} />
           <Route path="/proyectos" element={<Proyectos />} />
-          <Route path="/contact" element={<h1>Ñañañaña</h1>} />
+          <Route path="/" element={<ProjectsPage />} />
+          <Route path="/project/:id" element={<ProjectDetailPage />} />
         </Routes>
       </div>
 

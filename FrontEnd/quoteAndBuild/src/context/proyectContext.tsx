@@ -138,33 +138,36 @@ function normalizeProject(json: ProjectJSON): ProyectoFE {
 const toStr2 = (n: number | null | undefined): string | null =>
     n == null ? null : n.toFixed(2);
   
-  function denormalizeProject(p: ProyectoFE): ProjectJSON {
-    return {
-      project_id: p.id,
-      name: p.nombre,
-      location: p.lugar,
-      total: toStr2(p.total ?? null), // el backend puede recalcular igual
-      phases: p.fases.map(f => ({
-        phase_id: f.id as number | undefined,
-        name: f.nombre,
-        description: f.descripcion,
-        total: toStr2(f.total ?? null),
-        quotes: f.cotizaciones.map(c => ({
-          quote_id: c.id,
-          quote_date: c.fecha,
-          description: c.descripcion,
-          is_first_quote: c.esPrimera,
-          total: toStr2(c.total ?? null),
-          supplier_materials: c.materiales.map(m => ({
+function denormalizeProject(p: ProyectoFE): ProjectJSON {
+  return {
+    project_id: p.id,
+    name: p.nombre,
+    location: p.lugar,
+    total: toStr2(p.total ?? null),
+    phases: p.fases.map(f => ({
+      phase_id: f.id as number | undefined,
+      name: f.nombre,
+      description: f.descripcion,
+      total: toStr2(f.total ?? null),
+      quotes: f.cotizaciones.map(c => ({
+        quote_id: c.id,
+        quote_date: c.fecha,
+        description: c.descripcion,
+        is_first_quote: c.esPrimera,
+        total: toStr2(c.total ?? null),
+        supplier_materials: c.materiales
+          // ⬇️ deja pasar SOLO los que tienen ID válido
+          .filter(m => m.supplier_material_id != null)
+          .map(m => ({
             supplier_material_id: m.supplier_material_id,
             quantity: m.cantidad.toString(),
             unit_price: m.precioUnitario.toString(),
             subtotal: toStr2(m.subtotal ?? null),
           })),
-        })),
       })),
-    };
-  }
+    })),
+  };
+}
   
 
 export function ProyectoProvider({ children }: { children: ReactNode }) {

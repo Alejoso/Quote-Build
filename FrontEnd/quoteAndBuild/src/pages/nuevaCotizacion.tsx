@@ -81,7 +81,7 @@ export default function NuevaCotizacion() {
       materiales,
     } as any);
 
-    // Si tu addCotizacion aún no acepta 'materiales', aquí podrías TODO: addMaterialsToLastQuote(faseId, materiales)
+    
 
     navigate("/nuevoProyecto");
   };

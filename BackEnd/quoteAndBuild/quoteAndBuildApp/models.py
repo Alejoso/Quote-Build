@@ -6,7 +6,9 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
+from decimal import Decimal
 
 class Client(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
@@ -45,27 +47,19 @@ class Project(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.location})"
-    
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.update_total_price()
+        self.update_total()
 
-    def delete(self, *args, **kwargs):
-        # Store reference to the project before deletion
-        super().delete(*args, **kwargs)
-        self.update_total_price()
-
-    def update_total_price(self):
+    def update_total(self):
         if self.pk is None:
             return
-        
-        total = self.phases.aggregate(
-            total_price=models.Sum('total_price')
-        )['total_price'] or 0
-
-        self.total_price = total
-
-        Project.objects.filter(pk=self.pk).update(total_price=total)
+        agg = self.phases.aggregate(
+            total_sum=Coalesce(Sum('total'), Value(Decimal('0.00')))
+        )['total_sum']
+        Project.objects.filter(pk=self.pk).update(total=agg)
+        self.total = agg
 
 class ClientProject(models.Model):
     cedula = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
@@ -80,32 +74,30 @@ class ClientProject(models.Model):
     
 class Phase(models.Model):
     phase_id = models.AutoField(primary_key=True)
-    project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='phases')
+    project_id = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='phases')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.project_id})"
-    
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.update_total_price()
-    
-    def update_total_price(self):
+        self.update_total()
+
+    def update_total(self):
         if self.pk is None:
             return
-        
-        total = self.quotes.aggregate(
-            total_price=models.Sum('total_price')
-        )['total_price'] or 0
+        agg = self.quotes.aggregate(
+            total_sum=Coalesce(Sum('total'), Value(Decimal('0.00')))
+        )['total_sum']
+        Phase.objects.filter(pk=self.pk).update(total=agg)
+        self.total = agg
+        # Propagar al proyecto
+        if hasattr(self.project_id, 'update_total'):
+            self.project_id.update_total()
 
-        Phase.objects.filter(pk=self.pk).update(total_price=total)
-
-        self.total_price = total
-
-        self.project_id.update_total_price()  # Update the project total
-    
 class Quotes(models.Model):
     quote_id = models.AutoField(primary_key=True)
     phase_id = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='quotes')
@@ -115,34 +107,31 @@ class Quotes(models.Model):
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return f"Quote {self.quote_id} for {self.phase_id} - {self.phase_id}"
-    
+        return f"Quote {self.quote_id} for {self.phase_id}"
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        self.update_total_price()  # Ensure total_price is updated before saving
+        self.update_total()
 
     def delete(self, *args, **kwargs):
-        phase = self.phase_id  # Store reference before deletion
+        phase = self.phase_id  # mantener referencia
         super().delete(*args, **kwargs)
-        phase.update_total_price()  # Update phase total after deleting
+        # al eliminar una quote, recalcula la fase
+        if hasattr(phase, 'update_total'):
+            phase.update_total()
 
-    def update_total_price(self):
+    def update_total(self):
         if self.pk is None:
             return
+        agg = self.supplier_materials.aggregate(
+            total_sum=Coalesce(Sum('subtotal'), Value(Decimal('0.00')))
+        )['total_sum']
+        Quotes.objects.filter(pk=self.pk).update(total=agg)
+        self.total = agg
+        # Propagar a la fase
+        if hasattr(self.phase_id, 'update_total'):
+            self.phase_id.update_total()
 
-         # Calculate the total_price by summing all related QuoteSupplierMaterial subtotals
-        total = self.supplier_materials.aggregate(
-            total_price=models.Sum('subtotal')
-        )['total_price'] or 0
-        
-        # Use direct database update to avoid triggering save() again
-        Quotes.objects.filter(pk=self.pk).update(total_price=total)
-
-        # Update the total_price field
-        self.total_price = total
-
-        self.phase_id.update_total_price()  # Update the phase total after saving
-    
     @property
     def project_id(self):
         return self.phase_id.project_id.project_id
@@ -214,7 +203,7 @@ class SupplierMaterial(models.Model):
     
 class QuoteSupplierMaterial(models.Model):
     quote_id = models.ForeignKey(Quotes, on_delete=models.CASCADE, related_name='supplier_materials')
-    supplier_material_id = models.ForeignKey(SupplierMaterial, on_delete=models.CASCADE, related_name='quotes')
+    supplier_material_id = models.ForeignKey('SupplierMaterial', on_delete=models.CASCADE, related_name='quotes')
     quantity = models.DecimalField(max_digits=30, decimal_places=2)
     unit_price = models.DecimalField(max_digits=30, decimal_places=2)
     subtotal = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
@@ -225,17 +214,21 @@ class QuoteSupplierMaterial(models.Model):
     def __str__(self):
         return f"{self.supplier_material_id} for {self.quote_id} - Quantity: {self.quantity}"
 
-    def save(self, *args, **kwargs): # Override save so as to calculate subtotal automatically (subtotal = quantity * unit_price)
-        self.subtotal = self.quantity * self.unit_price
+    def save(self, *args, **kwargs):
+        # calcula subtotal si no está
+        if self.subtotal is None:
+            self.subtotal = self.quantity * self.unit_price
         super().save(*args, **kwargs)
-        self.quote_id.update_total_price()  # Update the quote total after saving
+        # tras guardar, recalcula total de la Quote
+        if hasattr(self.quote_id, 'update_total'):
+            self.quote_id.update_total()
 
     def delete(self, *args, **kwargs):
-        quote = self.quote_id  # Store reference before deletion
+        quote = self.quote_id
         super().delete(*args, **kwargs)
-        # Update quote total after deletion
-        self.quote_id.update_total_price()  # Update the quote total after deleting
-    
+        if hasattr(quote, 'update_total'):
+            quote.update_total()
+            
 class Worker(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
     first_name = models.CharField(max_length=100)

@@ -1,6 +1,9 @@
 from rest_framework import viewsets
-from quoteAndBuildApp.models import Material, Project ,SupplierMaterial
-from quoteAndBuildApp.api.serializers import MaterialListSerializer, ProjectSerializer
+from quoteAndBuildApp.models import Material, Project ,SupplierMaterial ,Phase , Quotes
+from quoteAndBuildApp.api.serializers import MaterialListSerializer, ProjectSerializer , ProjectDeepSerializer
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django.db.models import Prefetch
 
 from .serializers import MaterialListSerializer
 
@@ -9,5 +12,6 @@ class MaterialViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MaterialListSerializer
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by('project_id')
+    # el serializer por defecto puedes dejarlo para list/create si quieres
     serializer_class = ProjectSerializer

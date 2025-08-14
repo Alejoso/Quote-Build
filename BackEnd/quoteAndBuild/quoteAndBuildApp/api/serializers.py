@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from decimal import Decimal
 from quoteAndBuildApp.models import Material , Project, Phase, Quotes, QuoteSupplierMaterial, SupplierMaterial
 
 class MaterialListSerializer(serializers.ModelSerializer):
@@ -31,6 +32,51 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
         
+
+def dec_to_str(d: Decimal | None) -> str | None:
+    return f"{d:.2f}" if d is not None else None
+
+class ProjectDeepSerializer(serializers.Serializer):
+    """Devuelve el JSON completo de un proyecto con fases, cotizaciones y renglones.
+       Formato compatible con tu ProyectoContext (ProjectJSON)."""
+
+    def to_representation(self, project: Project):
+        # Prefetch ya optimizado si la vista lo hace; aquí solo construimos el dict.
+        return {
+            "project_id": project.project_id,
+            "name": project.name,
+            "location": project.location,
+            "total": dec_to_str(project.total),
+            "phases": [
+                {
+                    "phase_id": ph.phase_id,
+                    "name": ph.name,
+                    "description": ph.description,
+                    "total": dec_to_str(ph.total),
+                    "quotes": [
+                        {
+                            "quote_id": qt.quote_id,
+                            "quote_date": qt.quote_date.isoformat(),
+                            "description": qt.description,
+                            "is_first_quote": qt.is_first_quote,
+                            "total": dec_to_str(qt.total),
+                            "supplier_materials": [
+                                {
+                                    "supplier_material_id": sm.supplier_material_id_id,
+                                    "quantity": f"{sm.quantity:.2f}",
+                                    "unit_price": f"{sm.unit_price:.2f}",
+                                    "subtotal": dec_to_str(sm.subtotal),
+                                }
+                                for sm in qt.supplier_materials.all()
+                            ],
+                        }
+                        for qt in ph.quotes.all()
+                    ],
+                }
+                for ph in project.phases.all()
+            ],
+        }
+    
 # serializers.py
 from decimal import Decimal
 from typing import Any, Dict, List
@@ -52,7 +98,7 @@ class QuoteCreateSerializer(serializers.Serializer):
     description = serializers.CharField(allow_blank=True, required=False)
     is_first_quote = serializers.BooleanField()
     total = serializers.DecimalField(max_digits=30, decimal_places=2, required=False, allow_null=True)
-    supplier_materials = QuoteSupplierMaterialCreateSerializer(many=True, required=False)
+    supplier_materials_id = QuoteSupplierMaterialCreateSerializer(many=True, required=False)
 
     def create(self, validated_data: Dict[str, Any]) -> Quotes:
         supplier_materials: List[Dict[str, Any]] = validated_data.pop("supplier_materials", [])

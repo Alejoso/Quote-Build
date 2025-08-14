@@ -46,12 +46,21 @@ export default function NuevoProyecto() {
       });
 
       // 3) POST a Django (ajusta ENDPOINT)
+
+      
       const ENDPOINT = "http://127.0.0.1:8000/api/insertNewProject/"; // <-- cámbialo a tu ruta real
       console.log("PAYLOAD →", payload);
-
+      console.log(
+        JSON.stringify(payload.phases[0].quotes[0].supplier_materials, null, 2)
+      );
+      
       const res = await fetch(ENDPOINT, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
+        credentials: "omit", // si usas sesión/CSRF; opcional
       });
 
       if (!res.ok) {
