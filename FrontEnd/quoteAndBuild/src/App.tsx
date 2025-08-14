@@ -1,7 +1,11 @@
-import { Routes, Route, Link } from "react-router-dom";
-import MaterialList from "./components/materialList";
-import AppStyles from "./App.module.css";
-import PhaseTable from "./components/PhaseTable/phaseTable";
+
+
+import { Routes, Route, Link } from 'react-router-dom'
+import Home from "./pages/home";
+import NuevoProyecto from "./pages/nuevoProyecto";
+import NavBar from './components/NavBar';
+import ProjectView from './pages/projectView';
+
 
 function App() {
   const phasesData = [
@@ -13,32 +17,33 @@ function App() {
     { phase: "Desarrollo", status: "Pendiente" },
   ];
 
+
   const handleDelete = (index: number) => {
     console.log("Eliminar fila:", index);
     // Aquí iría la lógica para eliminar de la base de datos o del estado
   };
 
+  
+
   return (
-    <div className={AppStyles.AppContainer}>
-      <nav className="app-nav">
-        <Link to="/">Inicio</Link> | 
-        <Link to="/materiales">Materiales</Link> | 
-        <Link to="/project">Proyectos</Link> | 
-        <Link to="/phase">Fases</Link>
-      </nav>
+    <div className="w-screen h-screen overflow-x-hidden overflow-y-auto">
 
-      <h1>Gloria</h1>
+    <NavBar />
 
-      <Routes>
-        <Route path="/" element={null} />
-        <Route path="/materiales" element={<MaterialList label="AlejitoPingo" />} />
-        <Route
-          path="/phase"
-          element={<PhaseTable data={phasesData} onDelete={handleDelete} />}
-        />
-      </Routes>
+      <div className="w-full">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/nuevoProyecto" element={<NuevoProyecto/>} />
+          <Route path="/contact" element={<h1>Ñañañaña</h1>} />
+          <Route path="/phase" element={<ProjectView />} />
+
+        </Routes>
+      </div>
+
+      
+
     </div>
   );
-}
+}; 
 
 export default App;

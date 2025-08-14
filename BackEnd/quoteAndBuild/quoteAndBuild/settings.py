@@ -82,11 +82,15 @@ WSGI_APPLICATION = 'quoteAndBuild.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mydatabase",
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'quoteandbuild',
+            'USER': 'root',
+            'PASSWORD': 'Bebelindo2020-',
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+        }
     }
-}
 
 
 # Password validation
