@@ -61,9 +61,26 @@ class Phase(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='phases')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.project_id})"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_total_price()
+    
+    def update_total_price(self):
+        if self.pk is None:
+            return
+        
+        total = self.quotes.aggregate(
+            total_price=models.Sum('total_price')
+        )['total_price'] or 0
+
+        Phase.objects.filter(pk=self.pk).update(total_price=total)
+
+        self.total_price = total
     
 class Quotes(models.Model):
     quote_id = models.AutoField(primary_key=True)
@@ -71,16 +88,24 @@ class Quotes(models.Model):
     quote_date = models.DateField()
     description = models.TextField(blank=True, null=True)
     is_first_quote = models.BooleanField()
-    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f"Quote {self.quote_id} for {self.phase_id} - {self.phase_id}"
     
     def save(self, *args, **kwargs):
-        self.update_total_price()  # Ensure total_price is updated before saving
         super().save(*args, **kwargs)
+        self.update_total_price()  # Ensure total_price is updated before saving
+
+    def delete(self, *args, **kwargs):
+        phase = self.phase_id  # Store reference before deletion
+        super().delete(*args, **kwargs)
+        phase.update_total_price()  # Update phase total after deleting
 
     def update_total_price(self):
+        if self.pk is None:
+            return
+
          # Calculate the total_price by summing all related QuoteSupplierMaterial subtotals
         total = self.supplier_materials.aggregate(
             total_price=models.Sum('subtotal')
@@ -91,6 +116,8 @@ class Quotes(models.Model):
 
         # Update the total_price field
         self.total_price = total
+
+        self.phase_id.update_total_price()  # Update the phase total after saving
     
     @property
     def project_id(self):
