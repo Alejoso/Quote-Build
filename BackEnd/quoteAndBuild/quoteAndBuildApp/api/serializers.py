@@ -1,11 +1,16 @@
 from rest_framework import serializers
+<<<<<<< HEAD
 from quoteAndBuildApp.models import Material , Project, Phase, Quotes, QuoteSupplierMaterial, SupplierMaterial
+=======
+from quoteAndBuildApp.models import Material, Project
+>>>>>>> 5fb0dbf51791ca176c94ac2d37338c01eae3ffe8
 
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
         fields = '__all__'
 
+<<<<<<< HEAD
 # serializers.py
 from decimal import Decimal
 from typing import Any, Dict, List
@@ -149,3 +154,9 @@ class ProjectCreateSerializer(serializers.Serializer):
             "total": f"{instance.total:.2f}" if instance.total is not None else None,
             "phases": PhaseCreateSerializer(instance.phases.all(), many=True).data,
         }
+=======
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = '__all__'
+>>>>>>> 5fb0dbf51791ca176c94ac2d37338c01eae3ffe8
