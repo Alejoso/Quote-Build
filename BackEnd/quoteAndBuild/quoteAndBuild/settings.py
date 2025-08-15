@@ -58,6 +58,13 @@ CORS_ALLOWED_ORIGINS = [
   "http://localhost:5173",  # o donde esté tu frontend
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 ROOT_URLCONF = 'quoteAndBuild.urls'
 
 TEMPLATES = [
@@ -86,7 +93,7 @@ DATABASES = {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'quoteandbuild',
             'USER': 'root',
-            'PASSWORD': 'root',
+            'PASSWORD': 'Bebelindo2020-',
             'HOST': '127.0.0.1',
             'PORT': '3306',
         }
@@ -133,3 +140,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_ALL_ORIGINS = True
+

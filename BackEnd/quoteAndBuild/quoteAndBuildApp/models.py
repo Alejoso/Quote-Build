@@ -6,6 +6,9 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
+from decimal import Decimal
 
 class Client(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
@@ -40,9 +43,23 @@ class Project(models.Model):
     project_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=160)
+    total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.location})"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_total()
+
+    def update_total(self):
+        if self.pk is None:
+            return
+        agg = self.phases.aggregate(
+            total_sum=Coalesce(Sum('total'), Value(Decimal('0.00')))
+        )['total_sum']
+        Project.objects.filter(pk=self.pk).update(total=agg)
+        self.total = agg
 
 class ClientProject(models.Model):
     cedula = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
@@ -57,23 +74,68 @@ class ClientProject(models.Model):
     
 class Phase(models.Model):
     phase_id = models.AutoField(primary_key=True)
-    project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='phases')
+    project_id = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='phases')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
+    total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.project_id})"
-    
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_total()
+
+    def update_total(self):
+        if self.pk is None:
+            return
+        agg = self.quotes.aggregate(
+            total_sum=Coalesce(Sum('total'), Value(Decimal('0.00')))
+        )['total_sum']
+        Phase.objects.filter(pk=self.pk).update(total=agg)
+        self.total = agg
+        # Propagar al proyecto
+        if hasattr(self.project_id, 'update_total'):
+            self.project_id.update_total()
+
 class Quotes(models.Model):
     quote_id = models.AutoField(primary_key=True)
     phase_id = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='quotes')
     quote_date = models.DateField()
     description = models.TextField(blank=True, null=True)
     is_first_quote = models.BooleanField()
+    total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return f"Quote {self.quote_id} for {self.project_id} - {self.phase_id}"
-    
+        return f"Quote {self.quote_id} for {self.phase_id}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.update_total()
+
+    def delete(self, *args, **kwargs):
+        phase = self.phase_id  # mantener referencia
+        super().delete(*args, **kwargs)
+        # al eliminar una quote, recalcula la fase
+        if hasattr(phase, 'update_total'):
+            phase.update_total()
+
+    def update_total(self):
+        if self.pk is None:
+            return
+        agg = self.supplier_materials.aggregate(
+            total_sum=Coalesce(Sum('subtotal'), Value(Decimal('0.00')))
+        )['total_sum']
+        Quotes.objects.filter(pk=self.pk).update(total=agg)
+        self.total = agg
+        # Propagar a la fase
+        if hasattr(self.phase_id, 'update_total'):
+            self.phase_id.update_total()
+
+    @property
+    def project_id(self):
+        return self.phase_id.project_id.project_id
+
 class PhaseInterval(models.Model):
     interval_id = models.AutoField(primary_key=True)
     phase_id = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='intervals')
@@ -97,8 +159,8 @@ class Material(models.Model):
 class PhaseMaterial(models.Model):
     phase_id = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='materials')
     material_id = models.ForeignKey(Material, on_delete=models.CASCADE, related_name='phases')
-    unit_price_estimated = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity_estimated = models.DecimalField(max_digits=10, decimal_places=2)
+    unit_price_estimated = models.DecimalField(max_digits=30, decimal_places=2)
+    quantity_estimated = models.DecimalField(max_digits=30, decimal_places=2)
 
     class Meta:
         unique_together = (('phase_id', 'material_id'),)
@@ -130,7 +192,7 @@ class SupplierMaterial(models.Model):
     supplier_material_id = models.AutoField(primary_key=True)
     nit = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='materials')
     material_id = models.ForeignKey(Material, on_delete=models.CASCADE, related_name='suppliers')
-    actual_price = models.DecimalField(max_digits=10, decimal_places=2)
+    actual_price = models.DecimalField(max_digits=30, decimal_places=2)
     unit_of_measure = models.CharField(max_length=50)
 
     class Meta:
@@ -141,17 +203,32 @@ class SupplierMaterial(models.Model):
     
 class QuoteSupplierMaterial(models.Model):
     quote_id = models.ForeignKey(Quotes, on_delete=models.CASCADE, related_name='supplier_materials')
-    supplier_material_id = models.ForeignKey(SupplierMaterial, on_delete=models.CASCADE, related_name='quotes')
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    supplier_material_id = models.ForeignKey('SupplierMaterial', on_delete=models.CASCADE, related_name='quotes')
+    quantity = models.DecimalField(max_digits=30, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=30, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
 
     class Meta:
         unique_together = (('quote_id', 'supplier_material_id'),)
 
     def __str__(self):
         return f"{self.supplier_material_id} for {self.quote_id} - Quantity: {self.quantity}"
-    
+
+    def save(self, *args, **kwargs):
+        # calcula subtotal si no está
+        if self.subtotal is None:
+            self.subtotal = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+        # tras guardar, recalcula total de la Quote
+        if hasattr(self.quote_id, 'update_total'):
+            self.quote_id.update_total()
+
+    def delete(self, *args, **kwargs):
+        quote = self.quote_id
+        super().delete(*args, **kwargs)
+        if hasattr(quote, 'update_total'):
+            quote.update_total()
+            
 class Worker(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
     first_name = models.CharField(max_length=100)
