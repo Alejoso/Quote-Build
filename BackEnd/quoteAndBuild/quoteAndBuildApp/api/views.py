@@ -15,3 +15,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all().order_by('project_id')
     # el serializer por defecto puedes dejarlo para list/create si quieres
     serializer_class = ProjectSerializer
+
+    @action(detail=True, methods=['get'], url_path='full')
+    def full(self, request, pk=None):
+        project = self.get_object()
+        serializer = ProjectDeepSerializer()
+        return Response(serializer.to_representation(project))
