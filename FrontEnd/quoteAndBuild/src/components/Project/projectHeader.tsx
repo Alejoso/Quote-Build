@@ -1,4 +1,6 @@
-import Titulo from './tittle'; // Ajusta la ruta si es necesario
+import Titulo from '../shared/Titulo';
+
+
 
 interface ProjectHeaderProps {
   projectName: string;

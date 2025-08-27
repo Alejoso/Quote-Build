@@ -1,6 +1,6 @@
 // src/pages/ProjectsPage.tsx
-import Titulo from '../components/Titulo';
-import ProjectElement from '../components/ProjectElement';
+import Titulo from '../components/shared/Titulo';
+import ProjectElement from '../components/Project/ProjectElement';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
