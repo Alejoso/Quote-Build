@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from "react";
-import MaterialTable from "./materialTable";
+import MaterialTable from "./MaterialTable";
+
+interface Supplier {
+  nit: string;
+  name: string;
+  location: string;
+}
+
+interface SupplierMaterial {
+  supplier_material_id: number;
+  actual_price: number;
+  unit_of_measure: string;
+  supplier: Supplier;
+}
 
 interface Material {
   materialId: number;
@@ -7,11 +20,8 @@ interface Material {
   price: number;
   category: string;
   unitOfMeasure: string;
-  supplier: {
-    name: string;
-    location: string;
-    nit: number;
-  };
+  description?: string;
+  suppliers: SupplierMaterial[];
 }
 
 const MaterialContainer: React.FC = () => {
@@ -27,7 +37,14 @@ const MaterialContainer: React.FC = () => {
         throw new Error("Error al obtener los materiales");
       }
       const data = await response.json();
-      setMaterials(data);
+
+      // Aseguramos que cada material tenga suppliers (aunque vacío)
+      const materialsWithSuppliers = data.map((m: any) => ({
+        ...m,
+        suppliers: m.suppliers ?? [],
+      }));
+
+      setMaterials(materialsWithSuppliers);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -50,7 +67,6 @@ const MaterialContainer: React.FC = () => {
         }
       );
       if (response.ok) {
-        // Actualiza la lista local eliminando el material
         setMaterials((prev) => prev.filter((_, i) => i !== index));
       } else {
         alert("No se pudo eliminar el material");

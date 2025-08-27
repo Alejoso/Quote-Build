@@ -4,6 +4,8 @@ from quoteAndBuildApp.api.serializers import MaterialListSerializer, ProjectSeri
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Prefetch
+from django.http import JsonResponse
+
 
 from .serializers import MaterialListSerializer
 
@@ -21,3 +23,35 @@ class ProjectViewSet(viewsets.ModelViewSet):
         project = self.get_object()
         serializer = ProjectDeepSerializer()
         return Response(serializer.to_representation(project))
+    
+def materials_list(request):
+    # Obtener todos los materiales
+    materiales = Material.objects.all()
+
+    materiales_data = []
+    for material in materiales:
+        # Obtener proveedores relacionados con este material
+        proveedores = SupplierMaterial.objects.filter(material_id=material.material_id)
+        
+        proveedores_data = []
+        for sp in proveedores:
+            proveedores_data.append({
+                "supplier_material_id": sp.supplier_material_id,
+                "actual_price": float(sp.actual_price),
+                "unit_of_measure": sp.unit_of_measure,
+                "supplier": {
+                    "nit": sp.nit.nit,
+                    "name": sp.nit.name,
+                    "location": sp.nit.location,
+                }
+            })
+        
+        materiales_data.append({
+            "materialId": material.material_id,
+            "name": material.name,
+            "category": material.category,
+            "description": material.description,
+            "suppliers": proveedores_data,
+        })
+
+    return JsonResponse(materiales_data, safe=False)

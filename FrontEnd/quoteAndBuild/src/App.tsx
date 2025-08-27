@@ -1,7 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import Home from "./pages/home";
 import NuevoProyecto from "./pages/nuevoProyecto";
-import NavBar from './components/NavBar';
+import NavBar from './components/shared/NavBar';
 import Proyectos from "./pages/proyectos";
 import NuevaCotizacion from './pages/nuevaCotizacion';
 import ProjectsPage from "./pages/proyectos";
