@@ -89,11 +89,14 @@ WSGI_APPLICATION = 'quoteAndBuild.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
+
+
     "default": {  # destino: SQLite
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     },
 }
+
 
 
 # Password validation
