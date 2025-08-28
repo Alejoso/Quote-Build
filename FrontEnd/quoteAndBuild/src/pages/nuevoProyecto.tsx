@@ -33,18 +33,6 @@ export default function NuevoProyecto() {
       // 1) Base JSON según el mapeo del contexto
       const payload = toDjangoJSON();
 
-      // 2) Inyectar TOTALES derivados (string "1234.56")
-      payload.total = getProjectTotalNum(proyecto).toFixed(2);
-      payload.phases = payload.phases.map((ph, i) => {
-        const faseFE = proyecto.fases[i];
-        const phTotal = getPhaseTotalNum(faseFE).toFixed(2);
-        const quotes = ph.quotes.map((q, j) => {
-          const quoteFE = faseFE.cotizaciones[j];
-          return { ...q, total: getQuoteTotalNum(quoteFE).toFixed(2) };
-        });
-        return { ...ph, total: phTotal, quotes };
-      });
-
       // 3) POST a Django (ajusta ENDPOINT)
 
       

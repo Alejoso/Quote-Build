@@ -48,7 +48,6 @@ export default function ProjectDetailPage() {
         <h1 className="text-2xl font-bold">{data.name} • {data.location}</h1>
         <Link to="/" className="text-blue-600 hover:underline">← Volver</Link>
       </div>
-      <div className="text-gray-700">Total proyecto: <b>{fmt(data.total)}</b></div>
 
       {phases.map((ph) => {
         const quotes = ph.quotes ?? [];
