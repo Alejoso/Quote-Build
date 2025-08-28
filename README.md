@@ -10,7 +10,7 @@ Backend
 python3 -m venv venv
 source ./venv/bin/activate
 pip install -r requirements.txt
-cd Quote-Build/BackEnd/quoteAndBuild
+cd BackEnd/quoteAndBuild
 python3 manage.py runserver
 ```
 
