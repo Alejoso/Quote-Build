@@ -1,8 +1,6 @@
-// src/pages/nuevoProyecto.tsx
 import { useNavigate } from "react-router-dom";
 import { useProyecto } from "../context/proyectContext";
 import { useState } from "react";
-
 
 export default function NuevoProyecto() {
   const {
@@ -20,9 +18,20 @@ export default function NuevoProyecto() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const totalProyectoFmt = formatCOP(getProjectTotalNum(proyecto));
 
+  const totalProyectoFmt = formatCOP(getProjectTotalNum(proyecto));
   const canSubmit = proyecto.nombre.trim() !== "" && proyecto.lugar.trim() !== "";
+
+  // Para controlar desplegables por cotización
+  const [expandedQuotes, setExpandedQuotes] = useState<Record<string, boolean>>({});
+
+  const toggleQuoteExpand = (faseIndex: number, cotizacionIndex: number) => {
+    const key = `${faseIndex}-${cotizacionIndex}`;
+    setExpandedQuotes((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   const handleCompletar = async () => {
     if (!canSubmit || submitting) return;
@@ -30,25 +39,40 @@ export default function NuevoProyecto() {
     setErrorMsg(null);
 
     try {
-      // 1) Base JSON según el mapeo del contexto
       const payload = toDjangoJSON();
 
-      // 3) POST a Django (ajusta ENDPOINT)
+      payload.total = getProjectTotalNum(proyecto).toFixed(2);
+      payload.phases = payload.phases.map((ph, i) => {
+        const faseFE = proyecto.fases[i];
+        const phTotal = getPhaseTotalNum(faseFE).toFixed(2);
 
-      
-      const ENDPOINT = "http://127.0.0.1:8000/api/insertNewProject/"; // <-- cámbialo a tu ruta real
-      console.log("PAYLOAD →", payload);
-      console.log(
-        JSON.stringify(payload.phases[0].quotes[0].supplier_materials, null, 2)
-      );
-      
+        const quotes = ph.quotes.map((q, j) => {
+          const quoteFE = faseFE.cotizaciones[j];
+
+          return {
+            ...q,
+            total: getQuoteTotalNum(quoteFE).toFixed(2),
+            supplier_materials: quoteFE.materiales.map((m) => ({
+              supplier_material_id: m.supplier_material_id,
+              quantity: m.cantidad.toString(),
+              unit_price: m.precioUnitario.toString(),
+              subtotal: m.subtotal != null ? m.subtotal.toFixed(2) : null,
+            })),
+          };
+        });
+
+        return { ...ph, total: phTotal, quotes };
+      });
+
+      const ENDPOINT = "http://127.0.0.1:8000/api/insertNewProject/";
+
       const res = await fetch(ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-        credentials: "omit", // si usas sesión/CSRF; opcional
+        credentials: "omit",
       });
 
       if (!res.ok) {
@@ -56,7 +80,7 @@ export default function NuevoProyecto() {
         throw new Error(text || `Error HTTP ${res.status}`);
       }
 
-      navigate("/"); 
+      navigate("/");
     } catch (e: any) {
       setErrorMsg(e?.message ?? "No se pudo guardar el proyecto");
     } finally {
@@ -97,11 +121,11 @@ export default function NuevoProyecto() {
       </div>
 
       {/* Fases */}
-      {proyecto.fases.map((fase, index) => {
+      {proyecto.fases.map((fase, faseIndex) => {
         const totalFaseFmt = formatCOP(getPhaseTotalNum(fase));
         return (
           <div
-            key={`${fase.id ?? "tmp"}-${index}`}
+            key={`${fase.id ?? "tmp"}-${faseIndex}`}
             className="w-full max-w-2xl p-5 bg-white rounded-xl shadow-md flex flex-col space-y-4 transform transition duration-300 hover:scale-105"
           >
             <div className="flex items-center justify-between">
@@ -116,7 +140,7 @@ export default function NuevoProyecto() {
               <input
                 type="text"
                 value={fase.nombre}
-                onChange={(e) => updateFase(index, "nombre", e.target.value)}
+                onChange={(e) => updateFase(faseIndex, "nombre", e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
@@ -125,28 +149,71 @@ export default function NuevoProyecto() {
               <label className="text-gray-700 mb-1 font-medium">Descripción</label>
               <textarea
                 value={fase.descripcion}
-                onChange={(e) => updateFase(index, "descripcion", e.target.value)}
+                onChange={(e) => updateFase(faseIndex, "descripcion", e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
             </div>
 
             {/* Cotizaciones */}
             <div className="flex flex-col space-y-2">
-              {fase.cotizaciones.map((c, idx) => {
+              {fase.cotizaciones.map((c, cIndex) => {
                 const totalCotFmt = formatCOP(getQuoteTotalNum(c));
+                const key = `${faseIndex}-${cIndex}`;
+                const isExpanded = !!expandedQuotes[key];
+
                 return (
-                  <div key={idx} className="px-3 py-2 bg-orange-100 rounded-lg text-gray-800">
-                    <div className="font-medium">{c.descripcion || "Sin descripción"}</div>
-                    <div className="text-sm text-gray-600">
-                      {c.fecha} •{" "}
-                      <span className="font-semibold">{totalCotFmt}</span>
-                    </div>
+                  <div key={c.id ?? cIndex} className="border rounded-lg bg-orange-100 text-gray-800">
+                    <button
+                      type="button"
+                      onClick={() => toggleQuoteExpand(faseIndex, cIndex)}
+                      className="w-full flex justify-between items-center px-3 py-2 font-medium focus:outline-none"
+                    >
+                      <div>
+                        <div>{c.descripcion || "Sin descripción"}</div>
+                        <div className="text-sm text-gray-600">{c.fecha}</div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="font-semibold">{totalCotFmt}</div>
+                        <svg
+                          className={`w-5 h-5 transform transition-transform ${
+                            isExpanded ? "rotate-180" : "rotate-0"
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-6 pb-4 pt-2 text-sm text-gray-700">
+                        {c.materiales.length > 0 ? (
+                          <>
+                            <p className="font-semibold mb-2">Materiales:</p>
+                            <ul className="list-disc list-inside space-y-1">
+                              {c.materiales.map((m, iMat) => (
+                                <li key={iMat}>
+                                  ID {m.supplier_material_id} — {m.cantidad} x {formatCOP(m.precioUnitario)} ={" "}
+                                  {formatCOP(m.subtotal ?? m.cantidad * m.precioUnitario)}
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        ) : (
+                          <p className="italic text-gray-500">No hay materiales en esta cotización.</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
 
               <button
-                onClick={() => navigate(`/fase/${fase.id ?? index}/nueva-cotizacion`)}
+                onClick={() => navigate(`/fase/${fase.id ?? faseIndex}/nueva-cotizacion`)}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition transform hover:scale-105"
               >
                 Añadir cotización
@@ -169,16 +236,18 @@ export default function NuevoProyecto() {
           disabled={!canSubmit || submitting}
           onClick={handleCompletar}
           className={`px-6 py-3 text-white text-lg font-semibold rounded-xl shadow transition transform hover:scale-105 ${
-            !canSubmit || submitting
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-emerald-600 hover:bg-emerald-700"
+            canSubmit && !submitting
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-gray-400 cursor-not-allowed"
           }`}
         >
-          {submitting ? "Enviando..." : "Completar"}
+          {submitting ? "Guardando..." : "Completar"}
         </button>
-
-        {errorMsg && <span className="text-red-600 text-sm">{errorMsg}</span>}
       </div>
+
+      {errorMsg && (
+        <p className="text-red-600 font-semibold mt-4 max-w-2xl">{errorMsg}</p>
+      )}
     </div>
   );
 }

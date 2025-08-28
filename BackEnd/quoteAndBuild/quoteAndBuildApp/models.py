@@ -6,9 +6,6 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from django.db.models import Sum, Value
-from django.db.models.functions import Coalesce
-from decimal import Decimal
 
 class Client(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)
@@ -48,19 +45,6 @@ class Project(models.Model):
     def __str__(self):
         return f"{self.name} ({self.location})"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_total()
-
-    def update_total(self):
-        if self.pk is None:
-            return
-        agg = self.phases.aggregate(
-            total_sum=Coalesce(Sum('total'), Value(Decimal('0.00')))
-        )['total_sum']
-        Project.objects.filter(pk=self.pk).update(total=agg)
-        self.total = agg
-
 class ClientProject(models.Model):
     cedula = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='clients')
@@ -82,22 +66,6 @@ class Phase(models.Model):
     def __str__(self):
         return f"{self.name} ({self.project_id})"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_total()
-
-    def update_total(self):
-        if self.pk is None:
-            return
-        agg = self.quotes.aggregate(
-            total_sum=Coalesce(Sum('total'), Value(Decimal('0.00')))
-        )['total_sum']
-        Phase.objects.filter(pk=self.pk).update(total=agg)
-        self.total = agg
-        # Propagar al proyecto
-        if hasattr(self.project_id, 'update_total'):
-            self.project_id.update_total()
-
 class Quotes(models.Model):
     quote_id = models.AutoField(primary_key=True)
     phase_id = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='quotes')
@@ -109,32 +77,6 @@ class Quotes(models.Model):
     def __str__(self):
         return f"Quote {self.quote_id} for {self.phase_id}"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_total()
-
-    def delete(self, *args, **kwargs):
-        phase = self.phase_id  # mantener referencia
-        super().delete(*args, **kwargs)
-        # al eliminar una quote, recalcula la fase
-        if hasattr(phase, 'update_total'):
-            phase.update_total()
-
-    def update_total(self):
-        if self.pk is None:
-            return
-        agg = self.supplier_materials.aggregate(
-            total_sum=Coalesce(Sum('subtotal'), Value(Decimal('0.00')))
-        )['total_sum']
-        Quotes.objects.filter(pk=self.pk).update(total=agg)
-        self.total = agg
-        # Propagar a la fase
-        if hasattr(self.phase_id, 'update_total'):
-            self.phase_id.update_total()
-
-    @property
-    def project_id(self):
-        return self.phase_id.project_id.project_id
 
 class PhaseInterval(models.Model):
     interval_id = models.AutoField(primary_key=True)
@@ -213,21 +155,6 @@ class QuoteSupplierMaterial(models.Model):
 
     def __str__(self):
         return f"{self.supplier_material_id} for {self.quote_id} - Quantity: {self.quantity}"
-
-    def save(self, *args, **kwargs):
-        # calcula subtotal si no está
-        if self.subtotal is None:
-            self.subtotal = self.quantity * self.unit_price
-        super().save(*args, **kwargs)
-        # tras guardar, recalcula total de la Quote
-        if hasattr(self.quote_id, 'update_total'):
-            self.quote_id.update_total()
-
-    def delete(self, *args, **kwargs):
-        quote = self.quote_id
-        super().delete(*args, **kwargs)
-        if hasattr(quote, 'update_total'):
-            quote.update_total()
             
 class Worker(models.Model):
     cedula = models.CharField(primary_key=True, max_length=32)

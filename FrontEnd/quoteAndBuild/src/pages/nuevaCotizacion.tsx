@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useProyecto } from "../context/proyectContext";
 import { useState } from "react";
-import MaterialsBrowser, { type MaterialRow } from "../components/materialsBrowser";
+import MaterialsBrowser from "../components/Material/MaterialsBrowser";
+
 
 function today(): string {
   const d = new Date();
@@ -18,6 +19,12 @@ type ItemCotizacion = {
   subtotal: number;
   name: string;           // para mostrar
   unitOfMeasure: string;  // para mostrar
+};
+type MaterialRow = {
+  supplierMaterialId: number;
+  price: number | string;
+  name: string;
+  unitOfMeasure: string;
 };
 
 export default function NuevaCotizacion() {

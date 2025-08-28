@@ -3,19 +3,21 @@ It is a software for the administrative staff of the company OCIRAGA23 SAS who h
 
 
 # SetUp guide
+
+There are going to be two main folders, here are the instructions to set up each section
 Backend
 ```bash
 python3 -m venv venv
 source ./venv/bin/activate
 pip install -r requirements.txt
-cd Quote-Build/BackEnd/quoteAndBuild
+cd BackEnd/quoteAndBuild
+python3 manage.py runserver
 ```
 
 Frontend
 ```bash
 cd FrontEnd/quoteAndBuild
 npm install
-
 npm run dev
 ```
 
