@@ -1,12 +1,18 @@
-from rest_framework import viewsets
-from quoteAndBuildApp.models import SupplierMaterial
-from quoteAndBuildApp.api.serializers import MaterialSerializer
+from rest_framework import viewsets , serializers
 
-class MaterialViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = SupplierMaterial.objects.select_related('material_id', 'nit')
+from quoteAndBuildApp.models import Material , Supplier , SupplierMaterial
+#from django.core import serializers as sr 
+
+
+class MaterialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Material
+        fields = '__all__'
+
+class MaterialViewSet (viewsets.ModelViewSet):
+    queryset = Material.objects.all()
     serializer_class = MaterialSerializer
+    
 
-from django.http import JsonResponse
-from .models import Material, SupplierMaterial
 
 

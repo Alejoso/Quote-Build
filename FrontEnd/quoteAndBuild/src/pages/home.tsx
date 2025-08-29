@@ -4,6 +4,21 @@ import CascoLogo from "../assets/CascpoLogo.png";
 export default function Home() {
   const navigate = useNavigate();
 
+  async function fetchMaterials() {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/materials/'); // Replace with your API endpoint
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json(); // Or .text() for plain text
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+  
+  fetchMaterials();
+
   return (
     <div className="w-screen flex flex-col items-center justify-start pt-10 pb-20 bg-gray-100 space-y-6 px-4">
       {/* Contenedor del título + imagen */}
