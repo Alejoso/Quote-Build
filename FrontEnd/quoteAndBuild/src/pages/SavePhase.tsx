@@ -2,26 +2,34 @@ import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 // Import fuctions
-import { createProject} from "../api/calls";
+import { fetchPhasesByProject} from "../api/calls";
+import { createPhase} from "../api/calls";
 
 // Import Interfaces
-import type { Project } from "../types/interfaces";
+import type { Phase } from "../types/interfaces";
+import type { Project } from "../types/interfaces"; 
 
 
-export default function newProject() {
+export default function savePhase({project} : {project : Project}) {
 
-  //Definition of the variable project, that is going to be fulfiled while we are doing the forms with the useState
-  const [project , setProject] = useState<Project>({
+  async function fillNameProject(project : Project) {
+    await fetchPhasesByProject(project.id!); // It goes this due to the Id cannot be null
+  }
+  
+
+  //Definition of the variable phase, that is going to be fulfiled while we are doing the forms with the useState
+  const [phase , setPhase] = useState<Phase>({
+    project: project.name ,
     name: '',
-    location: '',
-    total: null
+    description: '',
+    total : null
   })
 
   const [loading, _] = useState(false);
   
   //Function to call the backend
-  async function createProjectFront(project:Project) {
-    await createProject(project);
+  async function createPhaseFront(phase:Phase) {
+    await createPhase(phase);
   }
 
   //It is the function on charge of doing something when the form is submitted
@@ -29,16 +37,17 @@ export default function newProject() {
     e.preventDefault(); //Prevent that the form is submited in a natural way, so we can controll validations
 
     //Check if there are not empty fields
-    if(project.name === '' || project.location === '' || project.total === null){
-      alert("Por favor ingrese todos los campos"); 
+    if(phase.name === ''){
+      alert("No se le olvide llenar el nombre"); 
     } else {
-      createProjectFront(project);  //Call the backend
-      toast.success("El proyecto " + project.name + " ha sido añadido!")
+      createPhaseFront(phase);  //Call the backend
+      toast.success("La Fase " + phase.name + " ha sido añadido al proyecto!")
 
       //Clear fields
-      setProject({
+      setPhase({
+        project = project.name,
         name: '',
-        location: '',
+        description: '',
         total: null
       });
     }
@@ -48,33 +57,33 @@ export default function newProject() {
   return (
     <div style={{ maxWidth: 520, margin: "2rem auto", padding: 16, border: "1px solid #e5e7eb", borderRadius: 10 }}>
       <div><Toaster/></div>
-      <h2 style={{ margin: 0, marginBottom: 12 }}>{project.name}</h2>
+      <h2 style={{ margin: 0, marginBottom: 12 }}>{phase.name}</h2>
 
       <form onSubmit={handleSubmit} noValidate>
         <label style={{ display: "block", marginBottom: 6 }}>
-          <span>Nombre del Proyecto *</span>
+          <span>Nombre de la Fase *</span>
           <input
             name="name"
             type="text"
             maxLength={100}
-            value={project.name}
-            onChange={(e) => setProject({ ...project, name: e.target.value })} //het the value that the user is writting 
+            value={phase.name}
+            onChange={(e) => setPhase({ ...phase, name: e.target.value })} //het the value that the user is writting 
             required
             style={inputStyle}
-            placeholder="e.g. Skyline Tower"
+            placeholder="e.g. Cimentación"
           />
         </label>
         <label style={{ display: "block", marginBottom: 6 }}>
-          <span>Ubicación*</span>
+          <span>Description*</span>
           <input
-            name="location"
+            name="description"
             type="text"
             maxLength={160}
-            value={project.location}
-            onChange={(e) => setProject({ ...project, location: e.target.value })}
+            value={phase.description}
+            onChange={(e) => setPhase{ ...phase, description: e.target.value })}
             required
             style={inputStyle}
-            placeholder="e.g. New York, NY"
+            placeholder="e.g. Son las bases de la casa "
           />
         </label>
 
@@ -93,7 +102,7 @@ export default function newProject() {
             marginTop: 8,
           }}
         >
-          {loading ? "Guardando..." : "Guardar proyecto"}
+          {loading ? "Guardando..." : "Guardar fase"}
         </button>
       </form>
       <p style={{ fontSize: 12, color: "#6b7280", marginTop: 10 }}>* required</p>

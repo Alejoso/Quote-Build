@@ -4,7 +4,7 @@ import CascoLogo from "../assets/CascpoLogo.png";
 
 export default function Home() {
   const navigate = useNavigate();
-  
+
   return (
     <div className="w-screen flex flex-col items-center justify-start pt-10 pb-20 bg-gray-100 space-y-6 px-4">
       {/* Contenedor del título + imagen */}
@@ -17,14 +17,14 @@ export default function Home() {
       {/*Botones*/}
       <div className="flex flex-col space-y-6">
         <button
-          onClick={() => navigate("/newProject")} 
+          onClick={() => navigate("/newProject")}
           className="px-8 py-4 bg-naranja text-white text-xl font-semibold rounded-lg hover:bg-naranjaHover transition transform hover:scale-105 hover:rotate-3  shadow-md"
         >
           Nuevo proyecto
         </button>
 
         <button
-          onClick={() => navigate("/proyectos")}
+          onClick={() => navigate("/projects")}
           className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105 hover:rotate-3"
         >
           Proyectos

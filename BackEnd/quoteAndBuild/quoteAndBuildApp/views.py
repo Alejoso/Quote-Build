@@ -1,6 +1,6 @@
 from rest_framework import viewsets , serializers
 
-from quoteAndBuildApp.models import Material , Project, Phase
+from quoteAndBuildApp.models import Material , Project, Phase, Client
 #from django.core import serializers as sr 
 
 # Material
@@ -23,6 +23,16 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+
+#Clients
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = '__all__'
+
+class ClientViewSet(viewsets.ModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
 
 # Phase
 class PhaseSerializer(serializers.ModelSerializer):

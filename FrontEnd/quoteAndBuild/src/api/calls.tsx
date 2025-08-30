@@ -3,21 +3,29 @@ import axios from "axios"
 
 //Materials
 export const fetchAllMaterials = () => {
-    return axios.get('http://127.0.0.1:8000/materials/')
+  return axios.get('http://127.0.0.1:8000/materials/')
 }
 
 export const createMaterial = (material: any) => {
-    return axios.post('http://127.0.0.1:8000/materials/' , material)
+  return axios.post('http://127.0.0.1:8000/materials/', material)
 }
 
 //Projects
 export const fetchAllProjects = () => {
-    return axios.get('http://127.0.0.1:8000/projects/')
+  return axios.get('http://127.0.0.1:8000/projects/')
 }
 
 export const createProject = (project: any) => {
-    return axios.post('http://127.0.0.1:8000/projects/' , project)
+  return axios.post('http://127.0.0.1:8000/projects/', project)
 }
+
+export const fetchProjectById = (id: number) => {
+  return axios.get(`http://127.0.0.1:8000/projects/${id}/`);
+};
+
+export const updateProject = (id: number, partial: any) => {
+  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, partial);
+};
 
 //Phases
 export const fetchPhasesByProject = (projectId: number) => {

@@ -22,6 +22,7 @@ export interface SupplierMaterials {
 }
 
 export interface Project {
+    id?: number, 
     name: string,
     location: string,
     total: number | null
