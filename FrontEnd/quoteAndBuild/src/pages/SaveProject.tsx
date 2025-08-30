@@ -48,6 +48,7 @@ export default function SaveProject() {
           location: data.location ?? "",
           total: data.total !== null && data.total !== undefined ? String(data.total) : "",
         });
+        setProject(data);
       } catch (err) {
         console.error(err);
         toast.error("No se pudo cargar el proyecto.");
@@ -93,10 +94,12 @@ export default function SaveProject() {
       if (projectId) {
         const { data } = await updateProject(projectId, payload);
         toast.success(`Proyecto actualizado (${data.name}).`);
+        setProject(data);
       } else {
         const { data } = await createProject(payload);
         toast.success(`Proyecto creado (${data.name}).`);
         setProjectId(data.id); // ahora tenemos id, mostramos fases debajo
+        setProject(data);
       }
     } catch (err: any) {
       toast.error(err?.message || "No se pudo guardar el proyecto.");
@@ -106,6 +109,8 @@ export default function SaveProject() {
   };
 
   const title = projectId ? "Editar Proyecto" : "Nuevo Proyecto";
+  const [project, setProject] = useState<any | null>(null);
+
 
   return (
     <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow">
@@ -184,11 +189,11 @@ export default function SaveProject() {
           {saving ? "Guardando..." : projectId ? "Guardar cambios" : "Crear proyecto"}
         </button>
       </form>
-
       {/* Fases del proyecto */}
       <div className="mt-8">
-        <SavePhase project={projectId} />
+        {project && <SavePhase project={project} />}
       </div>
+
     </div>
   );
 }
