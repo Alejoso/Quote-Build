@@ -17,9 +17,8 @@ function App() {
 
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/newProject' element={<SaveProject />} />
+        <Route path='/saveProject' element={<SaveProject />} />
         <Route path="/projects" element={<FetchProjects />} />
-        <Route path='/phases/:phaseId' element={<SavePhase />} />
       </Routes>
 
 

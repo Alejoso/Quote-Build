@@ -17,7 +17,7 @@ export default function Home() {
       {/*Botones*/}
       <div className="flex flex-col space-y-6">
         <button
-          onClick={() => navigate("/newProject")}
+          onClick={() => navigate("/saveProject")}
           className="px-8 py-4 bg-naranja text-white text-xl font-semibold rounded-lg hover:bg-naranjaHover transition transform hover:scale-105 hover:rotate-3  shadow-md"
         >
           Nuevo proyecto
