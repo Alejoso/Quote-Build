@@ -11,11 +11,10 @@ import type { Project } from "../types/interfaces";
 export default function newProject() {
 
   const [project , setProject] = useState<Project>({
-    name: '',
-    location: '',
-    total: 0
+    name: 'Casa Sloan',
+    location: 'COpacabana',
+    total: null
   })
-
 
 
   return (
@@ -53,8 +52,8 @@ export default function newProject() {
               name="total" 
               type="number"
               maxLength={100}
-              value={project.total}
-              onChange={(e) => setProject({ ...project, total: e.target.value })}
+              value={project.total ?? ''} //Asegura de que nunca se le pase null a number
+              onChange={(e) => setProject({ ...project, total: Number(e.target.value)})} // Paso la función a number
               placeholder="Total $$$"
             />
           </div>
