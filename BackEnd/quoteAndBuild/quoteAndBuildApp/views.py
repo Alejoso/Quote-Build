@@ -1,9 +1,9 @@
 from rest_framework import viewsets , serializers
 
-from quoteAndBuildApp.models import Material , Project
+from quoteAndBuildApp.models import Material , Project, Phase
 #from django.core import serializers as sr 
 
-#Material
+# Material
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
@@ -14,7 +14,7 @@ class MaterialViewSet (viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     
 
-#Projects
+# Project
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
@@ -24,4 +24,19 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
 
+# Phase
+class PhaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Phase
+        fields = '__all__'
+        
+class PhaseViewSet(viewsets.ModelViewSet):
+    serializer_class = PhaseSerializer
 
+    def get_queryset(self):
+        qs = Phase.objects.all()  # ← FIX: use Phase
+        # Optional filter to list phases for a specific project: /phases/?project=1
+        project_id = self.request.query_params.get('project')
+        if project_id:
+            qs = qs.filter(project_id=project_id)
+        return qs

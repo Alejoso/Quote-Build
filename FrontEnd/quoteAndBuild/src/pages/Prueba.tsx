@@ -1,9 +1,6 @@
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
-import NewPh from "./newPh";
-
-
 // Import fuctions
 import { createProject} from "../api/calls";
 
@@ -21,8 +18,6 @@ export default function newProject() {
   })
 
   const [loading, _] = useState(false);
-
-  
   
   //Function to call the backend
   async function createProjectFront(project:Project) {
@@ -102,9 +97,6 @@ export default function newProject() {
         </button>
       </form>
       <p style={{ fontSize: 12, color: "#6b7280", marginTop: 10 }}>* required</p>
-
-      {/* Child component to manage phases */}
-      <NewPh projectId={project} /> {/* ★ child */}
     </div>
     
   );

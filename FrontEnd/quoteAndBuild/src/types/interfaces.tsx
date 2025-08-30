@@ -28,10 +28,11 @@ export interface Project {
 }
 
 export interface Phase {
-    project: Project,
-    name: string,
-    description: string,
-    total: number | null
+  id?: number;
+  project: number;               // FK
+  name: string;
+  description?: string | null;
+  total?: number | null;
 }
 
 export interface Quote {

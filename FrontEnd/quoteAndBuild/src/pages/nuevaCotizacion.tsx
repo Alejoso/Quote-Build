@@ -4,6 +4,7 @@ import { useState } from "react";
 import MaterialsBrowser from "../components/Material/MaterialsBrowser";
 
 
+
 function today(): string {
   const d = new Date();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -89,7 +90,6 @@ export default function NuevaCotizacion() {
     } as any);
 
     
-
     navigate("/nuevoProyecto");
   };
 
