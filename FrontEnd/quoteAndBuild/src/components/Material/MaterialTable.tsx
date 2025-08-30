@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Material } from "../../types/material";
+import type { Material } from "../../types/interfaces";
 
 interface MaterialTableProps {
   data: Material[];

@@ -1,9 +1,9 @@
 from rest_framework import viewsets , serializers
 
-from quoteAndBuildApp.models import Material , Supplier , SupplierMaterial
+from quoteAndBuildApp.models import Material , Project
 #from django.core import serializers as sr 
 
-
+#Material
 class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Material
@@ -14,5 +14,14 @@ class MaterialViewSet (viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     
 
+#Projects
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = '__all__'
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
 

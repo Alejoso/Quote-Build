@@ -1,24 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import CascoLogo from "../assets/CascpoLogo.png";
 
+
 export default function Home() {
   const navigate = useNavigate();
-
-  async function fetchMaterials() {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/materials/'); // Replace with your API endpoint
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json(); // Or .text() for plain text
-      console.log(data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  }
   
-  fetchMaterials();
-
   return (
     <div className="w-screen flex flex-col items-center justify-start pt-10 pb-20 bg-gray-100 space-y-6 px-4">
       {/* Contenedor del título + imagen */}
@@ -27,10 +13,11 @@ export default function Home() {
         <img src={CascoLogo} alt="Logo" className="w-16 h-16" />
       </div>
 
+
       {/*Botones*/}
       <div className="flex flex-col space-y-6">
         <button
-          onClick={() => navigate("/nuevoProyecto")}
+          onClick={() => navigate("/newProject")} 
           className="px-8 py-4 bg-naranja text-white text-xl font-semibold rounded-lg hover:bg-naranjaHover transition transform hover:scale-105 hover:rotate-3  shadow-md"
         >
           Nuevo proyecto
