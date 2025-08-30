@@ -20,3 +20,24 @@ export const fetchAllProjects = () => {
 export const createProject = (project: any) => {
     return axios.post('http://127.0.0.1:8000/projects/' , project)
 }
+
+export const fetchProjectById = (id: number) => {
+  return axios.get(`http://127.0.0.1:8000/projects/${id}/`);
+};
+
+export const updateProject = (id: number, partial: any) => {
+  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, partial);
+};
+
+//Phases
+export const fetchPhasesByProject = (projectId: number) => {
+  return axios.get(`http://127.0.0.1:8000/phases/?project=${projectId}`);
+};
+
+export const createPhase = (phase: any) => {
+  return axios.post('http://127.0.0.1:8000/phases/', phase);
+};
+
+export const updatePhase = (id: number, partial: any) => {
+  return axios.patch(`http://127.0.0.1:8000/phases/${id}/`, partial);
+};
