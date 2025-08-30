@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 
 import { createProject, fetchProjectById, updateProject } from "../api/calls";
-import NewPh from "./SavePh";
+import SavePhase from "./SavePhase";
 
 type ProjectForm = {
   name: string;
@@ -187,7 +187,7 @@ export default function SaveProject() {
 
       {/* Fases del proyecto */}
       <div className="mt-8">
-        <NewPh projectId={projectId ?? null} />
+        <SavePhase project={projectId} />
       </div>
     </div>
   );

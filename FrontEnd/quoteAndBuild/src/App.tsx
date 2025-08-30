@@ -4,6 +4,7 @@ import SaveProject from './pages/SaveProject';
 import FetchProjects from "./pages/FetchProjects";
 //import NuevoProyecto from "./pages/nuevoProyecto";
 import NavBar from './components/shared/NavBar';
+import SavePhase from './pages/SavePhase';
 //import ProjectView from './pages/proyectos';
 
 
@@ -18,6 +19,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/newProject' element={<SaveProject />} />
         <Route path="/projects" element={<FetchProjects />} />
+        <Route path='/phases/:phaseId' element={<SavePhase />} />
       </Routes>
 
 

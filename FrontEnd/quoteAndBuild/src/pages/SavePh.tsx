@@ -1,264 +1,206 @@
-// src/components/NewPh.tsx
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { createPhase, fetchPhasesByProject, updatePhase } from "../api/calls";
-import type { Phase } from "../types/interfaces";
+// src/pages/SavePhase.tsx
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { createQuote, fetchPhaseById, fetchQuotesByPhase } from "../api/calls";
+import type { Phase, Quote } from "../types/interfaces";
 
-type Props = {
-  projectId: number | null; // parent passes this after project is created
+type QuoteForm = {
+  quote_date: string;     // YYYY-MM-DD
+  description: string;
 };
 
-const NewPh: React.FC<Props> = ({ projectId }) => {
+const SavePhase: React.FC = () => {
+  const navigate = useNavigate();
+  const params = useParams<{ phaseId?: string }>();
+  const location = useLocation() as { state?: { phaseId?: number } };
+
+  const routeId = params.phaseId ? Number(params.phaseId) : undefined;
+  const stateId = location?.state?.phaseId;
+  const initialPhaseId = typeof routeId === "number" && !Number.isNaN(routeId) ? routeId : stateId;
+
+  const [phaseId, setPhaseId] = useState<number | undefined>(initialPhaseId);
+  const [phase, setPhase] = useState<Phase | null>(null);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(false);
-  const [phases, setPhases] = useState<Phase[]>([]);
-  const [form, setForm] = useState({ name: "", description: "", total: "" });
+  const [saving, setSaving] = useState(false);
 
-  // Editing state
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", description: "", total: "" });
+  const [form, setForm] = useState<QuoteForm>({ quote_date: "", description: "" });
 
+  // Cargar fase + quotes
   useEffect(() => {
-    if (!projectId) return;
-    (async () => {
+    const run = async () => {
+      if (!phaseId) return;
       try {
-        const { data } = await fetchPhasesByProject(projectId);
-        setPhases(data);
-      } catch (e) {
-        console.error(e);
-        toast.error("No se pudieron cargar las fases.");
+        setLoading(true);
+        const [{ data: phaseData }, { data: quotesData }] = await Promise.all([
+          fetchPhaseById(phaseId),
+          fetchQuotesByPhase(phaseId),
+        ]);
+        setPhase(phaseData);
+        // ordenar por fecha descendente
+        const sorted = [...quotesData].sort(
+          (a: Quote, b: Quote) => (b.quote_date > a.quote_date ? 1 : b.quote_date < a.quote_date ? -1 : 0)
+        );
+        setQuotes(sorted);
+      } catch (err) {
+        console.error(err);
+        toast.error("No se pudo cargar la fase o sus cotizaciones.");
+      } finally {
+        setLoading(false);
       }
-    })();
-  }, [projectId]);
+    };
+    run();
+  }, [phaseId]);
 
-  if (!projectId) {
-    return (
-      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
-        Primero guarda el proyecto para poder crear fases.
-      </div>
-    );
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  };
 
-  const onCreate = async (e: React.FormEvent) => {
+  const onCreateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) {
-      toast.error("El nombre de la fase es obligatorio.");
+    if (!phaseId) {
+      toast.error("Falta el identificador de la fase.");
       return;
     }
-
-    const payload: Phase = {
-      project: projectId,
-      name: form.name.trim(),
-      description: form.description.trim() || null,
-      total: form.total.trim() === "" ? null : Number(Number(form.total).toFixed(2)),
-    };
-
-    if (payload.total !== null && Number.isNaN(payload.total)) {
-      toast.error("Total debe ser un número válido.");
+    if (!form.quote_date) {
+      toast.error("La fecha de cotización es obligatoria.");
       return;
     }
-
     try {
-      setLoading(true);
-      const { data } = await createPhase(payload);
-      setPhases((prev) => [data, ...prev]);
-      setForm({ name: "", description: "", total: "" });
-      toast.success(`Fase "${data.name}" creada.`);
+      setSaving(true);
+      const payload: Quote = {
+        phase: phaseId,
+        quote_date: form.quote_date,
+        description: form.description.trim() || null,
+        is_first_quote: false,      // por defecto para cumplir con el modelo
+        total: null,                // opcional
+      };
+      const { data } = await createQuote(payload);
+      setQuotes((prev) => [data, ...prev]);  // insertamos arriba
+      setForm({ quote_date: "", description: "" });
+      toast.success("Cotización creada.");
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const msg = typeof err.response?.data === "object" ? JSON.stringify(err.response?.data) : err.message;
-        toast.error(msg || "No se pudo crear la fase.");
-      } else {
-        toast.error("Error desconocido al crear la fase.");
-      }
+      toast.error("No se pudo crear la cotización.");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const startEdit = (p: Phase) => {
-    setEditingId(p.id!);
-    setEditForm({
-      name: p.name ?? "",
-      description: (p.description ?? "") as string,
-      total: p.total != null ? String(p.total) : "",
-    });
+  const goToQuote = (q: Quote) => {
+    // Implementarás SaveQuote luego
+    navigate(`/quote/${q.id}`, { state: { quoteId: q.id } });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({ name: "", description: "", total: "" });
-  };
-
-  const saveEdit = async (id: number) => {
-    const partial: Partial<Phase> = {
-      name: editForm.name.trim() || undefined,
-      description: editForm.description.trim() || null,
-    };
-
-    if (editForm.total.trim() === "") {
-      partial.total = null;
-    } else {
-      const n = Number(editForm.total);
-      if (Number.isNaN(n)) {
-        toast.error("Total debe ser un número válido.");
-        return;
-      }
-      partial.total = Number(n.toFixed(2));
-    }
-
-    try {
-      setLoading(true);
-      const { data } = await updatePhase(id, partial);
-      setPhases((prev) => prev.map((ph) => (ph.id === id ? data : ph)));
-      toast.success("Fase actualizada.");
-      cancelEdit();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const msg = typeof err.response?.data === "object" ? JSON.stringify(err.response?.data) : err.message;
-        toast.error(msg || "No se pudo actualizar la fase.");
-      } else {
-        toast.error("Error desconocido al actualizar la fase.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const title = phase ? `Fase: ${phase.name}` : "Fase";
 
   return (
-    <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow">
-      <h3 className="mb-4 text-xl font-semibold">Fases del proyecto</h3>
+    <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow">
+      <Toaster />
 
-      {/* Create form */}
-      <form onSubmit={onCreate} className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+        <button
+          onClick={() => navigate(-1)}
+          className="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+        >
+          Volver
+        </button>
+      </div>
+
+      {/* Encabezado de la fase */}
+      {loading ? (
+        <div className="mb-6 h-20 animate-pulse rounded-xl bg-gray-100" />
+      ) : phase ? (
+        <div className="mb-6 rounded-xl border border-gray-200 p-4">
+          <p className="text-base"><span className="font-semibold">Proyecto ID:</span> {phase.project.id}</p>
+          <p className="text-base"><span className="font-semibold">Nombre:</span> {phase.name}</p>
+          <p className="text-sm text-gray-600">
+            {phase.description || <span className="italic text-gray-400">Sin descripción</span>}
+          </p>
+          <p className="text-sm text-gray-600">
+            Total: {phase.total != null ? phase.total : <span className="italic text-gray-400">—</span>}
+          </p>
+        </div>
+      ) : (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
+          No se encontró la fase.
+        </div>
+      )}
+
+      {/* Formulario para crear nueva cotización */}
+      <form onSubmit={onCreateQuote} className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="md:col-span-1">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Nombre *</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Fecha *</label>
           <input
-            type="text"
-            maxLength={100}
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            type="date"
+            name="quote_date"
+            value={form.quote_date}
+            onChange={handleChange}
             className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-            placeholder="Ej: Excavación"
             required
           />
         </div>
 
-        <div className="md:col-span-1">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Total (opcional)</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={form.total}
-            onChange={(e) => setForm((f) => ({ ...f, total: e.target.value }))}
-            className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-            placeholder="0.00"
-          />
-        </div>
-
-        <div className="md:col-span-1">
+        <div className="md:col-span-2">
           <label className="mb-1 block text-sm font-medium text-gray-700">Descripción</label>
           <input
             type="text"
+            name="description"
             value={form.description}
-            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            onChange={handleChange}
+            placeholder="Descripción de la cotización"
             className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-            placeholder="Detalle breve"
           />
         </div>
 
         <div className="md:col-span-3">
           <button
             type="submit"
-            disabled={loading}
+            disabled={saving || loading || !phaseId}
             className="inline-flex w-full items-center justify-center rounded-xl bg-gray-900 px-4 py-2 font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Creando..." : "Agregar fase"}
+            {saving ? "Creando..." : "Agregar Cotización"}
           </button>
         </div>
       </form>
 
-      {/* List + inline edit */}
-      <div className="space-y-3">
-        {phases.length === 0 ? (
-          <p className="text-sm text-gray-500">Aún no hay fases para este proyecto.</p>
-        ) : (
-          phases.map((p) => (
-            <div key={p.id} className="rounded-xl border border-gray-200 p-4">
-              {editingId === p.id ? (
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                  <input
-                    type="text"
-                    maxLength={100}
-                    value={editForm.name}
-                    onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                    className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Nombre de la fase"
-                  />
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={editForm.total}
-                    onChange={(e) => setEditForm((f) => ({ ...f, total: e.target.value }))}
-                    className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Total"
-                  />
-                  <input
-                    type="text"
-                    value={editForm.description}
-                    onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                    className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Descripción"
-                  />
-
-                  <div className="md:col-span-3 flex gap-2">
-                    <button
-                      onClick={() => saveEdit(p.id!)}
-                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-                      type="button"
-                      disabled={loading}
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="inline-flex items-center justify-center rounded-xl bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-300"
-                      type="button"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <p className="text-base font-semibold">{p.name}</p>
-                    <p className="text-sm text-gray-600">
-                      {p.description ? p.description : <span className="italic text-gray-400">Sin descripción</span>}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Total: {p.total != null ? p.total : <span className="italic text-gray-400">—</span>}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => startEdit(p)}
-                      className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-black"
-                      type="button"
-                    >
-                      Editar
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+      {/* Lista de cotizaciones */}
+      <h3 className="mb-3 text-lg font-semibold">Cotizaciones</h3>
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-100" />
+          ))}
+        </div>
+      ) : quotes.length === 0 ? (
+        <p className="text-sm text-gray-500">Aún no hay cotizaciones para esta fase.</p>
+      ) : (
+        <div className="space-y-3">
+          {quotes.map((q) => (
+            <button
+              key={q.id}
+              onClick={() => goToQuote(q)}
+              className="w-full rounded-xl border border-gray-200 bg-white p-4 text-left shadow transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <div className="flex items-start justify-between">
+                <p className="text-base font-medium">
+                  {q.quote_date} {q.is_first_quote ? <span className="ml-2 rounded bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700">Primera</span> : null}
+                </p>
+              </div>
+              <p className="mt-1 text-sm text-gray-600">
+                {q.description || <span className="italic text-gray-400">Sin descripción</span>}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Total: {q.total != null ? q.total : "—"}
+              </p>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default NewPh;
+export default SavePhase;

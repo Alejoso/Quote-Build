@@ -22,27 +22,27 @@ export interface SupplierMaterials {
 }
 
 export interface Project {
-    id?: number, 
+    id?: number,
     name: string,
     location: string,
     total: number | null
 }
 
 export interface Phase {
-  id?: number;
-  project: number;               // FK
-  name: string;
-  description?: string | null;
-  total?: number | null;
+    id?: number;
+    project: Project;               // FK
+    name: string;
+    description?: string | null;
+    total?: number | null;
 }
 
 export interface Quote {
-    phase: Phase,
-    quote_date: string,
-    description: string,
-    is_first_quote: boolean,
-    total: number | null,
-    materials: SupplierMaterials
+    id?: number;
+    phase: number;
+    quote_date: string;             // "YYYY-MM-DD"
+    description?: string | null;
+    is_first_quote: boolean;        // lo seteamos false por defecto al crear
+    total?: number | null;          // opcional en tu modelo
 }
 
 export interface QuoteSupplierMaterial {

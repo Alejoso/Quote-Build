@@ -12,14 +12,14 @@ import type { Project } from "../types/interfaces";
 
 export default function savePhase({project} : {project : Project}) {
 
-  async function fillNameProject(project : Project) {
-    await fetchPhasesByProject(project.id!); // It goes this due to the Id cannot be null
+  async function savePhase(phase : Phase) {
+    await createPhase(phase); // It goes this due to the Id cannot be null
   }
   
 
   //Definition of the variable phase, that is going to be fulfiled while we are doing the forms with the useState
   const [phase , setPhase] = useState<Phase>({
-    project: project.name ,
+    project: project ,
     name: '',
     description: '',
     total : null
@@ -45,7 +45,7 @@ export default function savePhase({project} : {project : Project}) {
 
       //Clear fields
       setPhase({
-        project = project.name,
+        project : project,
         name: '',
         description: '',
         total: null
@@ -79,8 +79,8 @@ export default function savePhase({project} : {project : Project}) {
             name="description"
             type="text"
             maxLength={160}
-            value={phase.description}
-            onChange={(e) => setPhase{ ...phase, description: e.target.value })}
+            value={phase.description ?? ''} //To avoid problems in case is empty
+            onChange={(e) => setPhase({ ...phase, description: e.target.value })}
             required
             style={inputStyle}
             placeholder="e.g. Son las bases de la casa "

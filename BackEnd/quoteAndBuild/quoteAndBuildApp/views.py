@@ -1,6 +1,6 @@
 from rest_framework import viewsets , serializers
 
-from quoteAndBuildApp.models import Material , Project, Phase, Client
+from quoteAndBuildApp.models import Material , Project, Phase, Client, Quote
 #from django.core import serializers as sr 
 
 # Material
@@ -49,4 +49,20 @@ class PhaseViewSet(viewsets.ModelViewSet):
         project_id = self.request.query_params.get('project')
         if project_id:
             qs = qs.filter(project_id=project_id)
+        return qs
+
+# Quote
+class QuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quote
+        fields = '__all__'  # phase, quote_date, description, is_first_quote, total, ...
+
+class QuoteViewSet(viewsets.ModelViewSet):
+    serializer_class = QuoteSerializer
+
+    def get_queryset(self):
+        qs = Quote.objects.all()
+        phase_id = self.request.query_params.get('phase')
+        if phase_id:
+            qs = qs.filter(phase_id=phase_id)
         return qs
