@@ -10,24 +10,25 @@ import type {
   Material,
   PhaseMaterial,
   Supplier,
+  Project,
 } from "../types/interfaces";
 
 
 //Projects
 export const fetchAllProjects = () => {
   return axios.get('http://127.0.0.1:8000/projects/')
-}
+};
 
 export const createProject = (project: any) => {
   return axios.post('http://127.0.0.1:8000/projects/', project)
-}
+};
+
+export const updateProject = (id: number, fieldsUpdate: any) => {
+  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, fieldsUpdate); //Go to the specific project and do...
+};
 
 export const fetchProjectById = (id: number) => {
   return axios.get(`http://127.0.0.1:8000/projects/${id}/`);
-};
-
-export const updateProject = (id: number, partial: any) => {
-  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, partial);
 };
 
 //Phases
@@ -39,8 +40,8 @@ export const createPhase = (phase: any) => {
   return axios.post('http://127.0.0.1:8000/phases/', phase);
 };
 
-export const updatePhase = (id: number, partial: any) => {
-  return axios.patch(`http://127.0.0.1:8000/phases/${id}/`, partial);
+export const updatePhase = (id: number, fieldsUpdate: any) => {
+  return axios.patch(`http://127.0.0.1:8000/phases/${id}/`, fieldsUpdate);
 };
 
 export function fetchPhaseById(id: number) {

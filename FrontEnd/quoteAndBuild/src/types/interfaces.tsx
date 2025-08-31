@@ -10,7 +10,7 @@ export interface Project {
     id?: number,
     name: string,
     location: string,
-    total: number | null
+    total: number
 }
 
 export interface Phase {
@@ -18,7 +18,7 @@ export interface Phase {
     project: number;               // FK
     name: string;
     description?: string | null;
-    total?: number | null;
+    total: number; 
 }
 
 export type Quote = {
@@ -27,7 +27,7 @@ export type Quote = {
     quote_date: string; // "YYYY-MM-DD"
     description?: string | null;
     is_first_quote: boolean;
-    total?: number | null;
+    total: number;
 };
 export type Material = {
   id?: number;

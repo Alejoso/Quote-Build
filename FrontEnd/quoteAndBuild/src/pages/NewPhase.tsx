@@ -1,6 +1,6 @@
 // src/components/NewPh.tsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createPhase, fetchPhasesByProject, updatePhase } from "../api/calls";
 import type { Phase } from "../types/interfaces";
@@ -11,27 +11,33 @@ type Props = {
 
 const NewPhase: React.FC<Props> = ({ projectId }) => {
   const [loading, setLoading] = useState(false);
-  const [phases, setPhases] = useState<Phase[]>([]);
-  const [form, setForm] = useState({ name: "", description: "", total: "" });
-
-  // Editing state
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", description: "", total: "" });
+  const navigate = useNavigate();
+  
+  const [phases, setPhases] = useState<Phase[]>([]); // Here we establish the type of array we will work with. In this case we're using the Phase type from interfaces document
+  
+  // Here we are saying we are working with an empty array at first, the it will be filled with users info 
+  const [form, setForm] = useState({
+      name: "",
+      description: "",
+      total: 0,
+    }); 
 
   useEffect(() => {
+
     if (!projectId) return;
     (async () => {
       try {
-        const { data } = await fetchPhasesByProject(projectId);
-        setPhases(data);
-      } catch (e) {
-        console.error(e);
+        const { data } = await fetchPhasesByProject(projectId); // Here we get the bridge between the Phase we're creating and the project we were working on. 
+        setPhases(data); //We set the phase with the info given 
+      } catch (error) {
+        console.error(error);
         toast.error("No se pudieron cargar las fases.");
       }
     })();
+
   }, [projectId]);
 
-  if (!projectId) {
+  if (!projectId) { // Allows to control the case, the project don't exists (Maybe due to it wasn't save)
     return (
       <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
         Primero guarda el proyecto para poder crear fases.
@@ -41,7 +47,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) {
+    if (!form.name.trim()) { // If it doesn't amend info, then the field is empty 
       toast.error("El nombre de la fase es obligatorio.");
       return;
     }
@@ -50,79 +56,71 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
       project: projectId,
       name: form.name.trim(),
       description: form.description.trim() || null,
-      total: form.total.trim() === "" ? null : Number(Number(form.total).toFixed(2)),
+      total: form.total,
     };
 
-    if (payload.total !== null && Number.isNaN(payload.total)) {
-      toast.error("Total debe ser un número válido.");
-      return;
-    }
-
     try {
-      setLoading(true);
-      const { data } = await createPhase(payload);
-      setPhases((prev) => [data, ...prev]);
-      setForm({ name: "", description: "", total: "" });
+      setLoading(true); //Activate loading state
+      const { data } = await createPhase(payload); // Use info writted by the user and pass it to createPhase function to create formally the phase
+      setPhases((currentPhases) => [data, ...currentPhases]); // Insert new phase on the data info, preserving the other phases
+      setForm({ name: "", description: "", total: 0 }); // Set form to empty, so user can insert new phases 
       toast.success(`Fase "${data.name}" creada.`);
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const msg = typeof err.response?.data === "object" ? JSON.stringify(err.response?.data) : err.message;
-        toast.error(msg || "No se pudo crear la fase.");
-      } else {
-        toast.error("Error desconocido al crear la fase.");
-      }
+      
+    } catch (err: any) {
+    
+      toast.error(err?.message || "No se pudo guardar el proyecto.");
+
     } finally {
       setLoading(false);
     }
   };
 
+  // Editing state
+  const [editingId, setEditingId] = useState<number | null>(null); // Just Establishing  the Id phase type (number or null)
+  const [editForm, setEditForm] = useState({ name: "", description: "", total: 0 });  // We set info as " ". It will be filled by the user
+
+  
   const startEdit = (p: Phase) => {
     setEditingId(p.id!);
     setEditForm({
-      name: p.name ?? "",
-      description: (p.description ?? "") as string,
-      total: p.total != null ? String(p.total) : "",
+      name: p.name ?? "", //Allow to edit a phase ( we receive as a parameter ) if the field is null then if field as ""
+      description: p.description ?? "",
+      total: p.total ?? 0,
     });
   };
 
   const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({ name: "", description: "", total: "" });
+    setEditingId(null); //No form selected
+    setEditForm({ name: "", description: "", total: 0 }); //Clear fields
   };
 
+  //Build the payload to update an edit
   const saveEdit = async (id: number) => {
-    const partial: Partial<Phase> = {
-      name: editForm.name.trim() || undefined,
-      description: editForm.description.trim() || null,
+    const payload:Partial<Phase> = {
+      name: editForm.name.trim(),
+      description: editForm.description.trim(),
+      total: editForm.total,
     };
-
-    if (editForm.total.trim() === "") {
-      partial.total = null;
-    } else {
-      const n = Number(editForm.total);
-      if (Number.isNaN(n)) {
-        toast.error("Total debe ser un número válido.");
-        return;
-      }
-      partial.total = Number(n.toFixed(2));
-    }
 
     try {
       setLoading(true);
-      const { data } = await updatePhase(id, partial);
-      setPhases((prev) => prev.map((ph) => (ph.id === id ? data : ph)));
+      
+      const { data } = await updatePhase(id, payload);
+      setPhases((prev) => prev.map((ph) => (ph.id === id ? data : ph))); // Search for an Id coincidence, when find change old data with changes realized, else the phase is a new phase
       toast.success("Fase actualizada.");
       cancelEdit();
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const msg = typeof err.response?.data === "object" ? JSON.stringify(err.response?.data) : err.message;
-        toast.error(msg || "No se pudo actualizar la fase.");
-      } else {
-        toast.error("Error desconocido al actualizar la fase.");
-      }
+
+    } catch (err:any) {
+        toast.error(err?.message || "No se pudo editar la fase.");
+      
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToPhase = (p: Phase) => {
+    // Send user to SaveProject.tsx (route: /saveProject) with the chosen project id
+    navigate("/saveProject/quotes", { state: { phaseId: p.id , projectId: p.project} });
   };
 
   return (
@@ -141,19 +139,6 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
             className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
             placeholder="Ej: Excavación"
             required
-          />
-        </div>
-
-        <div className="md:col-span-1">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Total (opcional)</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={form.total}
-            onChange={(e) => setForm((f) => ({ ...f, total: e.target.value }))}
-            className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-            placeholder="0.00"
           />
         </div>
 
@@ -186,7 +171,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
         ) : (
           phases.map((p) => (
             <div key={p.id} className="rounded-xl border border-gray-200 p-4">
-              {editingId === p.id ? (
+              {editingId === p.id ? ( // It allows to search the phase we want edit and display fields so user can fill them 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <input
                     type="text"
@@ -196,15 +181,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                     placeholder="Nombre de la fase"
                   />
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={editForm.total}
-                    onChange={(e) => setEditForm((f) => ({ ...f, total: e.target.value }))}
-                    className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Total"
-                  />
+                  
                   <input
                     type="text"
                     value={editForm.description}
@@ -218,9 +195,9 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       onClick={() => saveEdit(p.id!)}
                       className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
                       type="button"
-                      disabled={loading}
-                    >
-                      Guardar
+                      disabled={loading} // When click in the button activates the logic to save the changes on the phase 
+                    > 
+                      Guardar 
                     </button>
                     <button
                       onClick={cancelEdit}
@@ -252,11 +229,11 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     </button>
 
                     <button
-                      onClick={() => window.location.assign(`/quotes/new?phase=${p.id}`)}
+                      onClick={() => goToPhase(p)}
                       className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
                       type="button"
                     >
-                      Nueva Cotización
+                      Ver cotizaciones
                     </button>
                   </div>
                 </div>

@@ -46,7 +46,8 @@ class PhaseViewSet(viewsets.ModelViewSet):
     serializer_class = PhaseSerializer
 
     def get_queryset(self):
-        qs = Phase.objects.all()  # ← FIX: use Phase
+        qs = Phase.objects.all()
+
         # Optional filter to list phases for a specific project: /phases/?project=1
         project_id = self.request.query_params.get('project')
         if project_id:
