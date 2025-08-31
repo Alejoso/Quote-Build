@@ -4,8 +4,9 @@ import SaveProject from './pages/SaveProject';
 import FetchProjects from "./pages/FetchProjects";
 //import NuevoProyecto from "./pages/nuevoProyecto";
 import NavBar from './components/shared/NavBar';
-import SavePhase from './pages/SavePhase';
 //import ProjectView from './pages/proyectos';
+
+import NewQuote from "./pages/SaveQuote";
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/saveProject' element={<SaveProject />} />
         <Route path="/projects" element={<FetchProjects />} />
+        <Route path="/quotes/new" element={<NewQuote />} />
       </Routes>
 
 

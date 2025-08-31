@@ -1,11 +1,13 @@
 // src/pages/SaveProject.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 
 import { createProject, fetchProjectById, updateProject } from "../api/calls";
-import SavePhase from "./SavePhase";
+import NewPhase from "./NewPhase";
+import { number } from "framer-motion";
 
+// Interface for having the form of the project
 type ProjectForm = {
   name: string;
   location: string;
@@ -15,19 +17,14 @@ type ProjectForm = {
 export default function SaveProject() {
   const navigate = useNavigate();
 
-  // 1) tomar projectId desde location.state o desde ?id= en la URL
-  const location = useLocation() as { state?: { projectId?: number } };
-  const stateId = location?.state?.projectId;
-  const queryId = useMemo(() => {
-    const sp = new URLSearchParams(window.location.search);
-    const raw = sp.get("id");
-    return raw ? Number(raw) : undefined;
-  }, []);
-  const initialProjectId = typeof stateId === "number" ? stateId : typeof queryId === "number" ? queryId : undefined;
 
-  const [projectId, setProjectId] = useState<number | undefined>(initialProjectId);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const location = useLocation() as { state?: { projectId?: number } }; //Look for the state that we sent with navigate, so we know in which project are we looking at.
+
+  const stateId = location?.state?.projectId; //Get the projectId safely from the location parameter.
+
+  const [projectId, setProjectId] = useState<number | undefined>(stateId); //Set the project Id with the initial state
+  const [loading, setLoading] = useState(false); //Its an state for knowing when things are loaging
+  const [saving, setSaving] = useState(false); //Its the smae, but for saving
 
   const [form, setForm] = useState<ProjectForm>({
     name: "",
@@ -35,82 +32,88 @@ export default function SaveProject() {
     total: "",
   });
 
-  // Cargar proyecto existente si hay projectId
+  //Load an existent project
   useEffect(() => {
-    const run = async () => {
-      if (!projectId) return;
+    const loadProjects = async () => {
+
+      if (!projectId) return; //No project ID, rerutn
+
       try {
-        setLoading(true);
-        const { data } = await fetchProjectById(projectId);
+        setLoading(true); // It's usufull for loading page 
+        
+        const {data} = await fetchProjectById(projectId); //Get the project info by ID, using fetchProjectById function
         // DRF puede devolver total como string; aseguramos string en el form
+        
         setForm({
-          name: data.name ?? "",
+          name: data.name ?? "", //If null, use rigth side
           location: data.location ?? "",
-          total: data.total !== null && data.total !== undefined ? String(data.total) : "",
-        });
-        setProject(data);
+          total: data.total ?? 0,
+        }); // name the data of database as we want, helps for working with these names in the frontend
+
       } catch (err) {
         console.error(err);
         toast.error("No se pudo cargar el proyecto.");
+
       } finally {
         setLoading(false);
       }
     };
-    run();
-  }, [projectId]);
 
+    loadProjects(); //Call the function from above
+  }, [projectId]);
+  
+  //Gets the information that we are writting and saves it into the corresponding field
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setForm((f) => ({ ...f, [name]: value })); 
   };
-
+  
+  //Build the payload to send it to the backend, it cleans the data(whitespaces, format, etc)
   const buildPayload = () => {
+
     const payload: any = {
-      name: form.name.trim(),
+      name: form.name.trim(), //
       location: form.location.trim(),
+      total: form.total,
     };
-    if (form.total.trim() === "") {
-      payload.total = null;
-    } else {
-      const n = Number(form.total);
-      if (Number.isNaN(n)) {
-        throw new Error("El total debe ser un número válido.");
-      }
-      payload.total = Number(n.toFixed(2));
-    }
+
     return payload;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name.trim() || !form.location.trim()) {
+    
+    e.preventDefault(); //Dont send the form instatly
+
+    if (!form.name.trim() || !form.location.trim()) { // If don't amend the form then it is empty 
       toast.error("Nombre y ubicación son obligatorios.");
       return;
     }
+    
     try {
       setSaving(true);
-      const payload = buildPayload();
+      const payload = buildPayload(); //Call the function to build the payload
 
+      //If we have project ID, it means we are updating
       if (projectId) {
         const { data } = await updateProject(projectId, payload);
         toast.success(`Proyecto actualizado (${data.name}).`);
-        setProject(data);
+      
+      //Else we are creating one
       } else {
         const { data } = await createProject(payload);
         toast.success(`Proyecto creado (${data.name}).`);
-        setProjectId(data.id); // ahora tenemos id, mostramos fases debajo
-        setProject(data);
+        setProjectId(data.id); // Now we have an id, so we set it
+
       }
     } catch (err: any) {
       toast.error(err?.message || "No se pudo guardar el proyecto.");
+
     } finally {
       setSaving(false);
     }
   };
 
-  const title = projectId ? "Editar Proyecto" : "Nuevo Proyecto";
-  const [project, setProject] = useState<any | null>(null);
-
+  const title = projectId ? "Editar Proyecto" : "Nuevo Proyecto"; 
 
   return (
     <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow">
@@ -163,24 +166,6 @@ export default function SaveProject() {
           />
         </div>
 
-        <div>
-          <label htmlFor="total" className="mb-1 block text-sm font-medium text-gray-700">
-            Total (opcional)
-          </label>
-          <input
-            id="total"
-            name="total"
-            type="number"
-            step="0.01"
-            min="0"
-            disabled={loading}
-            placeholder="0.00"
-            value={form.total}
-            onChange={handleChange}
-            className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
-          />
-        </div>
-
         <button
           type="submit"
           disabled={saving || loading}
@@ -189,11 +174,11 @@ export default function SaveProject() {
           {saving ? "Guardando..." : projectId ? "Guardar cambios" : "Crear proyecto"}
         </button>
       </form>
+
       {/* Fases del proyecto */}
       <div className="mt-8">
-        {project && <SavePhase project={project} />}
+        <NewPhase projectId={projectId ?? null} />
       </div>
-
     </div>
   );
 }

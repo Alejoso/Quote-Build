@@ -39,8 +39,8 @@ const FetchProjects: React.FC = () => {
   }, [projects, query]);
 
   const goToProject = (p: ProjectRow) => {
-    // Send user to SaveProject.tsx (route: /newProject) with the chosen project id
-    navigate("/newProject", { state: { projectId: p.id } });
+    // Send user to SaveProject.tsx (route: /saveProject) with the chosen project id
+    navigate("/saveProject", { state: { projectId: p.id } });
   };
 
   return (
@@ -48,7 +48,7 @@ const FetchProjects: React.FC = () => {
       <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <h1 className="text-2xl font-semibold tracking-tight">Proyectos</h1>
         <button
-          onClick={() => navigate("/newProject")}
+          onClick={() => navigate("/saveProject")}
           className="rounded-xl bg-gray-900 px-4 py-2 font-semibold text-white transition hover:bg-black"
         >
           Nuevo Proyecto
