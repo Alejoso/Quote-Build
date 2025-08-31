@@ -12,15 +12,19 @@ type Props = {
 const NewPhase: React.FC<Props> = ({ projectId }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  
+
   const [phases, setPhases] = useState<Phase[]>([]); // Here we establish the type of array we will work with. In this case we're using the Phase type from interfaces document
-  
+
+  // Editing state
+  const [editingId, setEditingId] = useState<number | null>(null); // Just Establishing  the Id phase type (number or null)
+  const [editForm, setEditForm] = useState({ name: "", description: "", total: 0 });  // We set info as " ". It will be filled by the user
+
   // Here we are saying we are working with an empty array at first, the it will be filled with users info 
   const [form, setForm] = useState({
-      name: "",
-      description: "",
-      total: 0,
-    }); 
+    name: "",
+    description: "",
+    total: 0,
+  });
 
   useEffect(() => {
 
@@ -65,9 +69,9 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
       setPhases((currentPhases) => [data, ...currentPhases]); // Insert new phase on the data info, preserving the other phases
       setForm({ name: "", description: "", total: 0 }); // Set form to empty, so user can insert new phases 
       toast.success(`Fase "${data.name}" creada.`);
-      
+
     } catch (err: any) {
-    
+
       toast.error(err?.message || "No se pudo guardar el proyecto.");
 
     } finally {
@@ -75,11 +79,9 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
     }
   };
 
-  // Editing state
-  const [editingId, setEditingId] = useState<number | null>(null); // Just Establishing  the Id phase type (number or null)
-  const [editForm, setEditForm] = useState({ name: "", description: "", total: 0 });  // We set info as " ". It will be filled by the user
 
-  
+
+
   const startEdit = (p: Phase) => {
     setEditingId(p.id!);
     setEditForm({
@@ -96,7 +98,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
 
   //Build the payload to update an edit
   const saveEdit = async (id: number) => {
-    const payload:Partial<Phase> = {
+    const payload: Partial<Phase> = {
       name: editForm.name.trim(),
       description: editForm.description.trim(),
       total: editForm.total,
@@ -104,15 +106,15 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
 
     try {
       setLoading(true);
-      
+
       const { data } = await updatePhase(id, payload);
       setPhases((prev) => prev.map((ph) => (ph.id === id ? data : ph))); // Search for an Id coincidence, when find change old data with changes realized, else the phase is a new phase
       toast.success("Fase actualizada.");
       cancelEdit();
 
-    } catch (err:any) {
-        toast.error(err?.message || "No se pudo editar la fase.");
-      
+    } catch (err: any) {
+      toast.error(err?.message || "No se pudo editar la fase.");
+
     } finally {
       setLoading(false);
     }
@@ -120,7 +122,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
 
   const goToPhase = (p: Phase) => {
     // Send user to SaveProject.tsx (route: /saveProject) with the chosen project id
-    navigate("/saveProject/quotes", { state: { phaseId: p.id , projectId: p.project} });
+    navigate("/saveProject/quotes", { state: { phaseId: p.id, projectId: p.project } });
   };
 
   return (
@@ -181,7 +183,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                     placeholder="Nombre de la fase"
                   />
-                  
+
                   <input
                     type="text"
                     value={editForm.description}
@@ -196,8 +198,8 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
                       type="button"
                       disabled={loading} // When click in the button activates the logic to save the changes on the phase 
-                    > 
-                      Guardar 
+                    >
+                      Guardar
                     </button>
                     <button
                       onClick={cancelEdit}
