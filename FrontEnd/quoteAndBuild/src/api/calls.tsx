@@ -33,7 +33,7 @@ export const fetchProjectById = (id: number) => {
 
 //Phases
 export const fetchPhasesByProject = (projectId: number) => {
-  return axios.get(`http://127.0.0.1:8000/phases/?project=${projectId}`);
+  return axios.get(`http://127.0.0.1:8000/phases/?project=${projectId}`); //Get info from a specific Project given a Id 
 };
 
 export const createPhase = (phase: any) => {
@@ -45,7 +45,7 @@ export const updatePhase = (id: number, fieldsUpdate: any) => {
 };
 
 export function fetchPhaseById(id: number) {
-  return axios.get<Phase>(`${BASE_URL}/phases/${id}/`);
+  return axios.get<Phase>(`${BASE_URL}/phases/${id}/`); 
 }
 
 // ---- Quotes
