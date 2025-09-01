@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createPhase, fetchPhasesByProject, updatePhase } from "../api/calls";
 import type { Phase } from "../types/interfaces";
+import DisplayMaterialTable from "../components/Material/MaterialPrueba";
+
 
 type Props = {
   projectId: number | null; // parent passes this after project is created
@@ -243,6 +245,10 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
             </div>
           ))
         )}
+      </div>
+      <div className="mt-8">
+        <h3 className="mb-4 text-xl font-semibold">Materiales disponibles</h3>
+        <DisplayMaterialTable />
       </div>
     </div>
   );

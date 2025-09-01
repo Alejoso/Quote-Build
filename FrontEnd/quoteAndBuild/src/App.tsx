@@ -5,7 +5,7 @@ import FetchProjects from "./pages/FetchProjects";
 //import NuevoProyecto from "./pages/nuevoProyecto";
 import NavBar from './components/shared/NavBar';
 //import ProjectView from './pages/proyectos';
-
+import Quotes from './pages/Quotes';
 import NewQuote from "./pages/SaveQuote";
 
 
@@ -20,7 +20,8 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/saveProject' element={<SaveProject />} />
         <Route path="/projects" element={<FetchProjects />} />
-        <Route path="/saveProject/quotes" element={<NewQuote />} />
+        <Route path="/saveProject/quotes" element={<Quotes />} />
+
       </Routes>
 
 

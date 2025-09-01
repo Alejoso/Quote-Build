@@ -5,6 +5,8 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 import type {
   Quote,
   QuoteItemPayload,
+  QuoteCreatePayload,
+  QuoteUpdatePayload,
   Phase,
   SupplierMaterial,
   Material,
@@ -50,12 +52,19 @@ export function fetchPhaseById(id: number) {
 
 // ---- Quotes
 export function fetchQuotesByPhase(phaseId: number) {
-  // You can implement filtering in DRF: /quotes/?phase=<id>
-  return axios.get(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });
+  return axios.get<Quote[]>(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });
 }
 
-export function createQuote(payload: Quote) {
-  return axios.post(`${BASE_URL}/quotes/`, payload);
+export function createQuote(payload: QuoteCreatePayload) {   // ⬅ change type
+  return axios.post<Quote>(`${BASE_URL}/quotes/`, payload);
+}
+
+export function updateQuote(id: number, payload: QuoteUpdatePayload) {  // ⬅ add/update
+  return axios.patch<Quote>(`${BASE_URL}/quotes/${id}/`, payload);
+}
+
+export function deleteQuote(id: number) {
+  return axios.delete(`${BASE_URL}/quotes/${id}/`);
 }
 
 export function createQuoteItem(payload: QuoteItemPayload) {
@@ -94,9 +103,11 @@ export function createSupplierMaterial(payload: {
 }
 
 
-export function fetchAllMaterials() {
-  return axios.get<Material[]>(`${BASE_URL}/materials/`);
+// SupplierMaterials
+export function fetchAllSupplierMaterials() {
+  return axios.get<SupplierMaterial[]>(`${BASE_URL}/supplier-materials/`);
 }
+
 
 // NEW: suppliers that sell a given material
 export function fetchSupplierMaterialsByMaterial(materialId: number) {

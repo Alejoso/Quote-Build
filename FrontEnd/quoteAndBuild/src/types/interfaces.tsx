@@ -1,34 +1,27 @@
 // interfaces.tsx
 export interface SupplierMaterials {
-    supplier: Supplier,
-    material: Material,
-    actual_price: number,
-    unit_of_measure: string
+  supplier: Supplier,
+  material: Material,
+  actual_price: number,
+  unit_of_measure: string
 }
 
 export interface Project {
-    id?: number,
-    name: string,
-    location: string,
-    total: number
+  id?: number,
+  name: string,
+  location: string,
+  total: number
 }
 
 export interface Phase {
-    id?: number;
-    project: number;               // FK
-    name: string;
-    description?: string | null;
-    total: number; 
+  id?: number;
+  project: number;               // FK
+  name: string;
+  description?: string | null;
+  total: number;
 }
 
-export type Quote = {
-    id?: number;
-    phase: number;
-    quote_date: string; // "YYYY-MM-DD"
-    description?: string | null;
-    is_first_quote: boolean;
-    total: number;
-};
+
 export type Material = {
   id?: number;
   name: string;
@@ -51,10 +44,14 @@ export type SupplierMaterial = {
   actual_price: number;
   unit_of_measure: string;
 
-  // convenience labels sent by backend (recommend adding in serializer)
+  // convenience labels sent by backend
   supplier_name?: string;
+  supplier_location?: string;
   material_name?: string;
+  material_category?: string;
+  material_description?: string;
 };
+
 
 export type PhaseMaterial = {
   id?: number;
@@ -71,3 +68,28 @@ export type QuoteItemPayload = {
   unit_price: number;
   subtotal?: number | null;
 };
+
+export interface Quote {
+  id: number;
+  phase: number;
+  quote_date: string;           // "YYYY-MM-DD"
+  description: string | null;
+  is_first_quote: boolean;
+  total: number | null;         // ⬅ change from `number` to `number | null`
+}
+
+// Payloads
+export type QuoteCreatePayload = {
+  phase: number;
+  quote_date: string;
+  description?: string | null;
+  is_first_quote?: boolean;
+  total?: number | null;        // optional & nullable in create
+};
+
+export type QuoteUpdatePayload = Partial<{
+  quote_date: string;
+  description: string | null;
+  is_first_quote: boolean;
+  total: number | null;
+}>;
