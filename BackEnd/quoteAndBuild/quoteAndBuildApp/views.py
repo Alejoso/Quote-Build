@@ -68,11 +68,27 @@ class SupplierViewSet(viewsets.ModelViewSet):
 # --- SupplierMaterial
 class SupplierMaterialSerializer(serializers.ModelSerializer):
     supplier_name = serializers.CharField(source='supplier.name', read_only=True)
+    supplier_location = serializers.CharField(source='supplier.location', read_only=True)
     material_name = serializers.CharField(source='material.name', read_only=True)
+    material_category = serializers.CharField(source='material.category', read_only=True)
+    material_description = serializers.CharField(source='material.description', read_only=True)
 
     class Meta:
         model = SupplierMaterial
-        fields = ['id','supplier','material','actual_price','unit_of_measure','supplier_name','material_name']
+        fields = [
+            'id',
+            'supplier',
+            'material',
+            'actual_price',
+            'unit_of_measure',
+            # etiquetas convenientes:
+            'supplier_name',
+            'supplier_location',
+            'material_name',
+            'material_category',
+            'material_description',
+        ]
+
 
 class SupplierMaterialViewSet(viewsets.ModelViewSet):
     queryset = SupplierMaterial.objects.select_related('supplier','material').all()
@@ -104,9 +120,14 @@ class QuoteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class QuoteViewSet(viewsets.ModelViewSet):
-    queryset = Quote.objects.all().select_related('phase')
     serializer_class = QuoteSerializer
-    filterset_fields = ['phase']  # /quotes/?phase=<id>
+
+    def get_queryset(self):
+        qs = Quote.objects.all().select_related('phase')
+        phase_id = self.request.query_params.get('phase')
+        if phase_id:
+            qs = qs.filter(phase_id=phase_id)
+        return qs
 
 # --- Quote items (QuoteSupplierMaterial)
 class QuoteItemSerializer(serializers.ModelSerializer):

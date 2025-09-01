@@ -5,6 +5,8 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 import type {
   Quote,
   QuoteItemPayload,
+  QuoteCreatePayload,
+  QuoteUpdatePayload,
   Phase,
   SupplierMaterial,
   Material,
@@ -13,8 +15,7 @@ import type {
   Project,
 } from "../types/interfaces";
 
-
-//Projects
+// ---- Projects ----
 export const fetchAllProjects = () => {
   return axios.get('http://127.0.0.1:8000/projects/')
 };
@@ -24,14 +25,14 @@ export const createProject = (project: any) => {
 };
 
 export const updateProject = (id: number, fieldsUpdate: any) => {
-  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, fieldsUpdate); //Go to the specific project and do...
+  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, fieldsUpdate);
 };
 
 export const fetchProjectById = (id: number) => {
   return axios.get(`http://127.0.0.1:8000/projects/${id}/`);
 };
 
-//Phases
+// ---- Phases ----
 export const fetchPhasesByProject = (projectId: number) => {
   return axios.get(`http://127.0.0.1:8000/phases/?project=${projectId}`); //Get info from a specific Project given a Id 
 };
@@ -48,24 +49,44 @@ export function fetchPhaseById(id: number) {
   return axios.get<Phase>(`${BASE_URL}/phases/${id}/`); 
 }
 
-// ---- Quotes
+// ---- Quotes ----
 export function fetchQuotesByPhase(phaseId: number) {
-  // You can implement filtering in DRF: /quotes/?phase=<id>
-  return axios.get(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });
+  return axios.get<Quote[]>(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });
 }
 
-export function createQuote(payload: Quote) {
-  return axios.post(`${BASE_URL}/quotes/`, payload);
+export function createQuote(payload: QuoteCreatePayload) {
+  return axios.post<Quote>(`${BASE_URL}/quotes/`, payload);
+}
+
+export function updateQuote(id: number, payload: QuoteUpdatePayload) {
+  return axios.patch<Quote>(`${BASE_URL}/quotes/${id}/`, payload);
+}
+
+export function deleteQuote(id: number) {
+  return axios.delete(`${BASE_URL}/quotes/${id}/`);
+}
+
+// ---- QuoteItems ----
+export function fetchQuoteItems(quoteId: number) {
+  return axios.get(`${BASE_URL}/quote-items/`, {
+    params: { quote: quoteId },
+  });
 }
 
 export function createQuoteItem(payload: QuoteItemPayload) {
-  // Model is QuoteSupplierMaterial; expose a simple endpoint:
   return axios.post(`${BASE_URL}/quote-items/`, payload);
 }
 
-// ---- SupplierMaterial options scoped to phase
+export function updateQuoteItem(id: number, payload: Partial<QuoteItemPayload>) {
+  return axios.patch(`${BASE_URL}/quote-items/${id}/`, payload);
+}
+
+export function deleteQuoteItem(id: number) {
+  return axios.delete(`${BASE_URL}/quote-items/${id}/`);
+}
+
+// ---- SupplierMaterial options scoped to phase ----
 export function fetchSupplierMaterialsByPhase(phaseId: number) {
-  // Implement this filter in DRF to return SupplierMaterials whose material is linked to this phase
   return axios.get<SupplierMaterial[]>(`${BASE_URL}/supplier-materials/`, {
     params: { phase: phaseId },
   });
@@ -93,9 +114,9 @@ export function createSupplierMaterial(payload: {
   return axios.post(`${BASE_URL}/supplier-materials/`, payload);
 }
 
-
-export function fetchAllMaterials() {
-  return axios.get<Material[]>(`${BASE_URL}/materials/`);
+// ---- SupplierMaterials ----
+export function fetchAllSupplierMaterials() {
+  return axios.get<SupplierMaterial[]>(`${BASE_URL}/supplier-materials/`);
 }
 
 // NEW: suppliers that sell a given material
