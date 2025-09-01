@@ -136,12 +136,9 @@ class Quote(models.Model):
 class QuoteSupplierMaterial(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     supplierMaterial = models.ForeignKey(SupplierMaterial, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=30, decimal_places=2)
+    quantity = models.DecimalField(max_digits=30, decimal_places=2) #Should be an integer
     unit_price = models.DecimalField(max_digits=30, decimal_places=2)
     subtotal = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
-
-    class Meta:
-        unique_together = (('quote', 'supplierMaterial'),)
 
     def __str__(self):
         return f"{self.supplierMaterial.material.name} from {self.supplierMaterial.supplier.name}- Quantity: {self.quantity}"
