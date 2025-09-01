@@ -102,7 +102,7 @@ export default function Quotes() {
     // Create a new quote
     const onCreate = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!phaseId) return;
+
 
         if (!newForm.quote_date) {
             toast.error("La fecha es obligatoria.");
@@ -117,12 +117,12 @@ export default function Quotes() {
                 quote_date: newForm.quote_date,
                 description: newForm.description?.trim() || null,
                 is_first_quote: !!newForm.is_first_quote,
-                // total: (optional) leave undefined; server may set/return null or a number
             };
 
-            const { data } = await createQuote(payload as any); // cast safeguards older types
-            setQuotes((prev) => [data as Quote, ...prev]);
+            const { data } = await createQuote(payload);
+            setQuotes((prev) => [data, ...prev]); //Save all the quotes including the new one
 
+            //Clearing the form
             setNewForm({
                 phase: phaseId,
                 quote_date: todayISO(),
@@ -131,6 +131,7 @@ export default function Quotes() {
             });
 
             toast.success("Cotización creada.");
+
         } catch (err: any) {
             console.error(err);
             toast.error(err?.message || "No se pudo crear la cotización.");
@@ -150,12 +151,13 @@ export default function Quotes() {
         });
     };
 
+    //Cancel by making forms and params null
     const cancelEdit = () => {
         setEditingId(null);
         setEditForm(null);
     };
 
-    // Save inline edit
+    //Save the edit into the data base
     const saveEdit = async () => {
         if (!editingId || !editForm) return;
 
@@ -180,10 +182,6 @@ export default function Quotes() {
             setSaving(false);
         }
     };
-
-    if (!phaseId) {
-        return null;
-    }
 
     return (
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow">
@@ -219,7 +217,7 @@ export default function Quotes() {
                     <label className="mb-1 block text-sm font-medium text-gray-700">Descripción</label>
                     <input
                         type="text"
-                        value={(newForm.description as string) ?? ""}
+                        value={(newForm.description) ?? ""}
                         onChange={(e) => setNewForm((f) => ({ ...f, description: e.target.value }))}
                         className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                         placeholder="Detalle breve"
@@ -247,17 +245,17 @@ export default function Quotes() {
             </form>
 
             {/* List */}
-            {loading ? (
+            {loading ? ( //While loading show 3 empty squares
                 <div className="space-y-3">
                     {Array.from({ length: 3 }).map((_, i) => (
                         <div key={i} className="h-20 animate-pulse rounded-xl border border-gray-200 bg-gray-100" />
                     ))}
                 </div>
-            ) : quotes.length === 0 ? (
+            ) : quotes.length === 0 ? ( //If there are not any quotations
                 <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
                     <p className="text-gray-600">Aún no hay cotizaciones para esta fase.</p>
                 </div>
-            ) : (
+            ) : ( //If there are quotations
                 <div className="space-y-3">
                     {quotes.map((q) => (
                         <div key={q.id} className="rounded-xl border border-gray-200 p-4">
@@ -317,7 +315,7 @@ export default function Quotes() {
                                         </button>
                                     </div>
                                 </div>
-                            ) : (
+                            ) : ( //If we dont have an editing Id, it shows the current quotes
                                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                                     <div>
                                         <p className="text-base font-semibold">
@@ -340,17 +338,16 @@ export default function Quotes() {
                                             Editar
                                         </button>
 
-                                        {/* If you later want to manage materials for a quote,
-                        enable this navigation and create SaveQuote.tsx */}
-                                        {/* <button
-                      onClick={() =>
-                        navigate("/saveQuote", { state: { quoteId: q.id, phaseId, projectId } })
-                      }
-                      className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                      type="button"
-                    >
-                      Materiales
-                    </button> */}
+
+                                        <button
+                                            onClick={() =>
+                                                navigate("/saveProject/quotes/saveQuote", { state: { quoteId: q.id, phaseId, projectId } })
+                                            }
+                                            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                                            type="button"
+                                        >
+                                            Materiales
+                                        </button>
                                     </div>
                                 </div>
                             )}

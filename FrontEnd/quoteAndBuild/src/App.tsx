@@ -6,7 +6,7 @@ import FetchProjects from "./pages/FetchProjects";
 import NavBar from './components/shared/NavBar';
 //import ProjectView from './pages/proyectos';
 import Quotes from './pages/Quotes';
-import NewQuote from "./pages/SaveQuote";
+import SaveQuote from './pages/SaveQuote';
 
 
 function App() {
@@ -21,6 +21,7 @@ function App() {
         <Route path='/saveProject' element={<SaveProject />} />
         <Route path="/projects" element={<FetchProjects />} />
         <Route path="/saveProject/quotes" element={<Quotes />} />
+        <Route path="/saveProject/quotes/saveQuote" element={<SaveQuote />} />
 
       </Routes>
 

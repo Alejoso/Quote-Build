@@ -246,10 +246,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
           ))
         )}
       </div>
-      <div className="mt-8">
-        <h3 className="mb-4 text-xl font-semibold">Materiales disponibles</h3>
-        <DisplayMaterialTable />
-      </div>
+      
     </div>
   );
 };
