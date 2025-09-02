@@ -52,13 +52,13 @@ export function fetchPhaseById(id: number) {
 // ----- PhasesInterval --- 
 
 export async function createPhaseInterval(payload: PhaseInterval) { // Create an interval
-  const { data } = await axios.post("/api/phase-intervals/", payload);
+  const { data } = await axios.post("http://127.0.0.1:8000/phase-intervals/", payload);
   return data;
 }
 
 
 export async function fetchPhaseIntervals(phaseId: number) {  // List an interval phase
-  const { data } = await axios.get(`/api/phase-intervals/?phase=${phaseId}`);
+  const { data } = await axios.get(`http://127.0.0.1:8000/phase-intervals/?phase=${phaseId}`);
   return data;
 }
 

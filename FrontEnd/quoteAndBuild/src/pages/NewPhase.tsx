@@ -246,11 +246,11 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     >
                       Ver cotizaciones
                     </button>
-                    {/* Nuevo botón para intervalos */}
+                    {/* New Button for  intervals  */}
                     <button
                       onClick={() => {
-                        setCreatedPhase(p); // guardamos la fase seleccionada
-                        setShowIntervals(true); // mostramos el formulario
+                        setCreatedPhase(p); // save selected phase
+                        setShowIntervals(true); // show form 
                       }}
                       className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                       type="button"
@@ -260,7 +260,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                   </div>
                 </div>
               )}
-              {/* Formulario de intervalos debajo de la fase seleccionada */}
+              {/* Form with intervals below */}
               {showIntervals && createdPhase && createdPhase.id === p.id && (
                 <div className="mt-4">
                   <PhaseIntervalForm
@@ -268,7 +268,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     onCreated={(interval: PhaseInterval) => {
                       toast.success("Intervalo agregado con éxito");
                       console.log("Intervalo creado:", interval);
-                      setShowIntervals(false); // cerramos después de guardar
+                      setShowIntervals(false); // close after save
                     }}
                     onClose={() => setShowIntervals(false)}
                   />
