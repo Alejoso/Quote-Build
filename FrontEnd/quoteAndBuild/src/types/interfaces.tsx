@@ -93,3 +93,14 @@ export type QuoteUpdatePayload = Partial<{
   is_first_quote: boolean;
   total: number | null;
 }>;
+
+export interface PhaseInterval {
+  phaseid?: number;
+  phase: Phase;   // puede ser un id o un objeto
+  start_date: Date;
+  end_date: Date | null;
+  reason: string | null;
+}
+
+
+    

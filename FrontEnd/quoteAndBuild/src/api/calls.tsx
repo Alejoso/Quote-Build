@@ -13,6 +13,7 @@ import type {
   PhaseMaterial,
   Supplier,
   Project,
+  PhaseInterval
 } from "../types/interfaces";
 
 // ---- Projects ----
@@ -47,6 +48,18 @@ export const updatePhase = (id: number, fieldsUpdate: any) => {
 
 export function fetchPhaseById(id: number) {
   return axios.get<Phase>(`${BASE_URL}/phases/${id}/`); 
+}
+// ----- PhasesInterval --- 
+
+export async function createPhaseInterval(payload: PhaseInterval) { // Create an interval
+  const { data } = await axios.post("/api/phase-intervals/", payload);
+  return data;
+}
+
+
+export async function fetchPhaseIntervals(phaseId: number) {  // List an interval phase
+  const { data } = await axios.get(`/api/phase-intervals/?phase=${phaseId}`);
+  return data;
 }
 
 // ---- Quotes ----

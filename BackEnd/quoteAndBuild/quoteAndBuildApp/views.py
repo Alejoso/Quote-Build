@@ -1,6 +1,6 @@
 from rest_framework import viewsets , serializers
 
-from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial
+from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 
 
 #from django.core import serializers as sr 
@@ -51,6 +51,25 @@ class PhaseViewSet(viewsets.ModelViewSet):
         project_id = self.request.query_params.get('project')
         if project_id:
             qs = qs.filter(project_id=project_id)
+        return qs
+
+# --- PhaseInterval
+
+class PhaseIntervalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PhaseInterval
+        fields = '__all__'
+
+class PhaseIntervalViewSet(viewsets.ModelViewSet):
+    queryset = PhaseInterval.objects.all().select_related('phase')
+    serializer_class = PhaseIntervalSerializer
+
+    # opcional: filtro por fase ?phase=<id>
+    def get_queryset(self):
+        qs = super().get_queryset()
+        phase_id = self.request.query_params.get('phase')
+        if phase_id:
+            qs = qs.filter(phase_id=phase_id)
         return qs
 
 

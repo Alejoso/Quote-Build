@@ -3,16 +3,23 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { createPhase, fetchPhasesByProject, updatePhase } from "../api/calls";
-import type { Phase } from "../types/interfaces";
+import type { Phase, PhaseInterval } from "../types/interfaces";
 import DisplayMaterialTable from "../components/Material/MaterialPrueba";
-
+import PhaseIntervalForm from "./CompletePhase";
 
 type Props = {
   projectId: number | null; // parent passes this after project is created
 };
 
 const NewPhase: React.FC<Props> = ({ projectId }) => {
+    // Estado para la fase recién creada
+  const [createdPhase, setCreatedPhase] = useState<Phase | null>(null);
+
+  // Estado para mostrar u ocultar el formulario de intervalos
+  const [showIntervals, setShowIntervals] = useState(false);
+
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const [phases, setPhases] = useState<Phase[]>([]); // Here we establish the type of array we will work with. In this case we're using the Phase type from interfaces document
@@ -216,7 +223,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-base font-semibold">{p.name}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600"> 
                       {p.description ? p.description : <span className="italic text-gray-400">Sin descripción</span>}
                     </p>
                     <p className="text-sm text-gray-600">
@@ -239,7 +246,32 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     >
                       Ver cotizaciones
                     </button>
+                    {/* Nuevo botón para intervalos */}
+                    <button
+                      onClick={() => {
+                        setCreatedPhase(p); // guardamos la fase seleccionada
+                        setShowIntervals(true); // mostramos el formulario
+                      }}
+                      className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                      type="button"
+                    >
+                      Agregar intervalos
+                    </button>
                   </div>
+                </div>
+              )}
+              {/* Formulario de intervalos debajo de la fase seleccionada */}
+              {showIntervals && createdPhase && createdPhase.id === p.id && (
+                <div className="mt-4">
+                  <PhaseIntervalForm
+                    phaseId={createdPhase.id!}
+                    onCreated={(interval: PhaseInterval) => {
+                      toast.success("Intervalo agregado con éxito");
+                      console.log("Intervalo creado:", interval);
+                      setShowIntervals(false); // cerramos después de guardar
+                    }}
+                    onClose={() => setShowIntervals(false)}
+                  />
                 </div>
               )}
             </div>
