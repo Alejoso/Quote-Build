@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import { deleteQuote } from "../api/calls";
 
 // API calls
 import {
@@ -183,6 +184,28 @@ export default function Quotes() {
         }
     };
 
+    const onDeleteQuote = async (q: Quote) => {
+    if (q.status !== "draft") {
+        toast.error("Solo se pueden eliminar cotizaciones en borrador.");
+        return;
+    }
+    const ok = window.confirm("¿Eliminar esta cotización? Esta acción no se puede deshacer.");
+    if (!ok) return;
+
+    try {
+        await deleteQuote(q.id);
+        toast.success("Cotización eliminada.");
+        setQuotes(prev => prev.filter(item => item.id !== q.id));
+    } catch (err: any) {
+        if (err?.response?.status === 409) {
+        toast.error(err.response?.data?.detail || "No se puede eliminar esta cotización.");
+        } else {
+        toast.error("Error eliminando la cotización.");
+        }
+    }
+    };
+
+
     return (
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow">
             <Toaster />
@@ -336,6 +359,20 @@ export default function Quotes() {
                                             type="button"
                                         >
                                             Editar
+                                        </button>
+
+                                        <button
+                                            onClick={() => onDeleteQuote(q)}
+                                            disabled={q.status !== "draft"}
+                                            title={q.status !== "draft" ? "Solo borradores se pueden eliminar" : "Eliminar"}
+                                            className={`inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold border ${
+                                                q.status !== "draft"
+                                                ? "border-gray-300 text-gray-400 cursor-not-allowed"
+                                                : "border-red-600 text-red-600 hover:bg-red-50"
+                                            }`}
+                                            type="button"
+                                            >
+                                            Eliminar
                                         </button>
 
 

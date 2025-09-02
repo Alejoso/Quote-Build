@@ -122,12 +122,20 @@ class SupplierMaterial(models.Model):
 
 #Quote with one to many relation with phases and many to many relation with materials
 class Quote(models.Model):
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("sent", "Sent"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='quotes')
     quote_date = models.DateField()
     description = models.TextField(blank=True, null=True)
     is_first_quote = models.BooleanField()
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
     materials = models.ManyToManyField(SupplierMaterial , through='QuoteSupplierMaterial')
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
 
     def __str__(self):
         return f"Quote {self.pk} for {self.phase_id}"

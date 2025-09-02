@@ -76,6 +76,7 @@ export interface Quote {
   description: string | null;
   is_first_quote: boolean;
   total: number | null;         // ⬅ change from `number` to `number | null`
+  status: "draft"|"sent"|"approved"|"rejected";
 }
 
 // Payloads

@@ -1,5 +1,6 @@
 from rest_framework import viewsets , serializers
-
+from rest_framework.response import Response
+from rest_framework import status as drf_status
 from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 
 
@@ -147,6 +148,23 @@ class QuoteViewSet(viewsets.ModelViewSet):
         if phase_id:
             qs = qs.filter(phase_id=phase_id)
         return qs
+    
+    def destroy(self, request, *args, **kwargs):
+        quote = self.get_object()
+
+        # Check if quote is in draft status
+        # If not, return conflict
+        if quote.status != "draft":
+            return Response(
+                {
+                    "detail": "Solo podes borrar cotizaciones en estado draft.",
+                    "quote_id": quote.pk,
+                    "status": quote.status,
+                },
+                status=drf_status.HTTP_409_CONFLICT,
+            )
+        # If it is draft, delete as normal
+        return super().destroy(request, *args, **kwargs)
 
 # --- Quote items (QuoteSupplierMaterial)
 class QuoteItemSerializer(serializers.ModelSerializer):
