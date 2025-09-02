@@ -11,8 +11,9 @@ type Props = {
   projectId: number | null; // parent passes this after project is created
 };
 
+
 const NewPhase: React.FC<Props> = ({ projectId }) => {
-    // Estado para la fase recién creada
+  // Estado para la fase recién creada
   const [createdPhase, setCreatedPhase] = useState<Phase | null>(null);
 
   // Estado para mostrar u ocultar el formulario de intervalos
@@ -134,6 +135,17 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
     navigate("/saveProject/quotes", { state: { phaseId: p.id, projectId: p.project } });
   };
 
+  // Funcion para recargar las fases después de agregar intervalos
+  const reloadPhases = async () => {
+    if (!projectId) return;
+    try {
+      const { data } = await fetchPhasesByProject(projectId);
+      setPhases(data);
+    } catch (error) {
+      toast.error("No se pudieron actualizar las fases.");
+    }
+  };
+
   return (
     <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow">
       <h3 className="mb-4 text-xl font-semibold">Fases del proyecto</h3>
@@ -223,11 +235,14 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-base font-semibold">{p.name}</p>
-                    <p className="text-sm text-gray-600"> 
+                    <p className="text-sm text-gray-600">
                       {p.description ? p.description : <span className="italic text-gray-400">Sin descripción</span>}
                     </p>
                     <p className="text-sm text-gray-600">
                       Total: {p.total != null ? p.total : <span className="italic text-gray-400">—</span>}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Duración: {p.duration != null ? p.duration : <span className="italic text-gray-400">—</span>}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -265,10 +280,10 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                 <div className="mt-4">
                   <PhaseIntervalForm
                     phaseId={createdPhase.id!}
-                    onCreated={(interval: PhaseInterval) => {
-                      toast.success("Intervalo agregado con éxito");
-                      console.log("Intervalo creado:", interval);
-                      setShowIntervals(false); // close after save
+                    onCreated={async (interval: PhaseInterval) => {
+                      toast.success("Intervalo agregado con éxito. Duración actualizada.");
+                      await reloadPhases(); // recarga las fases para ver la duración actualizada
+                      setShowIntervals(false); // cierra el formulario
                     }}
                     onClose={() => setShowIntervals(false)}
                   />
@@ -278,7 +293,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
           ))
         )}
       </div>
-      
+
     </div>
   );
 };

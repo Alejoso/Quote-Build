@@ -19,6 +19,7 @@ export interface Phase {
   name: string;
   description?: string | null;
   total: number;
+  duration?: number | null; // <-- Añade esta línea
 }
 
 
