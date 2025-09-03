@@ -61,6 +61,7 @@ class PhaseInterval(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
     reason = models.TextField(blank=True, null=True)
+    is_planning_phase = models.BooleanField(default=False) # Allows Us to know the type of interval we are working with 
 
     def __str__(self):
         return f"Interval of {self.phase} that started on {self.start_date} "

@@ -22,6 +22,8 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const [isPlanningPhase, setIsPlanningPhase] = useState(false);
+
 
   const [phases, setPhases] = useState<Phase[]>([]); // Here we establish the type of array we will work with. In this case we're using the Phase type from interfaces document
 
@@ -277,13 +279,24 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
               )}
               {/* Form with intervals below */}
               {showIntervals && createdPhase && createdPhase.id === p.id && (
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={isPlanningPhase}
+                      onChange={(e) => setIsPlanningPhase(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium">¿Es una fase de planeo?</span>
+                  </label>
+
                   <PhaseIntervalForm
                     phaseId={createdPhase.id!}
+                    isPlanningPhase={isPlanningPhase}  // 👈 valor dinámico según el checkbox
                     onCreated={async (interval: PhaseInterval) => {
                       toast.success("Intervalo agregado con éxito. Duración actualizada.");
-                      await reloadPhases(); // recarga las fases para ver la duración actualizada
-                      setShowIntervals(false); // cierra el formulario
+                      await reloadPhases();
+                      setShowIntervals(false);
                     }}
                     onClose={() => setShowIntervals(false)}
                   />

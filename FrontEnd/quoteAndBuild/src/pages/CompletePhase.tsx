@@ -6,17 +6,20 @@ interface PhaseIntervalFormProps {
   phaseId: number;
   onCreated: (interval: PhaseInterval) => void;
   onClose: () => void;
+  isPlanningPhase: boolean; // New atribute to know the interval we're working with
 }
 
 export default function PhaseIntervalForm({
   phaseId,
   onCreated,
   onClose,
+  isPlanningPhase, 
 }: PhaseIntervalFormProps) {
   const [form, setForm] = useState({
     start_date: "",
     end_date: "",
     reason: "",
+    is_planning_phase: isPlanningPhase, // We use the value of the parameter isPlanningPhase, we receive it from New Phase
   });
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +32,7 @@ export default function PhaseIntervalForm({
         start_date: form.start_date, // string (YYYY-MM-DD)
         end_date: form.end_date || null,
         reason: form.reason || null,
+        is_planning_phase: isPlanningPhase, 
       };
       const newInterval = await createPhaseInterval(payload);
       onCreated(newInterval);
