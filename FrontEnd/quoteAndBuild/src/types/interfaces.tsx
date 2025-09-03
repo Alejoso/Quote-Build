@@ -10,7 +10,9 @@ export interface Project {
   id?: number,
   name: string,
   location: string,
-  total: number
+  total: number,
+  projectDurationExecuted?: number | null; // <-- campo calculado por backend
+  projectDurationPlanning?: number | null; // <-- campo calculado por backend
 }
 
 export interface Phase {
