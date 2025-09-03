@@ -19,9 +19,32 @@ class MaterialViewSet (viewsets.ModelViewSet):
 
 # Project
 class ProjectSerializer(serializers.ModelSerializer):
+    projectDurationExecuted = serializers.SerializerMethodField()
+    projectDurationPlanning = serializers.SerializerMethodField()
+
     class Meta:
         model = Project
         fields = '__all__'
+
+    def get_projectDurationExecuted(self, project):
+        total_days = 0
+        phases = Phase.objects.filter(project_id=project.id)
+        for phase in phases:
+            intervals = PhaseInterval.objects.filter(phase_id=phase.id)
+            for interval in intervals:
+                if interval.start_date and interval.end_date and not interval.is_planning_phase:
+                    total_days += (interval.end_date - interval.start_date).days
+        return total_days if total_days > 0 else None
+    
+    def get_projectDurationPlanning(self, project):
+        total_days = 0
+        phases = Phase.objects.filter(project_id=project.id)
+        for phase in phases:
+            intervals = PhaseInterval.objects.filter(phase_id=phase.id, is_planning_phase=True)
+            for interval in intervals:
+                if interval.start_date and interval.end_date:
+                    total_days += (interval.end_date - interval.start_date).days
+        return total_days if total_days > 0 else None
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
