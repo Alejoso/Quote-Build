@@ -241,10 +241,10 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       {p.description ? p.description : <span className="italic text-gray-400">Sin descripción</span>}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Total: {p.total != null ? p.total : <span className="italic text-gray-400">—</span>}
+                      Total: $ {p.total != null ? p.total : <span className="italic text-gray-400">—</span>}
                     </p>
                     <p className="text-sm text-gray-600">
-                      Duración: {p.duration != null ? p.duration : <span className="italic text-gray-400">—</span>}
+                      Duración: {p.duration != null ? p.duration : <span className="italic text-gray-400">—</span>} dias
                     </p>
                   </div>
                   <div className="flex gap-2">

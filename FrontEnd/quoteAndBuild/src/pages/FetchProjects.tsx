@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { fetchAllProjects } from "../api/calls";
 import type { Project } from "../types/interfaces";
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // Extend your Project type with id for list rows (DRF returns `id`)
 type ProjectRow = Project & { id: number };
@@ -42,6 +43,11 @@ const FetchProjects: React.FC = () => {
     // Send user to SaveProject.tsx (route: /saveProject) with the chosen project id
     navigate("/saveProject", { state: { projectId: p.id } });
   };
+
+  const goToProjectGraphs = (p: ProjectRow) => {
+    // Send user to SpecificGraph.tsx (route: /specificGraph/:id) with the chosen project id
+    navigate("/specificGraph/",{state: {projectId: p.id} });
+  }
 
   return (
     <div className="mx-auto max-w-5xl p-6">
@@ -84,24 +90,43 @@ const FetchProjects: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => goToProject(p)}
-              className="group rounded-2xl border border-gray-200 bg-white p-4 text-left shadow transition hover:-translate-y-0.5 hover:shadow-md"
-            >
+            <div key={p.id} className="group rounded-2xl border border-gray-200 bg-white p-4 text-left shadow transition hover:-translate-y-0.5 hover:shadow-md flex flex-col gap-2">
               <div className="flex items-start justify-between">
-                <h2 className="text-lg font-semibold group-hover:text-indigo-600">
-                  {p.name}
-                </h2>
+                <button
+                  onClick={() => goToProject(p)}
+                  className="w-full text-left mt-2 rounded-xl bg-white px-4 py-2 font-semibold text-gray-900 transition"
+                  aria-label="Ver proyecto"
+                >
+                  <h2 className="text-lg font-semibold group-hover:text-indigo-600">
+                    {p.name}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">{p.location}</p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Total: $ {" "}
+                    {p.total !== null && p.total !== undefined && p.total !== 0
+                      ? p.total
+                      : "—"}
+                  </p>
+                </button>
+                <div className="flex gap-2 items-center h-full">
+                  <button
+                    onClick={() => goToProject(p)}
+                    className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
+                    aria-label="Editar proyecto"
+                  >
+                    <i className="bi bi-pencil text-xl"></i>
+                  </button>
+                  <button
+                    onClick={() => goToProjectGraphs(p)}
+                    className="rounded-full p-2 hover:bg-gray-100 text-naranja"
+                    aria-label="Ver gráficos"
+                  >
+                    <i className="bi bi-file-earmark-bar-graph text-xl"></i>
+                  </button>
+                </div>
               </div>
-              <p className="mt-1 text-sm text-gray-600">{p.location}</p>
-              <p className="mt-2 text-sm text-gray-500">
-                Total:{" "}
-                {p.total !== null && p.total !== undefined && p.total !== 0
-                  ? p.total
-                  : "—"}
-              </p>
-            </button>
+
+            </div>
           ))}
         </div>
       )}

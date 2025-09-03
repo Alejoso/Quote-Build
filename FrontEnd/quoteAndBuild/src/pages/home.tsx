@@ -29,13 +29,6 @@ export default function Home() {
         >
           Proyectos
         </button>
-
-        <button
-          onClick={() => navigate("/graficos")}
-          className="px-8 py-4 bg-gray-700 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-gray-800 transition transform hover:scale-105 hover:rotate-3"
-        >
-          Gráficos
-        </button>
       </div>
     </div>
   );
