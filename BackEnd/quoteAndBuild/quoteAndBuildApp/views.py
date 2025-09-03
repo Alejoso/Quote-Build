@@ -2,7 +2,7 @@ from rest_framework import viewsets , serializers
 from rest_framework.response import Response
 from rest_framework import status as drf_status
 from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
-
+from django.utils import timezone
 
 #from django.core import serializers as sr 
 
@@ -71,10 +71,13 @@ class PhaseSerializer(serializers.ModelSerializer):
         # 'phaseDuration' se agrega automáticamente por SerializerMethodField
 
     def get_phaseDurationExecuted(self, phase):
-        # Si el ViewSet no está disponible, importamos aquí
         intervals = PhaseInterval.objects.filter(phase_id=phase.id)
         total_days = 0
         for interval in intervals:
+            # Si end_date está en null, asignar fecha actual
+            if interval.end_date is None:
+                interval.end_date = timezone.now().date()
+                interval.save(update_fields=["end_date"])
             if interval.start_date and interval.end_date and not interval.is_planning_phase:
                 total_days += (interval.end_date - interval.start_date).days
         return total_days if total_days > 0 else None
