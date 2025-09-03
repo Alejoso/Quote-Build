@@ -1,5 +1,5 @@
 django
 django-cors-headers
 djangorestframework
-mysqlclient
-pymysql
+django-extensions
+axios
