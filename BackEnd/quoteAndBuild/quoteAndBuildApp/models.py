@@ -147,9 +147,7 @@ class SupplierMaterial(models.Model):
 class Quote(models.Model):
     STATUS_CHOICES = [
         ("draft", "Draft"),
-        ("sent", "Sent"),
-        ("approved", "Approved"),
-        ("rejected", "Rejected"),
+        ("completed", "Completed"),
     ]
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE, related_name='quotes')
     quote_date = models.DateField()
