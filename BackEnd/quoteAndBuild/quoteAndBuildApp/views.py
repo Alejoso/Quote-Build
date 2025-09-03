@@ -39,9 +39,30 @@ class ClientViewSet(viewsets.ModelViewSet):
 
 # Phase
 class PhaseSerializer(serializers.ModelSerializer):
+    phaseDurationExecuted = serializers.SerializerMethodField()
+    phaseDurationPlanning = serializers.SerializerMethodField()
+
     class Meta:
         model = Phase
         fields = '__all__'
+        # 'phaseDuration' se agrega automáticamente por SerializerMethodField
+
+    def get_phaseDurationExecuted(self, phase):
+        # Si el ViewSet no está disponible, importamos aquí
+        intervals = PhaseInterval.objects.filter(phase_id=phase.id)
+        total_days = 0
+        for interval in intervals:
+            if interval.start_date and interval.end_date and not interval.is_planning_phase:
+                total_days += (interval.end_date - interval.start_date).days
+        return total_days if total_days > 0 else None
+    
+    def get_phaseDurationPlanning(self, phase):
+        intervals = PhaseInterval.objects.filter(phase_id=phase.id, is_planning_phase=True)
+        total_days = 0
+        for interval in intervals:
+            if interval.start_date and interval.end_date:
+                total_days += (interval.end_date - interval.start_date).days
+        return total_days if total_days > 0 else None
         
 class PhaseViewSet(viewsets.ModelViewSet):
     serializer_class = PhaseSerializer
@@ -72,7 +93,7 @@ class PhaseIntervalViewSet(viewsets.ModelViewSet):
         if phase_id:
             qs = qs.filter(phase_id=phase_id)
         return qs
-
+    
 
 # --- Supplier
 class SupplierSerializer(serializers.ModelSerializer):

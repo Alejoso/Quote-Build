@@ -50,7 +50,6 @@ class Phase(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
-    duration = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} {self.project}"
@@ -65,28 +64,6 @@ class PhaseInterval(models.Model):
 
     def __str__(self):
         return f"Interval of {self.phase} that started on {self.start_date} "
-    
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        phase = self.phase
-        intervals = PhaseInterval.objects.filter(phase=phase)
-        total_days = 0
-        for interval in intervals:
-            if interval.start_date and interval.end_date:
-                total_days += (interval.end_date - interval.start_date).days
-        phase.duration = total_days if total_days > 0 else None
-        phase.save()
-
-    def delete(self, *args, **kwargs):
-        phase = self.phase
-        super().delete(*args, **kwargs)
-        intervals = PhaseInterval.objects.filter(phase=phase)
-        total_days = 0
-        for interval in intervals:
-            if interval.start_date and interval.end_date:
-                total_days += (interval.end_date - interval.start_date).days
-        phase.duration = total_days if total_days > 0 else None
-        phase.save()
     
 #Supplier table with nit as pk
 class Supplier(models.Model):

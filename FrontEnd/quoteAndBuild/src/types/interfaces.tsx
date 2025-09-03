@@ -19,7 +19,8 @@ export interface Phase {
   name: string;
   description?: string | null;
   total: number;
-  duration?: number | null; // <-- Añade esta línea
+  phaseDurationExecuted?: number | null; // <-- campo calculado por backend
+  phaseDurationPlanning?: number | null; // <-- campo calculado por backend
 }
 
 
