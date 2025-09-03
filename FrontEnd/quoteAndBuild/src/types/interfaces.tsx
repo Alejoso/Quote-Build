@@ -77,7 +77,7 @@ export interface Quote {
   description: string | null;
   is_first_quote: boolean;
   total: number | null;         // ⬅ change from `number` to `number | null`
-  status: "draft"|"sent"|"approved"|"rejected";
+  status: "draft" | "sent" | "approved" | "rejected";
 }
 
 // Payloads
@@ -97,12 +97,9 @@ export type QuoteUpdatePayload = Partial<{
 }>;
 
 export interface PhaseInterval {
-  phaseid?: number;
-  phase: Phase;   // puede ser un id o un objeto
-  start_date: Date;
-  end_date: Date | null;
-  reason: string | null;
+  id?: number;
+  phase: number;                  // FK → just Id
+  start_date: string;             // usar string, no Date
+  end_date?: string | null;
+  reason?: string | null;
 }
-
-
-    

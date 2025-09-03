@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PhaseInterval } from "../types/interfaces";
+import type { PhaseInterval } from "../types/interfaces";
 import { createPhaseInterval } from "../api/calls";
 
 interface PhaseIntervalFormProps {
@@ -25,7 +25,7 @@ export default function PhaseIntervalForm({
     try {
       setLoading(true);
       const payload: PhaseInterval = {
-        phase: phaseId, // enviamos el id de la fase
+        phase: phaseId, // sent Id of the phase
         start_date: form.start_date, // string (YYYY-MM-DD)
         end_date: form.end_date || null,
         reason: form.reason || null,
