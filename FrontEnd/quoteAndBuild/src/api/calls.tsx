@@ -138,3 +138,8 @@ export function fetchSupplierMaterialsByMaterial(materialId: number) {
     params: { material: materialId },
   });
 }
+
+export function generateGraph(costs: any) {
+  console.log("Costs" , costs)
+  return axios.post<any>(`${BASE_URL}/graphs/pie/`, { costs });
+}

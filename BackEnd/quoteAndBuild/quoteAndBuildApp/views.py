@@ -1,8 +1,16 @@
-from rest_framework import viewsets , serializers
+from rest_framework import viewsets , serializers , status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status as drf_status
 from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 from django.utils import timezone
+import base64
+from io import BytesIO
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 
 #from django.core import serializers as sr 
 
@@ -21,6 +29,8 @@ class MaterialViewSet (viewsets.ModelViewSet):
 class ProjectSerializer(serializers.ModelSerializer):
     projectDurationExecuted = serializers.SerializerMethodField()
     projectDurationPlanning = serializers.SerializerMethodField()
+    projectTotalCostExecuted = serializers.SerializerMethodField()
+    projectTotalCostPlanned = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -45,6 +55,27 @@ class ProjectSerializer(serializers.ModelSerializer):
                 if interval.start_date and interval.end_date:
                     total_days += (interval.end_date - interval.start_date).days
         return total_days if total_days > 0 else None
+    
+    #Cost
+    def get_projectTotalCostExecuted(self, project):
+        total = 0
+        phases = Phase.objects.filter(project_id=project.id)
+        for phase in phases:
+            quotes = Quote.objects.filter(phase_id=phase.id, status='completed')
+            for quote in quotes:
+                if (quote.is_first_quote==False):
+                    total += quote.total if quote.total else 0
+        return total if total > 0 else None
+    
+    def get_projectTotalCostPlanned(self, project):
+        total = 0
+        phases = Phase.objects.filter(project_id=project.id)
+        for phase in phases:
+            quotes = Quote.objects.filter(phase_id=phase.id, is_first_quote=True)
+            for quote in quotes:
+                if (quote.is_first_quote==False):
+                    total += quote.total if quote.total else 0
+        return total if total > 0 else None
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -64,6 +95,8 @@ class ClientViewSet(viewsets.ModelViewSet):
 class PhaseSerializer(serializers.ModelSerializer):
     phaseDurationExecuted = serializers.SerializerMethodField()
     phaseDurationPlanning = serializers.SerializerMethodField()
+    phaseTotalCostExecuted = serializers.SerializerMethodField()
+    phaseTotalCostPlanned = serializers.SerializerMethodField()
 
     class Meta:
         model = Phase
@@ -89,6 +122,17 @@ class PhaseSerializer(serializers.ModelSerializer):
             if interval.start_date and interval.end_date:
                 total_days += (interval.end_date - interval.start_date).days
         return total_days if total_days > 0 else None
+
+    def get_phaseTotalCostExecuted(self, phase):
+        quotesExecuted = Quote.objects.filter(phase_id=phase.id, status='completed')
+        total = sum(quote.total for quote in quotesExecuted if quote.total)
+        return total if total > 0 else None
+    
+    def get_phaseTotalCostPlanned(self, phase):
+        quotesPlanned = Quote.objects.filter(phase_id=phase.id, is_first_quote=True)
+        total = sum(quote.total for quote in quotesPlanned if quote.total)
+        return total if total > 0 else None
+    
         
 class PhaseViewSet(viewsets.ModelViewSet):
     serializer_class = PhaseSerializer
@@ -224,3 +268,37 @@ class QuoteItemViewSet(viewsets.ModelViewSet):
     serializer_class = QuoteItemSerializer
 
     filterset_fields = ['quote']
+
+
+class GraphsViewSet(viewsets.ModelViewSet):
+    queryset = Quote.objects.all()   # obligatorio aunque no lo uses
+    serializer_class = QuoteItemSerializer
+
+    @action(detail=False, methods=["post"], url_path="pie")
+    def pie(self, request):
+        costs = request.data.get("costs", [])
+        # costs será algo como:
+        # [ {"name": "Fase 1", "cost": 80000}, {"name": "Fase 2", "cost": 40000} ]
+
+        # Ejemplo: armar labels y values para graficar
+        labels = [item["name"] for item in costs]
+        values = [item["cost"] for item in costs]
+
+        # Aquí generas tu gráfico como quieras (matplotlib, etc.)
+        import matplotlib.pyplot as plt
+        import io, base64
+
+        fig, ax = plt.subplots()
+        ax.pie(values, labels=labels, autopct='%1.1f%%')
+        ax.axis("equal")
+
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format="png")
+        buffer.seek(0)
+        image_png = buffer.getvalue()
+        buffer.close()
+
+        graphic = base64.b64encode(image_png).decode("utf-8")
+        html = f"<img alt='Gráfico de costos' src='data:image/png;base64,{graphic}' />"
+
+        return Response({"html": html})

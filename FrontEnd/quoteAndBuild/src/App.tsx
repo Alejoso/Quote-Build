@@ -7,6 +7,7 @@ import NavBar from './components/shared/NavBar';
 //import ProjectView from './pages/proyectos';
 import Quotes from './pages/Quotes';
 import SaveQuote from './pages/SaveQuote';
+import SpecificGraph from './pages/SpecificGraph';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/projects" element={<FetchProjects />} />
         <Route path="/saveProject/quotes" element={<Quotes />} />
         <Route path="/saveProject/quotes/saveQuote" element={<SaveQuote />} />
+        <Route path="/ProjectGraph" element={<SpecificGraph />} />
 
       </Routes>
 

@@ -5,7 +5,6 @@ import toast, { Toaster } from "react-hot-toast";
 
 import { createProject, fetchProjectById, updateProject } from "../api/calls";
 import NewPhase from "./NewPhase";
-import { number } from "framer-motion";
 
 // Interface for having the form of the project
 type ProjectForm = {
