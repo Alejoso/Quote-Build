@@ -64,3 +64,4 @@ const PieChartCosts: React.FC<PieChartProps> = ({ data }) => {
 };
 
 export default PieChartCosts;
+
