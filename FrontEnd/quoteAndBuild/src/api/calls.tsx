@@ -138,3 +138,9 @@ export function fetchSupplierMaterialsByMaterial(materialId: number) {
     params: { material: materialId },
   });
 }
+
+export function generateGraph(costs: any) {
+  return axios.post<any>(`${BASE_URL}/graphs/pie/`, {   // 👈 ojo, /pie/ porque definiste @action
+    costs: costs,
+  });
+}

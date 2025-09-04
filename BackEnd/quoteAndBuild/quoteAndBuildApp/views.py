@@ -1,8 +1,16 @@
-from rest_framework import viewsets , serializers
+from rest_framework import viewsets , serializers , status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status as drf_status
 from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 from django.utils import timezone
+import base64
+from io import BytesIO
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 
 #from django.core import serializers as sr 
 
@@ -124,6 +132,7 @@ class PhaseSerializer(serializers.ModelSerializer):
         quotesPlanned = Quote.objects.filter(phase_id=phase.id, is_first_quote=True)
         total = sum(quote.total for quote in quotesPlanned if quote.total)
         return total if total > 0 else None
+    
         
 class PhaseViewSet(viewsets.ModelViewSet):
     serializer_class = PhaseSerializer
@@ -259,3 +268,45 @@ class QuoteItemViewSet(viewsets.ModelViewSet):
     serializer_class = QuoteItemSerializer
 
     filterset_fields = ['quote']
+
+
+class GraphsViewSet(viewsets.ModelViewSet):
+    queryset = Quote.objects.all()   # obligatorio aunque no lo uses
+    serializer_class = QuoteItemSerializer
+
+    @action(detail=False, methods=["post"], url_path="pie")
+    def pie(self, request):
+        costs = request.data.get("costs", [])
+
+        try:
+            values = [float(v) for v in costs]
+        except (ValueError, TypeError):
+            return Response(
+                {"detail": "Todos los costos deben ser números."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not values or not any(values):
+            return Response(
+                {"detail": "Todos los costos son cero o vacíos."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        labels = [f"Cost {i+1}" for i in range(len(values))]
+
+        # genera el gráfico
+        fig, ax = plt.subplots(figsize=(4, 4), dpi=150)
+        ax.pie(values, labels=labels, autopct="%1.1f%%", startangle=90)
+        ax.axis("equal")
+
+        buf = BytesIO()
+        plt.tight_layout()
+        fig.savefig(buf, format="png", bbox_inches="tight")
+        plt.close(fig)
+        buf.seek(0)
+
+        b64_png = base64.b64encode(buf.read()).decode("utf-8")
+        html = f"<img alt='Gráfico de costos' src='data:image/png;base64,{b64_png}' />"
+
+        return Response({"html": html}, status=status.HTTP_200_OK)
+

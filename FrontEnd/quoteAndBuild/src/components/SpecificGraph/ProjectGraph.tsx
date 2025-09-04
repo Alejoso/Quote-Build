@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation ,useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import type { Material , Phase } from '../types/interfaces';
-import { fetchProjectById, fetchPhasesByProject , fetchSupplierMaterialsByPhase } from '../api/calls';
+import type { Material , Phase } from '../../types/interfaces';
+import { fetchProjectById, fetchPhasesByProject , fetchSupplierMaterialsByPhase , generateGraph} from '../../api/calls';
 
 // Extender la interfaz para incluir cantidad
 
@@ -13,6 +13,8 @@ const ProjectGraph: React.FC = () => {
     const [project , setProject] = useState<Phase[]>([]); 
     const [phases , setPhases] = useState<Phase[]>([]); 
     const [materials , setMaterials] = useState<Material[]>([]); 
+    const [costs, setCosts] = useState<(number | null | undefined)[]>([]);
+    const [graph , setGraph] = useState<string>(''); 
     const [isSaving, setIsSaving] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -74,10 +76,31 @@ useEffect(() => {
     };
     getMaterials();
 
-    console.log(phases); 
   }, [stateId, phases]);
 
+  useEffect(() => {
+
+    const phaseCosts = phases.map(p => p.phaseTotalCostExecuted);
+    setCosts(phaseCosts);
+
+    const graphs = async () => {
+      try {
+        setLoading(true);
+        const {data} = await generateGraph(costs); 
+        console.log(data); 
+        setGraph(data); 
+      } catch (error: any) {
+        toast.error(error || "Ha ocurrido un problema generando los graficos");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    graphs();
+
+  }, []);
     
+
     return (
         <div className="mx-auto max-w-5xl p-6">
       {loading ? (
@@ -111,6 +134,11 @@ useEffect(() => {
           </div>
         </div>
       )}
+
+    <div
+        className="graph-container"
+        dangerouslySetInnerHTML={{ __html: graph }}
+    />
     </div>
     );
 };
