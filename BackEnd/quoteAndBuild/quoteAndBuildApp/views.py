@@ -4,6 +4,10 @@ from rest_framework.decorators import action
 from rest_framework import status as drf_status
 from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 from django.utils import timezone
+from decimal import Decimal
+from django.db import transaction
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 import base64
 from io import BytesIO
 
@@ -255,15 +259,76 @@ class QuoteViewSet(viewsets.ModelViewSet):
             )
         # If it is draft, delete as normal
         return super().destroy(request, *args, **kwargs)
+    
+    def save(self, *args, **kwargs):
+        total = 0
 
-# --- Quote items (QuoteSupplierMaterial)
+        quote = self.get_object()
+
+        related_qsm = QuoteSupplierMaterial.objects.filter(quote_id=quote.id)
+        
+        for qsm in related_qsm:
+            total = total + qsm.subtotal
+        
+        self.total = total
+        super().save(*args, **kwargs)
+
+# --- Helpers to clculate totals ---
+def _recalc_quote_total(quote):
+    total = QuoteSupplierMaterial.objects.filter(quote=quote).aggregate(
+        s=Coalesce(Sum('subtotal'), Decimal('0'))
+    )['s']
+    Quote.objects.filter(pk=quote.pk).update(total=total)
+
+def _recalc_phase_total(phase):
+    total = Quote.objects.filter(phase=phase).aggregate(
+        s=Coalesce(Sum('total'), Decimal('0'))
+    )['s']
+    Phase.objects.filter(pk=phase.pk).update(total=total)
+
+def _recalc_project_total(project):
+    total = Phase.objects.filter(project=project).aggregate(
+        s=Coalesce(Sum('total'), Decimal('0'))
+    )['s']
+    Project.objects.filter(pk=project.pk).update(total=total)
+
+def _recalc_chain(quote):
+    _recalc_quote_total(quote)
+    _recalc_phase_total(quote.phase)
+    _recalc_project_total(quote.phase.project)
+
+# --- Quote items (QuoteSupplierMaterial) ---
 class QuoteItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuoteSupplierMaterial
         fields = '__all__'
 
-class QuoteItemViewSet(viewsets.ModelViewSet):
-    queryset = QuoteSupplierMaterial.objects.all().select_related('quote','supplierMaterial')
-    serializer_class = QuoteItemSerializer
+    def validate(self, attrs):
+        qty = attrs.get('quantity', getattr(self.instance, 'quantity', None))
+        up  = attrs.get('unit_price', getattr(self.instance, 'unit_price', None))
+        if qty is not None and up is not None:
+            attrs['subtotal'] = Decimal(qty) * Decimal(up)
+        return attrs
 
+class QuoteItemViewSet(viewsets.ModelViewSet):
+    queryset = QuoteSupplierMaterial.objects.all().select_related(
+        'quote','supplierMaterial','quote__phase','quote__phase__project'
+    )
+    serializer_class = QuoteItemSerializer
     filterset_fields = ['quote']
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        item = serializer.save()
+        _recalc_chain(item.quote)
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        item = serializer.save()
+        _recalc_chain(item.quote)
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        quote = instance.quote
+        super().perform_destroy(instance)
+        _recalc_chain(quote)
