@@ -147,6 +147,21 @@ class PhaseViewSet(viewsets.ModelViewSet):
         if project_id:
             qs = qs.filter(project_id=project_id)
         return qs
+    
+    def destroy(self, request, *args, **kwargs):
+        phase = self.get_object()
+
+        # If there is a SINGLE draft quote, block the deletion :P
+        if phase.quotes.exclude(status="draft").exists():
+            return Response(
+                {
+                    "detail": "Solo podés borrar fases que no tengan cotizaciones en estado 'draft'.",
+                    "phase_id": phase.pk,
+                },
+                status=drf_status.HTTP_409_CONFLICT,
+            )
+
+        return super().destroy(request, *args, **kwargs)
 
 # --- PhaseInterval
 
