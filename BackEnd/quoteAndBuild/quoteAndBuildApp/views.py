@@ -277,36 +277,28 @@ class GraphsViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], url_path="pie")
     def pie(self, request):
         costs = request.data.get("costs", [])
+        # costs será algo como:
+        # [ {"name": "Fase 1", "cost": 80000}, {"name": "Fase 2", "cost": 40000} ]
 
-        try:
-            values = [float(v) for v in costs]
-        except (ValueError, TypeError):
-            return Response(
-                {"detail": "Todos los costos deben ser números."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # Ejemplo: armar labels y values para graficar
+        labels = [item["name"] for item in costs]
+        values = [item["cost"] for item in costs]
 
-        if not values or not any(values):
-            return Response(
-                {"detail": "Todos los costos son cero o vacíos."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # Aquí generas tu gráfico como quieras (matplotlib, etc.)
+        import matplotlib.pyplot as plt
+        import io, base64
 
-        labels = [f"Cost {i+1}" for i in range(len(values))]
-
-        # genera el gráfico
-        fig, ax = plt.subplots(figsize=(4, 4), dpi=150)
-        ax.pie(values, labels=labels, autopct="%1.1f%%", startangle=90)
+        fig, ax = plt.subplots()
+        ax.pie(values, labels=labels, autopct='%1.1f%%')
         ax.axis("equal")
 
-        buf = BytesIO()
-        plt.tight_layout()
-        fig.savefig(buf, format="png", bbox_inches="tight")
-        plt.close(fig)
-        buf.seek(0)
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format="png")
+        buffer.seek(0)
+        image_png = buffer.getvalue()
+        buffer.close()
 
-        b64_png = base64.b64encode(buf.read()).decode("utf-8")
-        html = f"<img alt='Gráfico de costos' src='data:image/png;base64,{b64_png}' />"
+        graphic = base64.b64encode(image_png).decode("utf-8")
+        html = f"<img alt='Gráfico de costos' src='data:image/png;base64,{graphic}' />"
 
-        return Response({"html": html}, status=status.HTTP_200_OK)
-
+        return Response({"html": html})

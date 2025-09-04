@@ -140,7 +140,6 @@ export function fetchSupplierMaterialsByMaterial(materialId: number) {
 }
 
 export function generateGraph(costs: any) {
-  return axios.post<any>(`${BASE_URL}/graphs/pie/`, {   // 👈 ojo, /pie/ porque definiste @action
-    costs: costs,
-  });
+  console.log("Costs" , costs)
+  return axios.post<any>(`${BASE_URL}/graphs/pie/`, { costs });
 }

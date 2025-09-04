@@ -3,7 +3,7 @@ import { useLocation ,useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Material , Phase } from '../../types/interfaces';
 import { fetchProjectById, fetchPhasesByProject , fetchSupplierMaterialsByPhase , generateGraph} from '../../api/calls';
-
+import { Bar } from 'react-chartjs-2';
 // Extender la interfaz para incluir cantidad
 
 
@@ -13,8 +13,8 @@ const ProjectGraph: React.FC = () => {
     const [project , setProject] = useState<Phase[]>([]); 
     const [phases , setPhases] = useState<Phase[]>([]); 
     const [materials , setMaterials] = useState<Material[]>([]); 
-    const [costs, setCosts] = useState<(number | null | undefined)[]>([]);
-    const [graph , setGraph] = useState<string>(''); 
+    const [executedGraph , setExecutedGraph] = useState<{ html: string } | null>(null); 
+    const [plannedGraph , setPlannedGraph] = useState<{ html: string } | null>(null); 
     const [isSaving, setIsSaving] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -78,28 +78,46 @@ useEffect(() => {
 
   }, [stateId, phases]);
 
+  //Llamar los graficos
   useEffect(() => {
-
-    const phaseCosts = phases.map(p => p.phaseTotalCostExecuted);
-    setCosts(phaseCosts);
-
+    if (!phases || phases.length === 0) return;
+  
+    const executedCosts = phases.map((phase) => ({
+      name: phase.name,
+      cost: phase.phaseTotalCostExecuted,
+    }));
+  
+    const plannedCosts = phases.map((phase) => ({
+      name: phase.name,
+      cost: phase.phaseTotalCostPlanned,
+    }));
+  
     const graphs = async () => {
       try {
         setLoading(true);
-        const {data} = await generateGraph(costs); 
-        console.log(data); 
-        setGraph(data); 
+  
+        // 🚀 Primero ejecutado
+        const executedRes = await generateGraph(executedCosts);
+        setExecutedGraph(executedRes.data);
+        
+        
+        // 🚀 Después planeado (solo se manda cuando terminó el primero)
+        const plannedRes = await generateGraph(plannedCosts);
+        setPlannedGraph(plannedRes.data);
+  
       } catch (error: any) {
-        toast.error(error || "Ha ocurrido un problema generando los graficos");
+        console.error("Graph error:", error);
+        toast.error("Ha ocurrido un problema generando los gráficos");
       } finally {
         setLoading(false);
       }
     };
-
+  
     graphs();
+  }, [phases]);
 
-  }, []);
-    
+
+ 
 
     return (
         <div className="mx-auto max-w-5xl p-6">
@@ -117,7 +135,14 @@ useEffect(() => {
                   <div>Duración Planificada: {phase.phaseDurationPlanning ?? '—'} días</div>
                 </li>
               ))}
+              
             </ul>
+            {plannedGraph && (
+            <div
+                className="graph-container"
+                dangerouslySetInnerHTML={{ __html: plannedGraph.html }}
+            />
+            )}
           </div>
 
           <div className="w-1/2 p-4 border rounded-xl shadow-lg">
@@ -131,14 +156,18 @@ useEffect(() => {
                 </li>
               ))}
             </ul>
+
+            {executedGraph && (
+            <div
+                className="graph-container"
+                dangerouslySetInnerHTML={{ __html: executedGraph.html }}
+            />
+            )}
           </div>
         </div>
       )}
 
-    <div
-        className="graph-container"
-        dangerouslySetInnerHTML={{ __html: graph }}
-    />
+    
     </div>
     );
 };
