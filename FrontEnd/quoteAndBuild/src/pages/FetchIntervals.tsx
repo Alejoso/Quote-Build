@@ -66,6 +66,7 @@ export default function PhaseGetIntervals({
       });
 
       toast.success("Intervalo actualizado correctamente");
+      onClose();
     } catch (err) {
       console.error("Error al actualizar:", err);
       toast.error("No se pudo actualizar el intervalo");
@@ -75,7 +76,7 @@ export default function PhaseGetIntervals({
   if (loading) return <p>Cargando intervalos...</p>;
 
   return (
-    <div className="space-y-6 p-4 bg-gray-100 rounded-xl">
+    <div className="space-y-6 p-4 bg-gray-100 rounded-xl mt-4">
       <h2 className="text-lg font-bold">Editar intervalos</h2>
       {(intervals || []).map((interval) => (
         <div key={interval.id} className="border p-3 rounded-lg space-y-2">
@@ -125,6 +126,7 @@ export default function PhaseGetIntervals({
 
           <button
             onClick={() => handleSave(interval.id!)}
+            
             className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
             Guardar cambios
