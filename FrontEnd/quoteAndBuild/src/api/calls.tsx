@@ -62,6 +62,13 @@ export async function fetchPhaseIntervals(phaseId: number) {  // List an interva
   return data;
 }
 
+export async function updatePhaseInterval(phaseIntervalId: number, fieldsUpdate: any) {
+  return axios.patch(
+    `http://127.0.0.1:8000/phase-intervals/${phaseIntervalId}/`,  
+    fieldsUpdate
+  );
+}// Allow us to edit a PhaseInterval
+
 // ---- Quotes ----
 export function fetchQuotesByPhase(phaseId: number) {
   return axios.get<Quote[]>(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });

@@ -2,10 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { createPhase, fetchPhasesByProject, updatePhase } from "../api/calls";
+import { createPhase, fetchPhasesByProject, updatePhase , fetchPhaseIntervals} from "../api/calls";
 import type { Phase, PhaseInterval } from "../types/interfaces";
 import DisplayMaterialTable from "../components/Material/MaterialPrueba";
 import PhaseIntervalForm from "./CompletePhase";
+import PhaseGetIntervals from "./FetchIntervals";
 
 type Props = {
   projectId: number | null; // parent passes this after project is created
@@ -287,12 +288,12 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       onChange={(e) => setIsPlanningPhase(e.target.checked)}
                       className="h-4 w-4"
                     />
-                    <span className="text-sm font-medium">¿Es una fase de planeo?</span>
+                    <span className="block text-sm font-medium">¿Es una fase de planeo?</span>
                   </label>
 
                   <PhaseIntervalForm
                     phaseId={createdPhase.id!}
-                    isPlanningPhase={isPlanningPhase}  // 👈 valor dinámico según el checkbox
+                    isPlanningPhase={isPlanningPhase}  // Dinamic value according with checkbox
                     onCreated={async (interval: PhaseInterval) => {
                       toast.success("Intervalo agregado con éxito. Duración actualizada.");
                       await reloadPhases();
@@ -302,6 +303,18 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                   />
                 </div>
               )}
+              {showIntervals && createdPhase && (
+                <PhaseGetIntervals
+                  phaseId={createdPhase.id}
+                  onCreated={async (interval) => {
+                    toast.success("Intervalo agregado con éxito. Duración actualizada.");
+                    await reloadPhases();
+                    setShowIntervals(false);
+                  }}
+                  onClose={() => setShowIntervals(false)}
+                />
+              )}
+
             </div>
           ))
         )}
