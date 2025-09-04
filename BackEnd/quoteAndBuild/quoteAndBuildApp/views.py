@@ -7,9 +7,8 @@ from django.utils import timezone
 import base64
 from io import BytesIO
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+
+
 
 
 #from django.core import serializers as sr 
