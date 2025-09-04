@@ -21,6 +21,8 @@ class MaterialViewSet (viewsets.ModelViewSet):
 class ProjectSerializer(serializers.ModelSerializer):
     projectDurationExecuted = serializers.SerializerMethodField()
     projectDurationPlanning = serializers.SerializerMethodField()
+    projectTotalCostExecuted = serializers.SerializerMethodField()
+    projectTotalCostPlanned = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -45,6 +47,27 @@ class ProjectSerializer(serializers.ModelSerializer):
                 if interval.start_date and interval.end_date:
                     total_days += (interval.end_date - interval.start_date).days
         return total_days if total_days > 0 else None
+    
+    #Cost
+    def get_projectTotalCostExecuted(self, project):
+        total = 0
+        phases = Phase.objects.filter(project_id=project.id)
+        for phase in phases:
+            quotes = Quote.objects.filter(phase_id=phase.id, status='completed')
+            for quote in quotes:
+                if (quote.is_first_quote==False):
+                    total += quote.total if quote.total else 0
+        return total if total > 0 else None
+    
+    def get_projectTotalCostPlanned(self, project):
+        total = 0
+        phases = Phase.objects.filter(project_id=project.id)
+        for phase in phases:
+            quotes = Quote.objects.filter(phase_id=phase.id, is_first_quote=True)
+            for quote in quotes:
+                if (quote.is_first_quote==False):
+                    total += quote.total if quote.total else 0
+        return total if total > 0 else None
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -64,6 +87,8 @@ class ClientViewSet(viewsets.ModelViewSet):
 class PhaseSerializer(serializers.ModelSerializer):
     phaseDurationExecuted = serializers.SerializerMethodField()
     phaseDurationPlanning = serializers.SerializerMethodField()
+    phaseTotalCostExecuted = serializers.SerializerMethodField()
+    phaseTotalCostPlanned = serializers.SerializerMethodField()
 
     class Meta:
         model = Phase
@@ -89,6 +114,16 @@ class PhaseSerializer(serializers.ModelSerializer):
             if interval.start_date and interval.end_date:
                 total_days += (interval.end_date - interval.start_date).days
         return total_days if total_days > 0 else None
+
+    def get_phaseTotalCostExecuted(self, phase):
+        quotesExecuted = Quote.objects.filter(phase_id=phase.id, status='completed')
+        total = sum(quote.total for quote in quotesExecuted if quote.total)
+        return total if total > 0 else None
+    
+    def get_phaseTotalCostPlanned(self, phase):
+        quotesPlanned = Quote.objects.filter(phase_id=phase.id, is_first_quote=True)
+        total = sum(quote.total for quote in quotesPlanned if quote.total)
+        return total if total > 0 else None
         
 class PhaseViewSet(viewsets.ModelViewSet):
     serializer_class = PhaseSerializer
