@@ -3,10 +3,9 @@ import { useLocation ,useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Material , Phase } from '../../types/interfaces';
 import { fetchProjectById, fetchPhasesByProject , fetchSupplierMaterialsByPhase} from '../../api/calls';4
-import PieChartCosts from '../Graph/GraphCosts';
-import PieChartTimes from '../Graph/GraphTimes';
 import BarChartCostTime from '../Graph/GraphCostsTime';
-
+import BarChartCosts from '../Graph/GraphCosts';
+import BarChartTimes from '../Graph/GraphTimes';
 
 const ProjectGraph: React.FC = () => {
     const navigate = useNavigate(); 
@@ -27,9 +26,13 @@ const ProjectGraph: React.FC = () => {
 
     const [plannedDuration , setPlannedDuration] = useState<costs[]>(); 
     const [executedDuration , setExecutedDuration] = useState<costs[]>(); 
+
+    const [initialRatio, SetInitialRatios] = useState<Ratio[] | undefined>(undefined); 
+    const [finalRatios, SetFinalRatios] = useState<Ratio[] | undefined>(undefined); 
     
     const location = useLocation() as { state?: { projectId?: number } }; //Look for the state that we sent with navigate, so we know in which project are we looking at.
     const stateId = location?.state?.projectId; //Get the projectId safely from the location parameter.
+
 // carga el proyecto
 
 useEffect(() => {
@@ -88,6 +91,29 @@ useEffect(() => {
 
   }, [stateId, phases]);
 
+  interface Ratio {
+    name: string, 
+    ratio: number
+  }
+
+  //calculate the ratios of cost/time
+  function calculateRatios(costs: costs[], durations: costs[]): Ratio[] {
+    return costs.map(costItem => {
+      // Buscar la duración que corresponda a la misma fase
+      const durationItem = durations.find(d => d.name === costItem.name);
+
+  
+      // Si la encuentra y es mayor a 0, calcular ratio
+      const ratio = durationItem && durationItem.cost > 0 
+        ? costItem.cost / durationItem.cost 
+        : 0;
+      return {
+        name: costItem.name,
+        ratio
+      };
+    });
+  }
+
   // Sacar la infromacion especifica para los graficos
   useEffect(() => {
     if (!phases || phases.length === 0) return;
@@ -119,6 +145,21 @@ useEffect(() => {
     }));
 
     setExecutedDuration(plannedDuration as costs[]);
+    
+    //Verificar que no sea nulo o undifined los campos
+    const initialRatios =calculateRatios(
+      plannedCosts?.filter(cost => cost.cost !== null && cost.cost !== undefined).map(cost => ({ ...cost, cost: cost.cost as number })) || [],
+      plannedDuration?.filter(duration => duration.cost !== null && duration.cost !== undefined).map(duration => ({ ...duration, cost: duration.cost as number })) || []
+    )
+
+    SetInitialRatios(initialRatios); 
+
+    const finalRatios =calculateRatios(
+      executedCosts?.filter(cost => cost.cost !== null && cost.cost !== undefined).map(cost => ({ ...cost, cost: cost.cost as number })) || [],
+      executedDuration?.filter(duration => duration.cost !== null && duration.cost !== undefined).map(duration => ({ ...duration, cost: duration.cost as number })) || []
+    )
+
+    SetFinalRatios(finalRatios); 
 
 
   
@@ -148,21 +189,21 @@ useEffect(() => {
               <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
               Gráfico de costos
               </h1>
-              {plannedCosts && <PieChartCosts data={plannedCosts} />}
+              {plannedCosts && <BarChartCosts data={plannedCosts} />}
             </div>
 
             <div>
               <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
               Gráfico de tiempo
               </h1>
-              {plannedDuration && <PieChartTimes data={plannedDuration} />}
+              {plannedDuration && <BarChartTimes data={plannedDuration} />}
             </div>
 
             <div>
               <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
               Gráfico costo/tiempo
               </h1>
-              {plannedDuration && <BarChartCostTime data={plannedDuration} />}
+              {initialRatio && <BarChartCostTime data={initialRatio} />}
             </div>
 
           </div>
@@ -183,16 +224,22 @@ useEffect(() => {
               <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
               Gráfico de costos
               </h1>
-              {executedCosts && <PieChartCosts data={executedCosts} />}
+              {executedCosts && <BarChartCosts data={executedCosts} />}
             </div>
 
             <div>  
               <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
               Gráfico de tiempo
               </h1>
-              {executedDuration && <PieChartTimes data={executedDuration} />}
+              {executedDuration && <BarChartTimes data={executedDuration} />}
             </div>
 
+            <div>
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico costo/tiempo
+              </h1>
+              {finalRatios && <BarChartCostTime data={finalRatios} />}
+            </div>
             
             
           </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -19,7 +19,7 @@ interface PieChartProps {
   data: Cost[];
 }
 
-const PieChartTimes: React.FC<PieChartProps> = ({ data }) => {
+const BarChartTimes: React.FC<PieChartProps> = ({ data }) => {
   const labels = data.map(item => item.name);
   const values = data.map(item => item.cost);
 
@@ -45,11 +45,14 @@ const PieChartTimes: React.FC<PieChartProps> = ({ data }) => {
   const options = {
     plugins: {
       legend: {
-        display: true,
-        position: "bottom" as const
+        display: false,
       },
       datalabels: {
-        color: "#fff",
+        font: {
+          weight: "bold",
+          size: 14,
+        },
+        color: "#0C0A09",
         formatter: (value: number, context: any) => {
           const data = context.chart.data.datasets[0].data as number[];
           const total = data.reduce((a, b) => a + b, 0);
@@ -60,8 +63,8 @@ const PieChartTimes: React.FC<PieChartProps> = ({ data }) => {
     }
   };
 
-  return <Pie data={chartData} options={options} />;
+  return <Bar data={chartData} options={options} />;
 };
 
-export default PieChartTimes;
+export default BarChartTimes;
 

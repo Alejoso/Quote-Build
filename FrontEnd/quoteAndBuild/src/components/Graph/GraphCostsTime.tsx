@@ -1,64 +1,65 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
 import {
-    Chart as ChartJS,
-    CategoryScale, // eje X (categorías)
-    LinearScale,  // eje Y (numérico)
-    BarElement,
-    Tooltip,
-    Legend,
-  } from "chart.js";
-  
-  ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-interface Cost {
+import type {ChartOptions} from "chart.js"; 
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, ChartDataLabels);
+
+interface Ratio {
   name: string;
-  cost: number;
+  ratio: number;
 }
 
-interface PieChartProps {
-  data: Cost[];
+interface BarChartProps {
+  data: Ratio[];
 }
 
-const BarChartCostTime: React.FC<PieChartProps> = ({ data }) => {
-    const labels = data.map(item => item.name);
-    const values = data.map(item => item.cost);
-  
-    const chartData = {
-      labels,
-      datasets: [
-        {
-          label: "Días",
-          data: values,
-          backgroundColor: [
-            "#4338CA", // morado
-            "#51A2FF", // azulito
-          ],
-          borderColor: [
-            "#312E81", // morado más oscuro
-            "#2563EB", // azul más oscuro
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
-  
-    const options = {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false, // ocultar la leyenda si solo hay un dataset
-        },
+const BarChartCostTime: React.FC<BarChartProps> = ({ data }) => {
+  const labels = data.map(item => item.name);
+  // <-- asegurar numbers, no strings
+  const values = data.map(item => Number(item.ratio.toFixed(2)));
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: "Costo/Tiempo",
+        data: values,
+        backgroundColor: ["#31D492", "#42D3F2"],
+        borderColor: ["#31D492", "#42D3F2"],
+        borderWidth: 1,
       },
-      scales: {
-        y: {
-          beginAtZero: true, // el eje Y empieza en 0
-        },
+    ],
+  };
+
+  // declarar opciones con un pequeño "escape" en plugins
+  const options: ChartOptions<"bar"> & { plugins?: any } = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        color: "#0C0A09",    // color del número dentro de la barra
+        anchor: "center",
+        align: "center",
+        font: { size: 14 , weight: "bold"},
       },
-    };
+    },
+    scales: {
+      y: { beginAtZero: true },
+    },
+  };
 
   return <Bar data={chartData} options={options} />;
 };
 
 export default BarChartCostTime;
-
