@@ -2,4 +2,3 @@ django
 django-cors-headers
 djangorestframework
 django-extensions
-axios   
