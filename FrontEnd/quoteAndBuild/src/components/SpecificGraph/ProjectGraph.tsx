@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useLocation ,useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Material , Phase } from '../../types/interfaces';
-import { fetchProjectById, fetchPhasesByProject , fetchSupplierMaterialsByPhase , generateGraph} from '../../api/calls';
-import { Bar } from 'react-chartjs-2';
-// Extender la interfaz para incluir cantidad
-
+import { fetchProjectById, fetchPhasesByProject , fetchSupplierMaterialsByPhase} from '../../api/calls';4
+import PieChartCosts from '../Graph/GraphCosts';
+import PieChartTimes from '../Graph/GraphTimes';
+import BarChartCostTime from '../Graph/GraphCostsTime';
 
 
 const ProjectGraph: React.FC = () => {
@@ -13,15 +13,25 @@ const ProjectGraph: React.FC = () => {
     const [project , setProject] = useState<Phase[]>([]); 
     const [phases , setPhases] = useState<Phase[]>([]); 
     const [materials , setMaterials] = useState<Material[]>([]); 
-    const [executedGraph , setExecutedGraph] = useState<{ html: string } | null>(null); 
-    const [plannedGraph , setPlannedGraph] = useState<{ html: string } | null>(null); 
     const [isSaving, setIsSaving] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    //Variables para los graficos de costos
+    interface costs {
+      name: string,
+      cost: number,
+    }
+
+    const [executedCosts , SetExecutedCosts] = useState<costs[]>(); 
+    const [plannedCosts , SetPlannedCosts] = useState<costs[]>(); 
+
+    const [plannedDuration , setPlannedDuration] = useState<costs[]>(); 
+    const [executedDuration , setExecutedDuration] = useState<costs[]>(); 
     
     const location = useLocation() as { state?: { projectId?: number } }; //Look for the state that we sent with navigate, so we know in which project are we looking at.
     const stateId = location?.state?.projectId; //Get the projectId safely from the location parameter.
 // carga el proyecto
+
 useEffect(() => {
     if (!stateId) return;
     const getProject = async () => {
@@ -78,7 +88,7 @@ useEffect(() => {
 
   }, [stateId, phases]);
 
-  //Llamar los graficos
+  // Sacar la infromacion especifica para los graficos
   useEffect(() => {
     if (!phases || phases.length === 0) return;
   
@@ -86,38 +96,34 @@ useEffect(() => {
       name: phase.name,
       cost: phase.phaseTotalCostExecuted,
     }));
+
+    SetExecutedCosts(executedCosts as costs[]);
   
     const plannedCosts = phases.map((phase) => ({
       name: phase.name,
       cost: phase.phaseTotalCostPlanned,
     }));
+
+    SetPlannedCosts(plannedCosts as costs[]);
+
+    const executedDuration = phases.map((phase) => ({
+      name: phase.name,
+      cost: phase.phaseDurationExecuted,
+    }));
+
+    setPlannedDuration(executedDuration as costs[]);
   
-    const graphs = async () => {
-      try {
-        setLoading(true);
+    const plannedDuration = phases.map((phase) => ({
+      name: phase.name,
+      cost: phase.phaseDurationPlanning,
+    }));
+
+    setExecutedDuration(plannedDuration as costs[]);
+
+
   
-        // 🚀 Primero ejecutado
-        const executedRes = await generateGraph(executedCosts);
-        setExecutedGraph(executedRes.data);
-        
-        
-        // 🚀 Después planeado (solo se manda cuando terminó el primero)
-        const plannedRes = await generateGraph(plannedCosts);
-        setPlannedGraph(plannedRes.data);
-  
-      } catch (error: any) {
-        console.error("Graph error:", error);
-        toast.error("Ha ocurrido un problema generando los gráficos");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    graphs();
   }, [phases]);
-
-
- 
+  
 
     return (
         <div className="mx-auto max-w-5xl p-6">
@@ -137,12 +143,28 @@ useEffect(() => {
               ))}
               
             </ul>
-            {plannedGraph && (
-            <div
-                className="graph-container"
-                dangerouslySetInnerHTML={{ __html: plannedGraph.html }}
-            />
-            )}
+            
+            <div>
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico de costos
+              </h1>
+              {plannedCosts && <PieChartCosts data={plannedCosts} />}
+            </div>
+
+            <div>
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico de tiempo
+              </h1>
+              {plannedDuration && <PieChartTimes data={plannedDuration} />}
+            </div>
+
+            <div>
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico costo/tiempo
+              </h1>
+              {plannedDuration && <BarChartCostTime data={plannedDuration} />}
+            </div>
+
           </div>
 
           <div className="w-1/2 p-4 border rounded-xl shadow-lg">
@@ -156,17 +178,27 @@ useEffect(() => {
                 </li>
               ))}
             </ul>
+              
+            <div>  
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico de costos
+              </h1>
+              {executedCosts && <PieChartCosts data={executedCosts} />}
+            </div>
 
-            {executedGraph && (
-            <div
-                className="graph-container"
-                dangerouslySetInnerHTML={{ __html: executedGraph.html }}
-            />
-            )}
+            <div>  
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico de tiempo
+              </h1>
+              {executedDuration && <PieChartTimes data={executedDuration} />}
+            </div>
+
+            
+            
           </div>
         </div>
       )}
-
+            
     
     </div>
     );

@@ -268,37 +268,3 @@ class QuoteItemViewSet(viewsets.ModelViewSet):
     serializer_class = QuoteItemSerializer
 
     filterset_fields = ['quote']
-
-
-class GraphsViewSet(viewsets.ModelViewSet):
-    queryset = Quote.objects.all()   # obligatorio aunque no lo uses
-    serializer_class = QuoteItemSerializer
-
-    @action(detail=False, methods=["post"], url_path="pie")
-    def pie(self, request):
-        costs = request.data.get("costs", [])
-        # costs será algo como:
-        # [ {"name": "Fase 1", "cost": 80000}, {"name": "Fase 2", "cost": 40000} ]
-
-        # Ejemplo: armar labels y values para graficar
-        labels = [item["name"] for item in costs]
-        values = [item["cost"] for item in costs]
-
-        # Aquí generas tu gráfico como quieras (matplotlib, etc.)
-        import matplotlib.pyplot as plt
-        import io, base64
-
-        fig, ax = plt.subplots()
-        ax.pie(values, labels=labels, autopct='%1.1f%%')
-        ax.axis("equal")
-
-        buffer = io.BytesIO()
-        plt.savefig(buffer, format="png")
-        buffer.seek(0)
-        image_png = buffer.getvalue()
-        buffer.close()
-
-        graphic = base64.b64encode(image_png).decode("utf-8")
-        html = f"<img alt='Gráfico de costos' src='data:image/png;base64,{graphic}' />"
-
-        return Response({"html": html})
