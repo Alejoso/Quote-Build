@@ -18,7 +18,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
   const [createdPhase, setCreatedPhase] = useState<Phase | null>(null);
 
   // Estado para mostrar u ocultar el formulario de intervalos
-  const [showIntervals, setShowIntervals] = useState(false);
+  const [showIntervalsId, setShowIntervalsId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -268,7 +268,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     <button
                       onClick={() => {
                         setCreatedPhase(p); // save selected phase
-                        setShowIntervals(true); // show form 
+                        setShowIntervalsId(p.id!); // show form 
                       }}
                       className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                       type="button"
@@ -281,7 +281,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                 </div>
               )}
               {/* Form with intervals below */}
-              {showIntervals && createdPhase && createdPhase.id === p.id && (
+              {showIntervalsId ===p.id && createdPhase && createdPhase.id === p.id && (
                 <div className="mt-4 space-y-3">
                   <label className="flex items-center gap-2">
                     <input
@@ -299,21 +299,21 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                     onCreated={async (interval: PhaseInterval) => {
                       toast.success("Intervalo agregado con éxito. Duración actualizada.");
                       await reloadPhases();
-                      setShowIntervals(false);
+                      setShowIntervalsId(null);
                     }}
-                    onClose={() => setShowIntervals(false)}
+                    onClose={() => setShowIntervalsId(null)}
                   />
                 </div>
               )}
-              {showIntervals && createdPhase && (
+              {showIntervalsId === p.id && createdPhase && (
                 <PhaseGetIntervals
-                  phaseId={createdPhase.id}
+                  phaseId={createdPhase.id!}
                   onCreated={async (interval) => {
                     toast.success("Intervalo agregado con éxito. Duración actualizada.");
                     await reloadPhases();
-                    setShowIntervals(false);
+                    setShowIntervalsId(null);
                   }}
-                  onClose={() => setShowIntervals(false)}
+                  onClose={() => setShowIntervalsId(null)}
                 />
               )}
 
