@@ -300,6 +300,23 @@ class QuoteViewSet(viewsets.ModelViewSet):
         # If it is draft, delete as normal
         return super().destroy(request, *args, **kwargs)
     
+    @action(detail=True, methods=["post"], url_path="set-status") # This allow us to access to set - status path ( This is call a decorator)
+    def set_status(self, request, pk=None):
+        try:
+            quote = Quote.objects.get(pk=pk)
+        except Quote.DoesNotExist:
+            return Response({"detail": "Cotización no encontrada."}, status=404)
+
+        new_status = request.data.get("status")
+        if new_status not in ["draft", "completed"]:
+            return Response({"detail": "Estado inválido."}, status=400)
+
+        quote.status = new_status
+        quote.save()
+
+        serializer = self.get_serializer(quote)
+        return Response(serializer.data, status=200)
+    
     def save(self, *args, **kwargs):
         total = 0
 

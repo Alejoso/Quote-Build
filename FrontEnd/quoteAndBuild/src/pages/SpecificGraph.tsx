@@ -66,11 +66,33 @@ const SpecificGraph: React.FC = () => {
   };
 
   return (
+    
     <div className="mx-auto max-w-5xl p-6">
       {loading ? (
         <div>Loading...</div>
       ) : (
+        
         <div>
+          {/* Sección de Información general del proyecto */}
+          <div className="mx-auto border rounded-xl shadow-lg p-6 w-[500px] mb-6">
+            <h2 className="text-xl font-bold mb-4 text-center">Información general del proyecto</h2>
+            {project ? (
+              <div className="space-y-2">
+                <div><span className="font-semibold">Nombre:</span> {project.name}</div>
+                {project.description && (
+                  <div><span className="font-semibold">Descripción:</span> {project.description}</div>
+                )}
+                {project.projectDurationPlanning !== null && (
+                  <div><span className="font-semibold">Duracion planeada total: </span>{project.projectDurationPlanning} dias</div>
+                )}
+                {project.projectDurationExecuted !== null && (
+                  <div><span className="font-semibold">Duracion planeada total: </span>{project.projectDurationExecuted} dias</div>
+                )}
+              </div>
+            ) : (
+              <div className="text-gray-500">No hay información del proyecto disponible.</div>
+            )}
+          </div>
           {/* Barra de Búsqueda */}
           <div className="mb-4">
             <input
@@ -86,8 +108,11 @@ const SpecificGraph: React.FC = () => {
           {filter.length === 0 ? (
             // Si no hay filtro, mostramos el componente ProjectGraph
             <ProjectGraph />
+          ) : filteredPhases.length === 0 ? (
+            // Si no hay coincidencias, mostramos un mensaje
+            <div className="text-center text-gray-500">No se encontraron fases con ese nombre.</div>
           ) : (
-            // Si hay filtro, mostramos el componente PhaseGraph
+            // Si hay filtro y coincidencias, mostramos el componente PhaseGraph
             <PhaseGraph phase={filteredPhases[0]} />
           )}
         </div>
