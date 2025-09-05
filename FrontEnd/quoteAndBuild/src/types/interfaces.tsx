@@ -10,7 +10,11 @@ export interface Project {
   id?: number,
   name: string,
   location: string,
-  total: number
+  total: number,
+  projectDurationExecuted?: number | null; // <-- campo calculado por backend
+  projectDurationPlanning?: number | null;
+  projectCostExecuted?: number | null;
+  projectCostPlanning?: number | null;
 }
 
 export interface Phase {
@@ -19,6 +23,12 @@ export interface Phase {
   name: string;
   description?: string | null;
   total: number;
+  phaseDurationExecuted?: number | null; // <-- campo calculado por backend
+  phaseDurationPlanning?: number | null; // <-- campo calculado por backend
+  phaseTotalCostExecuted?: number | null;
+  phaseTotalCostPlanned?: number | null;
+  materialsCostPlanned?: { [key: string]: number };
+  materialsCostExecuted?: { [key: string]: number };
 }
 
 
