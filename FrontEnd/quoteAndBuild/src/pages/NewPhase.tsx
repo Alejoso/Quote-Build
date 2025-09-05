@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { createPhase, fetchPhasesByProject, updatePhase , fetchPhaseIntervals} from "../api/calls";
+import { createPhase, fetchPhasesByProject, updatePhase , fetchPhaseIntervals, deletePhase} from "../api/calls";
 import type { Phase, PhaseInterval } from "../types/interfaces";
 import DisplayMaterialTable from "../components/Material/MaterialPrueba";
 import PhaseIntervalForm from "./CompletePhase";
@@ -92,9 +92,6 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
     }
   };
 
-
-
-
   const startEdit = (p: Phase) => {
     setEditingId(p.id!);
     setEditForm({
@@ -128,6 +125,22 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
     } catch (err: any) {
       toast.error(err?.message || "No se pudo editar la fase.");
 
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onDeletePhase = async (p: Phase) => {
+    const ok = window.confirm(`¿Seguro que deseas eliminar la fase "${p.name}"? Esta acción no se puede deshacer.`);
+    if (!ok) return;
+
+    try {
+      setLoading(true);
+      await deletePhase(p.id!);
+      setPhases(prev => prev.filter(ph => ph.id !== p.id));
+      toast.success("Fase eliminada.");
+    } catch (error) {
+      toast.error("No se pudo eliminar la fase.");
     } finally {
       setLoading(false);
     }
@@ -231,6 +244,23 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       type="button"
                     >
                       Cancelar
+                    </button>
+
+                    <button
+                      onClick = {() => onDeletePhase(p)}
+                      type = "button"
+                      disabled = {loading}
+                      title = "Eliminar fase"
+                      className="ml-auto inline-flex items-center justify-center rounded-xl border border-red-600 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                        <path d="M10 11v6" />
+                        <path d="M14 11v6" />
+                        <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                      </svg>
                     </button>
                   </div>
                 </div>

@@ -46,6 +46,10 @@ export const updatePhase = (id: number, fieldsUpdate: any) => {
   return axios.patch(`http://127.0.0.1:8000/phases/${id}/`, fieldsUpdate);
 };
 
+export const deletePhase = (id: number) => {
+  return axios.delete(`${BASE_URL}/phases/${id}/`);
+}
+
 export function fetchPhaseById(id: number) {
   return axios.get<Phase>(`${BASE_URL}/phases/${id}/`); 
 }
