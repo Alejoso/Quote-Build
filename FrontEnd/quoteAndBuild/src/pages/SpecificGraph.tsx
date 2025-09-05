@@ -83,7 +83,7 @@ const SpecificGraph: React.FC = () => {
           </div>
 
           {/* Mostrar el componente adecuado */}
-          {filter === '' ? (
+          {filter.length === 0 ? (
             // Si no hay filtro, mostramos el componente ProjectGraph
             <ProjectGraph />
           ) : (

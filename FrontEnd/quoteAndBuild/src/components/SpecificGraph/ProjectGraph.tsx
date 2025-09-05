@@ -102,7 +102,6 @@ useEffect(() => {
       // Buscar la duración que corresponda a la misma fase
       const durationItem = durations.find(d => d.name === costItem.name);
 
-  
       // Si la encuentra y es mayor a 0, calcular ratio
       const ratio = durationItem && durationItem.cost > 0 
         ? costItem.cost / durationItem.cost 
@@ -121,9 +120,12 @@ useEffect(() => {
     const executedCosts = phases.map((phase) => ({
       name: phase.name,
       cost: phase.phaseTotalCostExecuted,
+      
     }));
 
     SetExecutedCosts(executedCosts as costs[]);
+
+    console.log("Costo ejecutado " , executedCosts);
   
     const plannedCosts = phases.map((phase) => ({
       name: phase.name,

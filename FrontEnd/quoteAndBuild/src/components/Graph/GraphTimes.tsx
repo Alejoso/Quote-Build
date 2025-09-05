@@ -49,7 +49,7 @@ const BarChartTimes: React.FC<PieChartProps> = ({ data }) => {
       },
       datalabels: {
         font: {
-          weight: "bold",
+          weight: "bold" as "bold",
           size: 14,
         },
         color: "#0C0A09",
