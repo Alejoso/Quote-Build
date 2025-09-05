@@ -69,7 +69,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
       return;
     }
 
-    const payload: Phase = {
+    const payload: Partial<Phase> = {
       project: projectId,
       name: form.name.trim(),
       description: form.description.trim() || null,

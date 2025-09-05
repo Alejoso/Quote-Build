@@ -96,15 +96,21 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
             {renderMaterialsCost(phase.materialsCostPlanned)}
 
             <div>
+            <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico de costos
+            </h1>
             {plannedCosts && <BarChartCosts data={plannedCosts} />}
-          </div>
+            </div>
           </div>
 
           <div>
             <h4 className="text-lg font-semibold mb-2">Cuota final</h4>
             {renderMaterialsCost(phase.materialsCostExecuted)}
-
+            
             <div>
+            <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+              Gráfico de costos
+            </h1>
             {executedCosts && <BarChartCosts data={executedCosts} />}
           </div>
           </div>
@@ -116,6 +122,9 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
 
         <center>
           <div>
+            <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+                Gráfico costo vs tiempo
+            </h1>
               {finalPoint && initialPoint && <LineChart data={[finalPoint , initialPoint]} />}
           </div>
         </center>

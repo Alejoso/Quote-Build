@@ -57,7 +57,7 @@ useEffect(() => {
     const getAllPhases = async () => {
       try {
         setLoading(true);
-        const { data } = await fetchPhasesByProject(stateId);
+        const { data } = await fetchPhasesByProject(stateId); 
         setPhases(data);
       } catch (error: any) {
         toast.error(error || "Ha ocurrido un problema obteniendo las fases");
@@ -119,19 +119,19 @@ useEffect(() => {
   
     const executedCosts = phases.map((phase) => ({
       name: phase.name,
-      cost: phase.phaseTotalCostExecuted,
+      cost: phase.phaseTotalCostExecuted, //Probelma - Este valor viene como null
       
     }));
 
     SetExecutedCosts(executedCosts as costs[]);
 
-    console.log("Costo ejecutado " , executedCosts);
-  
+
     const plannedCosts = phases.map((phase) => ({
       name: phase.name,
       cost: phase.phaseTotalCostPlanned,
     }));
 
+ 
     SetPlannedCosts(plannedCosts as costs[]);
 
     const executedDuration = phases.map((phase) => ({
