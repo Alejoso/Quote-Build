@@ -89,6 +89,14 @@ export function updateQuote(id: number, payload: QuoteUpdatePayload) {
 export function deleteQuote(id: number) {
   return axios.delete(`${BASE_URL}/quotes/${id}/`);
 }
+// calls.ts
+export async function toggleQuoteStatus(id: number, currentStatus: "draft" | "completed") {
+  const newStatus = currentStatus === "draft" ? "completed" : "draft";
+  const response = await axios.post<Quote>(`${BASE_URL}/quotes/${id}/set-status/`, { status: newStatus });
+  return response.data;
+}
+
+
 
 // ---- QuoteItems ----
 export function fetchQuoteItems(quoteId: number) {
