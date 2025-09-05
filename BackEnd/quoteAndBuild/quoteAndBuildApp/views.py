@@ -139,35 +139,27 @@ class PhaseSerializer(serializers.ModelSerializer):
         total = sum(quote.total for quote in quotesPlanned if quote.total)
         return total if total > 0 else None
     
-    # Function get_materialsCostPlanned, get each quotematerialsuplier subtotal from each quote in the phase that has is_first_quote=True
     def get_materialsCostPlanned(self, phase):
-        supplier_material_subtotals = {}
+        material_costs = {}
         quotes = Quote.objects.filter(phase_id=phase.id, is_first_quote=True)
         for quote in quotes:
             for item in quote.quotesuppliermaterial_set.all():
-                supplier_material_key = (
-                    item.supplierMaterial.supplier.id,
-                    item.supplierMaterial.material.id
-                )
-                if supplier_material_key not in supplier_material_subtotals:
-                    supplier_material_subtotals[supplier_material_key] = 0
-                supplier_material_subtotals[supplier_material_key] += item.subtotal or 0
-        return supplier_material_subtotals
+                material_name = item.supplierMaterial.material.name
+                if material_name not in material_costs:
+                    material_costs[material_name] = 0
+                material_costs[material_name] += item.subtotal or 0
+        return material_costs
 
-    # Function get_materialsCostExecuted, get each quotematerialsuplier subtotal from each quote in the phase that has status='completed'
     def get_materialsCostExecuted(self, phase):
-        supplier_material_subtotals = {}
+        material_costs = {}
         quotes = Quote.objects.filter(phase_id=phase.id, status='completed')
         for quote in quotes:
             for item in quote.quotesuppliermaterial_set.all():
-                supplier_material_key = (
-                    item.supplierMaterial.supplier.id,
-                    item.supplierMaterial.material.id
-                )
-                if supplier_material_key not in supplier_material_subtotals:
-                    supplier_material_subtotals[supplier_material_key] = 0
-                supplier_material_subtotals[supplier_material_key] += item.subtotal or 0
-        return supplier_material_subtotals
+                material_name = item.supplierMaterial.material.name
+                if material_name not in material_costs:
+                    material_costs[material_name] = 0
+                material_costs[material_name] += item.subtotal or 0
+        return material_costs
 
 
 class PhaseViewSet(viewsets.ModelViewSet):
