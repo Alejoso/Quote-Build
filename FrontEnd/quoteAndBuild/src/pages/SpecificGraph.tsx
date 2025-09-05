@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { fetchProjectById, fetchPhasesByProject } from '../api/calls';
-import ProjectGraph from '../components/SpecificGraph/ProjectGraph'; 
-import PhaseGraph from '../components/SpecificGraph/PhaseGraph'; 
+import ProjectGraph from '../components/SpecificGraph/ProjectGraph';
+import PhaseGraph from '../components/SpecificGraph/PhaseGraph';
 
 const SpecificGraph: React.FC = () => {
   const [project, setProject] = useState<any | null>(null); // Usamos any por simplicidad (debes poner el tipo adecuado)
@@ -88,7 +88,7 @@ const SpecificGraph: React.FC = () => {
             <ProjectGraph />
           ) : (
             // Si hay filtro, mostramos el componente PhaseGraph
-            <PhaseGraph filteredPhases={filteredPhases} />
+            <PhaseGraph phase={filteredPhases[0]} />
           )}
         </div>
       )}
