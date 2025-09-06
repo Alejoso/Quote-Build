@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import DisplayMaterialTable from '../components/Material/MaterialPrueba';
 import type { SupplierMaterial, QuoteItemPayload } from '../types/interfaces';
-import { createQuoteItem, fetchQuoteItems , fetchAllSupplierMaterials} from '../api/calls';
+import { createQuoteItem, fetchQuoteItems , fetchAllSupplierMaterials , deleteQuoteItem} from '../api/calls';
 
 // Extender la interfaz para incluir cantidad
 interface MaterialWithQuantity extends SupplierMaterial {
@@ -131,48 +131,46 @@ const SaveQuote: React.FC = () => {
 
     const handleSaveQuote = async () => {
         if (materialsWithQuantities.length === 0) {
-            toast.error('Debe seleccionar al menos un material para la cotización');
-            return;
+          toast.error('Debe seleccionar al menos un material para la cotización');
+          return;
         }
-
+      
         setIsSaving(true);
         try {
-            // Crear los nuevos items de la cotización
-            const existingIds = new Set(materials.map(m => m.supplierMaterial));
-
-            const newMaterials = materialsWithQuantities.filter(
-            m => !existingIds.has(m.id) // excluye los que ya están
+          // 1️⃣ Borrar todos los registros antiguos
+          if (materials.length > 0) {
+            await Promise.all(
+              materials
+                .filter(item => item.id !== undefined) // por seguridad
+                .map(item => deleteQuoteItem(item.id!))
             );
-
-            const quoteItemsPromises = newMaterials.map(material => {
+          }
+      
+          // 2️⃣ Crear los nuevos registros
+          const quoteItemsPromises = materialsWithQuantities.map(material => {
             const itemPayload: QuoteItemPayload = {
-                quote: quoteId,
-                supplierMaterial: material.id,
-                quantity: material.quantity,
-                unit_price: material.actual_price,
-                subtotal: material.actual_price * material.quantity
+              quote: quoteId,
+              supplierMaterial: material.id,
+              quantity: material.quantity,
+              unit_price: material.actual_price,
+              subtotal: material.actual_price * material.quantity,
             };
-                return createQuoteItem(itemPayload);
-            });
-
-            await Promise.all(quoteItemsPromises);
-            toast.success('Cotización guardada exitosamente!');
-            
-            // Redirigir de vuelta a la vista de quotes
-            navigate('/saveProject/quotes', { 
-                state: { 
-                    phaseId: phaseId,
-                    projectId: projectId 
-                } 
-            });
-
-        } catch (error : any) {
-            console.error('Error al guardar la cotización:' , error);
-            toast.error('Error al guardar la cotización');
+            return createQuoteItem(itemPayload);
+          });
+      
+          await Promise.all(quoteItemsPromises);
+      
+          toast.success('Cotización guardada exitosamente!');
+          navigate('/saveProject/quotes', { 
+            state: { phaseId, projectId } 
+          });
+        } catch (error: any) {
+          console.error('Error al guardar la cotización:', error);
+          toast.error('Error al guardar la cotización');
         } finally {
-            setIsSaving(false);
+          setIsSaving(false);
         }
-    };
+      };
 
     const goBack = () => {
         navigate('/saveProject/quotes', { 
@@ -287,7 +285,11 @@ const SaveQuote: React.FC = () => {
                     <div className="bg-yellow-50 p-4 rounded">
                         <p>Esta cotización ya tiene {materials.length} material(es) asociado(s).</p>
                         <p className="mt-2">
-                            Al guardar, se añadirán {materialsWithQuantities.length} material(es) adicional(es).
+                        {materialsWithQuantities.length - materials.length < 0 ? (
+                            <>Al guardar, se eliminarán {materials.length - materialsWithQuantities.length} material(es).</>
+                        ) : (
+                            <>Al guardar, se añadirán {materialsWithQuantities.length - materials.length} material(es) adicional(es).</>
+                        )}
                         </p>
                     </div>
                 </div>

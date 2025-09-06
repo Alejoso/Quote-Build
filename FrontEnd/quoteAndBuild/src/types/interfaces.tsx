@@ -72,6 +72,7 @@ export type PhaseMaterial = {
 };
 
 export type QuoteItemPayload = {
+  id? : number; 
   quote: number;
   supplierMaterial: number; // matches model field name
   quantity: number;
