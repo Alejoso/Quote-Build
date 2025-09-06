@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import type { SupplierMaterial , QuoteItemPayload} from "../../types/interfaces";
+import { useEffect, useState } from "react";
+import toast , { Toaster }  from "react-hot-toast";
+import type { SupplierMaterial} from "../../types/interfaces";
 import { fetchAllSupplierMaterials } from "../../api/calls";
 import QuoteTable from "../Quote/QuoteTable"; // Asegúrate de tener la ruta correcta
 
@@ -28,7 +28,7 @@ export default function DisplayMaterialTable({ onSelectionChange  , currentSelec
                 setLoading(false);
             }
         };
-        
+
         if(currentSelectedMaterials)
             setSelectedMaterials(currentSelectedMaterials)
 
@@ -66,6 +66,7 @@ export default function DisplayMaterialTable({ onSelectionChange  , currentSelec
 
     return (
         <div>
+            <Toaster/>
             <h2 className="text-xl font-bold mb-4">Materiales Disponibles</h2>
             <table className="table-auto border-collapse border border-gray-400 w-full mb-8">
                 <thead className="bg-gray-200">

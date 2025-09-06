@@ -1,7 +1,6 @@
 import React, { useState , useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Phase } from '../../types/interfaces';
-import { object } from 'framer-motion/client';
 import BarChartCosts from '../Graph/GraphCosts';
 import LineChart from '../Graph/GraphPhaseTimeCost';
 

@@ -6,6 +6,7 @@ interface QuoteTableProps {
   onRemove?: (id: number) => void;
 }
 
+
 const QuoteTable: React.FC<QuoteTableProps> = ({ materials, onRemove }) => {
   const handleRemove = (id: number) => {
     if (onRemove) {

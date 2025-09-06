@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import toast , { Toaster } from 'react-hot-toast';
 import DisplayMaterialTable from '../components/Material/MaterialPrueba';
 import type { SupplierMaterial, QuoteItemPayload } from '../types/interfaces';
 import { createQuoteItem, fetchQuoteItems , fetchAllSupplierMaterials , deleteQuoteItem} from '../api/calls';
@@ -192,6 +192,7 @@ const SaveQuote: React.FC = () => {
 
     return (
         <div className="p-4 max-w-6xl mx-auto">
+            <Toaster/>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Editar Cotización #{quoteId}</h1>
                 <button

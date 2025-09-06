@@ -5,15 +5,13 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 import type {
   Quote,
   QuoteItemPayload,
-  QuoteCreatePayload,
   QuoteUpdatePayload,
   Phase,
   SupplierMaterial,
   Material,
   PhaseMaterial,
   Supplier,
-  Project,
-  PhaseInterval
+  PhaseInterval,
 } from "../types/interfaces";
 
 // ---- Projects ----
@@ -78,7 +76,7 @@ export function fetchQuotesByPhase(phaseId: number) {
   return axios.get<Quote[]>(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });
 }
 
-export function createQuote(payload: QuoteCreatePayload) {
+export function createQuote(payload: any) {
   return axios.post<Quote>(`${BASE_URL}/quotes/`, payload);
 }
 
