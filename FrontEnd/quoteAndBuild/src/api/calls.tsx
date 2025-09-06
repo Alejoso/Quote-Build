@@ -100,7 +100,7 @@ export async function toggleQuoteStatus(id: number, currentStatus: "draft" | "co
 
 // ---- QuoteItems ----
 export function fetchQuoteItems(quoteId: number) {
-  return axios.get(`${BASE_URL}/quote-items/`, {
+  return axios.get<QuoteItemPayload[]>(`${BASE_URL}/quote-items/`, {
     params: { quote: quoteId },
   });
 }
@@ -152,8 +152,9 @@ export function fetchAllSupplierMaterials() {
 }
 
 // NEW: suppliers that sell a given material
-export function fetchSupplierMaterialsByMaterial(materialId: number) {
-  return axios.get<SupplierMaterial[]>(`${BASE_URL}/supplier-materials/`, {
+export function fetchSupplierMaterialsByQuote(materialId: number) {
+  return axios.get<QuoteItemPayload[]>(`${BASE_URL}/supplier-materials/`, {
     params: { material: materialId },
   });
 }
+

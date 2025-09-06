@@ -374,6 +374,14 @@ class QuoteItemViewSet(viewsets.ModelViewSet):
     serializer_class = QuoteItemSerializer
     filterset_fields = ['quote']
 
+    def get_queryset(self):
+        qs = self.queryset
+        quote_id = self.request.query_params.get('quote')
+        if quote_id:
+            qs = qs.filter(quote_id=quote_id)
+            print(qs)
+        return qs
+
     @transaction.atomic
     def perform_create(self, serializer):
         item = serializer.save()
