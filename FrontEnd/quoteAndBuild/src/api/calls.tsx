@@ -5,15 +5,13 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 import type {
   Quote,
   QuoteItemPayload,
-  QuoteCreatePayload,
   QuoteUpdatePayload,
   Phase,
   SupplierMaterial,
   Material,
   PhaseMaterial,
   Supplier,
-  Project,
-  PhaseInterval
+  PhaseInterval,
 } from "../types/interfaces";
 
 // ---- Projects ----
@@ -46,6 +44,10 @@ export const updatePhase = (id: number, fieldsUpdate: any) => {
   return axios.patch(`http://127.0.0.1:8000/phases/${id}/`, fieldsUpdate);
 };
 
+export const deletePhase = (id: number) => {
+  return axios.delete(`${BASE_URL}/phases/${id}/`);
+}
+
 export function fetchPhaseById(id: number) {
   return axios.get<Phase>(`${BASE_URL}/phases/${id}/`); 
 }
@@ -62,12 +64,19 @@ export async function fetchPhaseIntervals(phaseId: number) {  // List an interva
   return data;
 }
 
+export async function updatePhaseInterval(phaseIntervalId: number, fieldsUpdate: any) {
+  return axios.patch(
+    `http://127.0.0.1:8000/phase-intervals/${phaseIntervalId}/`,  
+    fieldsUpdate
+  );
+}// Allow us to edit a PhaseInterval
+
 // ---- Quotes ----
 export function fetchQuotesByPhase(phaseId: number) {
   return axios.get<Quote[]>(`${BASE_URL}/quotes/`, { params: { phase: phaseId } });
 }
 
-export function createQuote(payload: QuoteCreatePayload) {
+export function createQuote(payload: any) {
   return axios.post<Quote>(`${BASE_URL}/quotes/`, payload);
 }
 
@@ -78,10 +87,18 @@ export function updateQuote(id: number, payload: QuoteUpdatePayload) {
 export function deleteQuote(id: number) {
   return axios.delete(`${BASE_URL}/quotes/${id}/`);
 }
+// calls.ts
+export async function toggleQuoteStatus(id: number, currentStatus: "draft" | "completed") {
+  const newStatus = currentStatus === "draft" ? "completed" : "draft";
+  const response = await axios.post<Quote>(`${BASE_URL}/quotes/${id}/set-status/`, { status: newStatus });
+  return response.data;
+}
+
+
 
 // ---- QuoteItems ----
 export function fetchQuoteItems(quoteId: number) {
-  return axios.get(`${BASE_URL}/quote-items/`, {
+  return axios.get<QuoteItemPayload[]>(`${BASE_URL}/quote-items/`, {
     params: { quote: quoteId },
   });
 }
@@ -133,8 +150,9 @@ export function fetchAllSupplierMaterials() {
 }
 
 // NEW: suppliers that sell a given material
-export function fetchSupplierMaterialsByMaterial(materialId: number) {
-  return axios.get<SupplierMaterial[]>(`${BASE_URL}/supplier-materials/`, {
+export function fetchSupplierMaterialsByQuote(materialId: number) {
+  return axios.get<QuoteItemPayload[]>(`${BASE_URL}/supplier-materials/`, {
     params: { material: materialId },
   });
 }
+

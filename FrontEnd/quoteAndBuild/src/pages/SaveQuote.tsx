@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import toast , { Toaster } from 'react-hot-toast';
 import DisplayMaterialTable from '../components/Material/MaterialPrueba';
 import type { SupplierMaterial, QuoteItemPayload } from '../types/interfaces';
-import { createQuoteItem, fetchQuoteItems, deleteQuoteItem } from '../api/calls';
+import { createQuoteItem, fetchQuoteItems , fetchAllSupplierMaterials , deleteQuoteItem} from '../api/calls';
 
 // Extender la interfaz para incluir cantidad
 interface MaterialWithQuantity extends SupplierMaterial {
@@ -19,40 +19,94 @@ const SaveQuote: React.FC = () => {
             projectId?: number 
         } 
     };
+
+    function transformQuoteItems(
+        items: QuoteItemPayload[],
+        supplierMaterials: SupplierMaterial[]
+      ): MaterialWithQuantity[] {
+        return items
+          .map(item => {
+            const supplierMaterial = supplierMaterials.find(sm => sm.id === item.supplierMaterial);
+            if (!supplierMaterial) {
+              return null; // lo marcamos como null temporalmente
+            }
+            return {
+              ...supplierMaterial,
+              quantity: item.quantity,
+            };
+          })
+          .filter((m): m is MaterialWithQuantity => m !== null); // quitamos los nulos
+      }
+
+      function transformQuoteItemsToSupplierMaterial(
+        items: QuoteItemPayload[],
+        supplierMaterials: SupplierMaterial[]
+      ): SupplierMaterial[] {
+        return items
+          .map(item => {
+            const supplierMaterial = supplierMaterials.find(sm => sm.id === item.supplierMaterial);
+            if (!supplierMaterial) {
+              return null; // lo marcamos como null temporalmente
+            }
+            return {
+              ...supplierMaterial,
+            };
+          })
+          .filter((m): m is MaterialWithQuantity => m !== null); // quitamos los nulos
+      }
+      
     
     const quoteId = location?.state?.quoteId ?? -1;
     const phaseId = location?.state?.phaseId ?? -1;
     const projectId = location?.state?.projectId ?? -1;
     
+    const [materials , SetMaterials] = useState<QuoteItemPayload[]>([]); 
     const [materialsWithQuantities, setMaterialsWithQuantities] = useState<MaterialWithQuantity[]>([]);
-    const [existingQuoteItems, setExistingQuoteItems] = useState<QuoteItemPayload[]>([]);
+    const [materialsInSupplierMaterialStructure , setMaterialsInStrcuture] = useState<SupplierMaterial[]>([]); 
+    const [supplierMaterials , setAllMaterials] = useState<SupplierMaterial[]>([]);
     const [isSaving, setIsSaving] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    // Cargar items existentes de la cotización
+    //Get supplier materials
     useEffect(() => {
-        if (quoteId === -1) {
-            toast.error('No se proporcionó un ID de cotización válido');
-            navigate('/quotes');
-            return;
-        }
-
-        const loadQuoteItems = async () => {
+        const getMaterials = async () => {
             try {
-                setLoading(true);
-                const response = await fetchQuoteItems(quoteId);
-                setExistingQuoteItems(response.data);
-                
-            } catch (error) {
-                console.error('Error al cargar items de la cotización:', error);
-                toast.error('Error al cargar la cotización');
+                const { data } = await fetchAllSupplierMaterials();
+                setAllMaterials(data);
+            } catch (err) {
+                console.error(err);
+                toast.error("No se pudo cargar los materiales.");
             } finally {
                 setLoading(false);
             }
-        };
+        }
 
-        loadQuoteItems();
-    }, [quoteId, navigate]);
+        getMaterials(); 
+    }, [quoteId]);
+
+    //Get materials loaded
+    useEffect(() => {
+        if(quoteId === -1)
+            return
+
+        const getMaterials = async() => {
+            try {
+                const {data} = await fetchQuoteItems(quoteId); 
+                SetMaterials(data);
+                const materialsLoaded = transformQuoteItems(data, supplierMaterials);
+                const supplierMaterialsIn = transformQuoteItemsToSupplierMaterial(data, supplierMaterials)
+                setMaterialsWithQuantities(materialsLoaded); 
+                setMaterialsInStrcuture(supplierMaterialsIn)
+            } catch (error:any){
+                console.log(error)
+                toast.error(error ||"No se pudo cargar los materiales")
+            }
+        }
+
+
+        getMaterials(); 
+        
+    } , [quoteId, supplierMaterials]);
 
     const handleSelectionChange = (materials: SupplierMaterial[]) => {
         // Inicializar cada material con cantidad 1
@@ -77,42 +131,46 @@ const SaveQuote: React.FC = () => {
 
     const handleSaveQuote = async () => {
         if (materialsWithQuantities.length === 0) {
-            toast.error('Debe seleccionar al menos un material para la cotización');
-            return;
+          toast.error('Debe seleccionar al menos un material para la cotización');
+          return;
         }
-
+      
         setIsSaving(true);
         try {
-            // Crear los nuevos items de la cotización
-            const quoteItemsPromises = materialsWithQuantities.map(material => {
-                const itemPayload: QuoteItemPayload = {
-                    quote: quoteId,
-                    supplierMaterial: material.id,
-                    quantity: material.quantity,
-                    unit_price: material.actual_price,
-                    subtotal: material.actual_price * material.quantity
-                };
-                return createQuoteItem(itemPayload);
-            });
-
-            await Promise.all(quoteItemsPromises);
-            toast.success('Cotización guardada exitosamente!');
-            
-            // Redirigir de vuelta a la vista de quotes
-            navigate('/saveProject/quotes', { 
-                state: { 
-                    phaseId: phaseId,
-                    projectId: projectId 
-                } 
-            });
-
-        } catch (error) {
-            console.error('Error al guardar la cotización:', error);
-            toast.error('Error al guardar la cotización');
+          // 1️⃣ Borrar todos los registros antiguos
+          if (materials.length > 0) {
+            await Promise.all(
+              materials
+                .filter(item => item.id !== undefined) // por seguridad
+                .map(item => deleteQuoteItem(item.id!))
+            );
+          }
+      
+          // 2️⃣ Crear los nuevos registros
+          const quoteItemsPromises = materialsWithQuantities.map(material => {
+            const itemPayload: QuoteItemPayload = {
+              quote: quoteId,
+              supplierMaterial: material.id,
+              quantity: material.quantity,
+              unit_price: material.actual_price,
+              subtotal: material.actual_price * material.quantity,
+            };
+            return createQuoteItem(itemPayload);
+          });
+      
+          await Promise.all(quoteItemsPromises);
+      
+          toast.success('Cotización guardada exitosamente!');
+          navigate('/saveProject/quotes', { 
+            state: { phaseId, projectId } 
+          });
+        } catch (error: any) {
+          console.error('Error al guardar la cotización:', error);
+          toast.error('Error al guardar la cotización');
         } finally {
-            setIsSaving(false);
+          setIsSaving(false);
         }
-    };
+      };
 
     const goBack = () => {
         navigate('/saveProject/quotes', { 
@@ -134,6 +192,7 @@ const SaveQuote: React.FC = () => {
 
     return (
         <div className="p-4 max-w-6xl mx-auto">
+            <Toaster/>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Editar Cotización #{quoteId}</h1>
                 <button
@@ -148,7 +207,7 @@ const SaveQuote: React.FC = () => {
                 Fase ID: {phaseId} | Proyecto ID: {projectId}
             </p>
 
-            <DisplayMaterialTable onSelectionChange={handleSelectionChange} />
+            <DisplayMaterialTable onSelectionChange={handleSelectionChange} currentSelectedMaterials={materialsInSupplierMaterialStructure}/>
             
             {/* Tabla de materiales seleccionados con cantidades */}
             {materialsWithQuantities.length > 0 && (
@@ -221,13 +280,17 @@ const SaveQuote: React.FC = () => {
             </div>
 
             {/* Mostrar items existentes en la cotización */}
-            {existingQuoteItems.length > 0 && (
+            {materials.length > 0 && (
                 <div className="mt-6">
                     <h3 className="text-lg font-semibold mb-2">Materiales existentes en esta cotización</h3>
                     <div className="bg-yellow-50 p-4 rounded">
-                        <p>Esta cotización ya tiene {existingQuoteItems.length} material(es) asociado(s).</p>
+                        <p>Esta cotización ya tiene {materials.length} material(es) asociado(s).</p>
                         <p className="mt-2">
-                            Al guardar, se añadirán {materialsWithQuantities.length} material(es) adicional(es).
+                        {materialsWithQuantities.length - materials.length < 0 ? (
+                            <>Al guardar, se eliminarán {materials.length - materialsWithQuantities.length} material(es).</>
+                        ) : (
+                            <>Al guardar, se añadirán {materialsWithQuantities.length - materials.length} material(es) adicional(es).</>
+                        )}
                         </p>
                     </div>
                 </div>

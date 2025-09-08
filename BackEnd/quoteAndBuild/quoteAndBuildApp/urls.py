@@ -14,7 +14,6 @@ router.register(r'quotes', QuoteViewSet, basename='quotes')
 router.register(r'quote-items', QuoteItemViewSet, basename='quote-items')
 router.register(r'phase-intervals', PhaseIntervalViewSet, basename='phase-intervals')
 
-
 urlpatterns = [
     path('', include(router.urls)),
 ]

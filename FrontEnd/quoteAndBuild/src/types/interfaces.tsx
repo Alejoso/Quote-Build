@@ -12,17 +12,23 @@ export interface Project {
   location: string,
   total: number,
   projectDurationExecuted?: number | null; // <-- campo calculado por backend
-  projectDurationPlanning?: number | null; // <-- campo calculado por backend
+  projectDurationPlanning?: number | null;
+  projectCostExecuted?: number | null;
+  projectCostPlanning?: number | null;
 }
 
 export interface Phase {
-  id?: number;
+  id: number;
   project: number;               // FK
   name: string;
   description?: string | null;
   total: number;
   phaseDurationExecuted?: number | null; // <-- campo calculado por backend
   phaseDurationPlanning?: number | null; // <-- campo calculado por backend
+  phaseTotalCostExecuted?: number | null;
+  phaseTotalCostPlanned?: number | null;
+  materialsCostPlanned?: { [key: string]: number };
+  materialsCostExecuted?: { [key: string]: number };
 }
 
 
@@ -66,6 +72,7 @@ export type PhaseMaterial = {
 };
 
 export type QuoteItemPayload = {
+  id? : number; 
   quote: number;
   supplierMaterial: number; // matches model field name
   quantity: number;
@@ -80,7 +87,7 @@ export interface Quote {
   description: string | null;
   is_first_quote: boolean;
   total: number | null;         // ⬅ change from `number` to `number | null`
-  status: "draft" | "sent" | "approved" | "rejected";
+  status?: "draft" | "completed";
 }
 
 // Payloads
@@ -97,6 +104,7 @@ export type QuoteUpdatePayload = Partial<{
   description: string | null;
   is_first_quote: boolean;
   total: number | null;
+  status?: "draft" | "completed";
 }>;
 
 export interface PhaseInterval {
@@ -105,4 +113,9 @@ export interface PhaseInterval {
   start_date: string;             // usar string, no Date
   end_date?: string | null;
   reason?: string | null;
+  is_planning_phase: boolean; 
 }
+
+
+
+    

@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import type { SupplierMaterial } from "../../types/interfaces";
+import { useEffect, useState } from "react";
+import toast , { Toaster }  from "react-hot-toast";
+import type { SupplierMaterial} from "../../types/interfaces";
 import { fetchAllSupplierMaterials } from "../../api/calls";
 import QuoteTable from "../Quote/QuoteTable"; // Asegúrate de tener la ruta correcta
 
 interface DisplayMaterialTableProps {
     onSelectionChange?: (selectedMaterials: SupplierMaterial[]) => void;
+    currentSelectedMaterials?: SupplierMaterial[]; 
 }
 
-export default function DisplayMaterialTable({ onSelectionChange }: DisplayMaterialTableProps) {
+export default function DisplayMaterialTable({ onSelectionChange  , currentSelectedMaterials}: DisplayMaterialTableProps) {
     const [allMaterials, setAllMaterials] = useState<SupplierMaterial[]>([]);
     const [selectedMaterials, setSelectedMaterials] = useState<SupplierMaterial[]>([]);
+
     const [loading, setLoading] = useState(true);
 
+    //Mostrar todos los materiales en la tabla
     useEffect(() => {
         const getMaterials = async () => {
             try {
@@ -25,12 +28,17 @@ export default function DisplayMaterialTable({ onSelectionChange }: DisplayMater
                 setLoading(false);
             }
         };
-        getMaterials();
-    }, []);
 
+        if(currentSelectedMaterials)
+            setSelectedMaterials(currentSelectedMaterials)
+
+        getMaterials();
+    }, [currentSelectedMaterials]);
+
+    //Añadir un material
     const handleAddMaterial = (material: SupplierMaterial) => {
         // Verificar si el material ya está seleccionado
-        if (!selectedMaterials.some(m => m.id === material.id)) {
+        if (selectedMaterials && !selectedMaterials.some(m => m.id === material.id)) {
             const updatedSelection = [...selectedMaterials, material];
             setSelectedMaterials(updatedSelection);
             
@@ -42,6 +50,7 @@ export default function DisplayMaterialTable({ onSelectionChange }: DisplayMater
             toast.error("Este material ya está en la cotización");
         }
     };
+
 
     const handleRemoveMaterial = (materialId: number) => {
         const updatedSelection = selectedMaterials.filter(m => m.id !== materialId);
@@ -57,6 +66,7 @@ export default function DisplayMaterialTable({ onSelectionChange }: DisplayMater
 
     return (
         <div>
+            <Toaster/>
             <h2 className="text-xl font-bold mb-4">Materiales Disponibles</h2>
             <table className="table-auto border-collapse border border-gray-400 w-full mb-8">
                 <thead className="bg-gray-200">

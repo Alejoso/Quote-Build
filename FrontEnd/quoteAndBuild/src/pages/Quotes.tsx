@@ -53,7 +53,8 @@ export default function Quotes() {
 
     // Inline edit state
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [editForm, setEditForm] = useState<QuoteUpdatePayload | null>(null);
+    const [editForm, setEditForm] = useState<QuoteUpdatePayload & { status?: "draft" | "completed" } | null>(null);
+
 
     //Go back to the saveProject view
     const goBack = () => {
@@ -135,7 +136,7 @@ export default function Quotes() {
 
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.message || "No se pudo crear la cotización.");
+            toast.error(err?.response?.data?.detail || err?.message || "Error desconocido");
         } finally {
             setSaving(false);
         }
@@ -149,6 +150,7 @@ export default function Quotes() {
             description: q.description ?? "",
             is_first_quote: q.is_first_quote,
             total: q.total ?? null,
+            status: q.status ?? "draft",
         });
     };
 
@@ -170,6 +172,7 @@ export default function Quotes() {
                 description: (editForm.description ?? "").toString().trim() || null,
                 is_first_quote: !!editForm.is_first_quote,
                 total: editForm.total ?? null,
+                status: editForm.status ?? "draft"
             };
 
             const { data } = await updateQuote(editingId, payload as any); // cast safeguards older types
@@ -178,7 +181,7 @@ export default function Quotes() {
             cancelEdit();
         } catch (err: any) {
             console.error(err);
-            toast.error(err?.message || "No se pudo actualizar la cotización.");
+            toast.error(err?.response?.data?.detail || err?.message || "Error desconocido");
         } finally {
             setSaving(false);
         }
@@ -198,9 +201,10 @@ export default function Quotes() {
         setQuotes(prev => prev.filter(item => item.id !== q.id));
     } catch (err: any) {
         if (err?.response?.status === 409) {
-        toast.error(err.response?.data?.detail || "No se puede eliminar esta cotización.");
+            console.error(err);
+            toast.error(err?.response?.data?.detail || err?.message || "Error desconocido");
         } else {
-        toast.error("Error eliminando la cotización.");
+            toast.error("Error eliminando la cotización.");
         }
     }
     };
@@ -208,7 +212,9 @@ export default function Quotes() {
 
     return (
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow">
-            <Toaster />
+            <div>
+                <Toaster />
+            </div>
 
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
@@ -319,6 +325,18 @@ export default function Quotes() {
                                         />
                                         ¿Primera cotización?
                                     </label>
+                                    
+                                    <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                                        <input
+                                            type="checkbox"
+                                            checked={editForm?.status === "completed"}
+                                            onChange={(e) => {
+                                                setEditForm((f) => f ? { ...f, status: e.target.checked ? "completed" : "draft" } : f);
+                                            }}
+                                        />
+                                        ¿Completada? 
+                                    </label>
+                                    
 
                                     <div className="md:col-span-3 flex gap-2">
                                         <button
