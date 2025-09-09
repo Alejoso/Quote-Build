@@ -28,10 +28,15 @@ class ClientPhone(models.Model):
     
 #Project table
 class Project(models.Model):
+    STATUS_CHOICES = [
+        ("inprogress", "InProgress"),
+        ("completed", "Completed"),
+    ]
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=160)
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
     clients = models.ManyToManyField(Client , through='ClientProject')
+    state = models.CharField(max_length=20, choices=STATUS_CHOICES, default="inprogress")
 
     def __str__(self):
         return f"{self.name} ({self.location})"
