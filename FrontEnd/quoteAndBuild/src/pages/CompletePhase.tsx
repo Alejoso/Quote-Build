@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { PhaseInterval } from "../types/interfaces";
 import { createPhaseInterval } from "../api/calls";
-
+import toast from "react-hot-toast";
 interface PhaseIntervalFormProps {
   phaseId: number;
   onCreated: (interval: PhaseInterval) => void;
@@ -25,6 +25,10 @@ export default function PhaseIntervalForm({
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isPlanningPhase && !form.end_date) {
+      toast.error("Si la fase es de planeación, debes ingresar una fecha de finalización.");
+      return;
+    } // Allows to validate that a when a Phase is a Planning phase, then it got to be End_Date
     try {
       setLoading(true);
       const payload: PhaseInterval = {
@@ -51,7 +55,6 @@ export default function PhaseIntervalForm({
           value={form.start_date}
           onChange={(e) => setForm({ ...form, start_date: e.target.value })}
           className="mt-1 w-full rounded-md border p-2"
-          required
         />
       </div>
       <div>
