@@ -26,7 +26,7 @@ export default function PhaseIntervalForm({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isPlanningPhase && !form.end_date) {
-      toast.error("Si la fase es de planeación, debes ingresar una fecha de finalización.");
+      toast.error("Si la fase es de planeo, debes ingresar una fecha de finalización.");
       return;
     } // Allows to validate that a when a Phase is a Planning phase, then it got to be End_Date
     try {
