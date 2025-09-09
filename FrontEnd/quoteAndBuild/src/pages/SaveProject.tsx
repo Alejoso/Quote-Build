@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { createProject, fetchProjectById, updateProject } from "../api/calls";
 import NewPhase from "./NewPhase";
@@ -11,6 +12,7 @@ type ProjectForm = {
   name: string;
   location: string;
   total: string; // usar string para el input, convertimos al enviar
+  state: "inprogress" | "completed";
 };
 
 export default function SaveProject() {
@@ -29,6 +31,7 @@ export default function SaveProject() {
     name: "",
     location: "",
     total: "",
+    state : "inprogress"
   });
 
   //Load an existent project
@@ -47,6 +50,8 @@ export default function SaveProject() {
           name: data.name ?? "", //If null, use rigth side
           location: data.location ?? "",
           total: data.total ?? 0,
+          state: data.state ?? "inprogress",
+
         }); // name the data of database as we want, helps for working with these names in the frontend
 
       } catch (err) {
@@ -74,6 +79,7 @@ export default function SaveProject() {
       name: form.name.trim(), //
       location: form.location.trim(),
       total: form.total,
+      state: form.state,
     };
 
     return payload;
@@ -111,6 +117,26 @@ export default function SaveProject() {
       setSaving(false);
     }
   };
+  const handleToggle = async () => {
+    try {
+      setLoading(true);
+      const newState = form.state === "inprogress" ? "completed" : "inprogress";
+
+      // actualizar backend
+      if (projectId) {
+        await updateProject(projectId, { ...buildPayload(), state: newState });
+        toast.success(`Estado cambiado a ${newState === "completed" ? "Completado" : "En progreso"}`);
+      }
+
+      // actualizar frontend
+      setForm((f) => ({ ...f, state: newState }));
+    } catch (err) {
+      toast.error("No se pudo cambiar el estado.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const title = projectId ? "Editar Proyecto" : "Nuevo Proyecto"; 
 
@@ -127,7 +153,7 @@ export default function SaveProject() {
         </button>
       </div>
 
-      {/* Formulario del proyecto */}
+      {/* Project  */}
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
           <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
@@ -173,11 +199,60 @@ export default function SaveProject() {
           {saving ? "Guardando..." : projectId ? "Guardar cambios" : "Crear proyecto"}
         </button>
       </form>
-
-      {/* Fases del proyecto */}
+      
+      {/* Project Phases */}
       <div className="mt-8">
         <NewPhase projectId={projectId ?? null} />
       </div>
+      
+      <div className="mt-12 flex justify-end">
+        <button
+          onClick={handleToggle}
+          disabled={loading}
+          className={`relative inline-flex h-12 w-24 items-center rounded-full transition-colors ${
+            form.state === "completed" ? "bg-green-500" : "bg-yellow-500"
+          } ${loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+        >
+          {/* Selector that moves */}
+          <motion.span
+            animate={{
+              x: form.state === "completed" ? 52 : 4,
+            }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            className="absolute top-1 left-1 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {form.state === "inprogress" ? (
+                <motion.span
+                  key="progress"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  🚧
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="completed"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  👷‍♂️
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.span>
+
+          {/* Text Below */}
+          <span className="absolute -bottom-6 left-0 w-full text-xs font-medium text-gray-700 text-center">
+            {form.state === "completed" ? "Completado" : "En progreso"}
+          </span>
+        </button>
+      </div>
+
     </div>
   );
 }
