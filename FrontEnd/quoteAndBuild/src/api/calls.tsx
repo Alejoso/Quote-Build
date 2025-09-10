@@ -135,6 +135,10 @@ export function createSupplier(payload: Supplier) {
   return axios.post(`${BASE_URL}/suppliers/`, payload);
 }
 
+export function fecthAllSuppliers() {
+  return axios.get<Supplier[]>(`${BASE_URL}/suppliers/`)
+}
+
 export function createSupplierMaterial(payload: {
   supplier: string; // nit
   material: number; // id
