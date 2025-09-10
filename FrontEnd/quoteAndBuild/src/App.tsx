@@ -10,6 +10,7 @@ import SaveQuote from './pages/SaveQuote';
 import SpecificGraph from './pages/SpecificGraph';
 import NewRegistry from './pages/NewRegistry';
 import AddMaterial from './pages/AddMaterial';
+import AddSupplier from './pages/AddSupplier';
 
 function App() {
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/ProjectGraph" element={<SpecificGraph />} />
         <Route path="/NewRegistry" element={<NewRegistry />} />
         <Route path="/AddMaterial" element={<AddMaterial />} />
+        <Route path="/AddSupplier" element={<AddSupplier />} />
 
       </Routes>
 

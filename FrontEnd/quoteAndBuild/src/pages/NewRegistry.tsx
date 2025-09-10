@@ -23,10 +23,10 @@ function NewRegistry()
                     </button>
 
                     <button
-                    onClick={() => navigate("/projects")}
+                    onClick={() => navigate("/AddSupplier")}
                     className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105 hover:rotate-3"
                     >
-                    Añadir proveedor
+                    Añadir/Editar Proveedor
                     </button>
                 </div>
             </div>

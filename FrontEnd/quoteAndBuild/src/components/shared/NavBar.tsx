@@ -20,7 +20,7 @@ const NavBar = () => {
                     </button>
                 </div>
                 
-                <button onClick={() => navigate("/")} className="bg-negroClaro rounded-full w-9 h-9 flex items-center justify-center hover:bg-blue-500">
+                <button onClick={() => navigate("/newRegistry")} className="bg-negroClaro rounded-full w-9 h-9 flex items-center justify-center hover:bg-blue-500">
                     <img src="/DataBaseButton.png" alt="DB" className="w-8 h-8 rounded-full object-contain" />
                 </button>
             </div>

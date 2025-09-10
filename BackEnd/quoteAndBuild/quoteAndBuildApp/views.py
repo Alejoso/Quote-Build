@@ -2,7 +2,7 @@ from rest_framework import viewsets , serializers , status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status as drf_status
-from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
+from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, SupplierPhone, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 from django.utils import timezone
 from decimal import Decimal
 from django.db import transaction
@@ -256,6 +256,17 @@ class SupplierMaterialViewSet(viewsets.ModelViewSet):
         if phase_id:
             qs = qs.filter(material__phases__id=phase_id)
         return qs
+
+# Serializer para SupplierPhone
+class SupplierPhoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierPhone
+        fields = '__all__'
+
+# ViewSet para SupplierPhone
+class SupplierPhoneViewSet(viewsets.ModelViewSet):
+    queryset = SupplierPhone.objects.all()
+    serializer_class = SupplierPhoneSerializer
 
 # --- PhaseMaterial (link Material to Phase)
 class PhaseMaterialSerializer(serializers.ModelSerializer):

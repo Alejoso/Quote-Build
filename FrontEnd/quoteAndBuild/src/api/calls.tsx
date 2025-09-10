@@ -139,6 +139,11 @@ export function fecthAllSuppliers() {
   return axios.get<Supplier[]>(`${BASE_URL}/suppliers/`)
 }
 
+// ---- Supplier Phones ----
+export function createSupplierPhone(payload: { supplier: string; phone: string }) {
+  return axios.post(`${BASE_URL}/supplier-phones/`, payload);
+}
+
 export function createSupplierMaterial(payload: {
   supplier: string; // nit
   material: number; // id
