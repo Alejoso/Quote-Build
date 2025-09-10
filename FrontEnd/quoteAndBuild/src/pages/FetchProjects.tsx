@@ -15,6 +15,9 @@ const FetchProjects: React.FC = () => {
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [query, setQuery] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("none");
+
+
 
   useEffect(() => {
     (async () => {
@@ -33,11 +36,17 @@ const FetchProjects: React.FC = () => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return projects;
-    return projects.filter((p) =>
-      [p.name, p.location].some((f) => (f ?? "").toLowerCase().includes(q))
-    );
-  }, [projects, query]);
+    let filteredProjects = projects;
+    if (q) {
+      filteredProjects = filteredProjects.filter((p) =>
+        [p.name, p.location].some((f) => (f ?? "").toLowerCase().includes(q))
+      );
+    }
+    if (statusFilter !== "none") {
+      filteredProjects = filteredProjects.filter((p) => p.state === statusFilter);
+    }
+    return filteredProjects;
+  }, [projects, query, statusFilter]);
 
   const goToProject = (p: ProjectRow) => {
     // Send user to SaveProject.tsx (route: /saveProject) with the chosen project id
@@ -46,7 +55,7 @@ const FetchProjects: React.FC = () => {
 
   const goToProjectGraphs = (p: ProjectRow) => {
     // Send user to SpecificGraph.tsx (route: /specificGraph/:id) with the chosen project id
-    navigate("/ProjectGraph/",{state: {projectId: p.id} });
+    navigate("/ProjectGraph/", { state: { projectId: p.id } });
   }
 
   return (
@@ -61,18 +70,29 @@ const FetchProjects: React.FC = () => {
         </button>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col sm:flex-row gap-2 items-center">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar por nombre o ubicación..."
           className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+          style={{ maxWidth: "400px" }}
         />
-        <p className="mt-2 text-xs text-gray-500">
-          {filtered.length} resultado{filtered.length === 1 ? "" : "s"}
-        </p>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+          style={{ minWidth: "160px" }}
+        >
+          <option value="none">Todos</option>
+          <option value="completed">Completados</option>
+          <option value="inprogress">En progreso</option>
+        </select>
       </div>
+      <p className="mt-2 text-xs text-gray-500">
+        {filtered.length} resultado{filtered.length === 1 ? "" : "s"}
+      </p>
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
