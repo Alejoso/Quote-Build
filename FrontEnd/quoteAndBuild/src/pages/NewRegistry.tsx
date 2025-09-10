@@ -21,10 +21,15 @@ function NewRegistry()
                     >
                     Añadir material
                     </button>
-
+                    <button 
+                    onClick={() => navigate("/materials")}
+                    className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg hover:bg-greenHover transition transform hover:scale-105 hover:rotate-3  shadow-md"
+                    >
+                    Ver materiales
+                    </button>
                     <button
                     onClick={() => navigate("/AddSupplier")}
-                    className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105 hover:rotate-3"
+                    className="px-8 py-4 bg-indigo-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition transform hover:scale-105 hover:rotate-3"
                     >
                     Añadir/Editar Proveedor
                     </button>

@@ -131,6 +131,18 @@ export function createPhaseMaterial(payload: PhaseMaterial) {
   return axios.post(`${BASE_URL}/phase-materials/`, payload);
 }
 
+export function fetchAllMaterials(params?: { search?: string }) {
+  return axios.get<Material[]>(`${BASE_URL}/materials/`, { params });
+}
+
+export function fetchMaterialById(id: number) {
+  return axios.get<Material>(`${BASE_URL}/materials/${id}/`);
+}
+
+export function updateMaterial(id: number, payload: Partial<Material>) {
+  return axios.patch<Material>(`${BASE_URL}/materials/${id}/`, payload);
+}
+
 export function createSupplier(payload: Supplier) {
   return axios.post(`${BASE_URL}/suppliers/`, payload);
 }
@@ -165,3 +177,12 @@ export function fetchSupplierMaterialsByQuote(materialId: number) {
   });
 }
 
+export function fetchSupplierMaterialsForMaterial(materialId: number) {
+  return axios.get<SupplierMaterial[]>(`${BASE_URL}/supplier-materials/`, {
+    params: { material: materialId },
+  });
+}
+
+export function updateSupplierMaterial(id: number, payload: Partial<SupplierMaterial>) {
+  return axios.patch<SupplierMaterial>(`${BASE_URL}/supplier-materials/${id}/`, payload);
+}
