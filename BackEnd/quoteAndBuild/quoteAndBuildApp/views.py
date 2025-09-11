@@ -252,9 +252,18 @@ class SupplierMaterialViewSet(viewsets.ModelViewSet):
     # /supplier-materials/?phase=<id> returns SMs whose material is linked to that phase
     def get_queryset(self):
         qs = super().get_queryset()
+
         phase_id = self.request.query_params.get('phase')
         if phase_id:
             qs = qs.filter(material__phases__id=phase_id)
+
+        material_id = self.request.query_params.get('material')
+        if material_id:
+            qs = qs.filter(material_id=material_id)
+
+        supplier_nit = self.request.query_params.get('supplier')
+        if supplier_nit:
+            qs = qs.filter(supplier__nit=supplier_nit)
         return qs
 
 # Serializer para SupplierPhone
