@@ -51,7 +51,7 @@ const BarChartCosts: React.FC<PieChartProps> = ({ data }) => {
         color: "#0C0A09",
         font: {
           weight: "bold" as "bold",
-          size: 14,
+          size: 18,
         },
         formatter: (value: number, context: any) => {
           const data = context.chart.data.datasets[0].data as number[];
