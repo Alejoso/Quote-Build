@@ -30,12 +30,12 @@ const BarChartTimes: React.FC<PieChartProps> = ({ data }) => {
         label: "Días",
         data: values,
         backgroundColor: [
-          "#4338CA", //Moradito fo
-          "#51A2FF",   // verde
+          "#FF5733", 
+          "#51A2FF",   
         ],
         borderColor: [
-          "#4338CA",   // borde naranja
-          "#51A2FF",     // borde verde
+          "#FF5733",   
+          "#51A2FF",     
         ],
         borderWidth: 1
       }
@@ -50,7 +50,7 @@ const BarChartTimes: React.FC<PieChartProps> = ({ data }) => {
       datalabels: {
         font: {
           weight: "bold" as "bold",
-          size: 14,
+          size: 18,
         },
         color: "#0C0A09",
         formatter: (value: number, context: any) => {
