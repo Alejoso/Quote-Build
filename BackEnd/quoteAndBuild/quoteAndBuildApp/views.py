@@ -2,7 +2,7 @@ from rest_framework import viewsets , serializers , status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status as drf_status
-from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
+from quoteAndBuildApp.models import Material , Project, Phase, Client, Supplier, SupplierMaterial, SupplierPhone, PhaseMaterial, Quote, QuoteSupplierMaterial, PhaseInterval
 from django.utils import timezone
 from decimal import Decimal
 from django.db import transaction
@@ -252,10 +252,30 @@ class SupplierMaterialViewSet(viewsets.ModelViewSet):
     # /supplier-materials/?phase=<id> returns SMs whose material is linked to that phase
     def get_queryset(self):
         qs = super().get_queryset()
+
         phase_id = self.request.query_params.get('phase')
         if phase_id:
             qs = qs.filter(material__phases__id=phase_id)
+
+        material_id = self.request.query_params.get('material')
+        if material_id:
+            qs = qs.filter(material_id=material_id)
+
+        supplier_nit = self.request.query_params.get('supplier')
+        if supplier_nit:
+            qs = qs.filter(supplier__nit=supplier_nit)
         return qs
+
+# Serializer para SupplierPhone
+class SupplierPhoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupplierPhone
+        fields = '__all__'
+
+# ViewSet para SupplierPhone
+class SupplierPhoneViewSet(viewsets.ModelViewSet):
+    queryset = SupplierPhone.objects.all()
+    serializer_class = SupplierPhoneSerializer
 
 # --- PhaseMaterial (link Material to Phase)
 class PhaseMaterialSerializer(serializers.ModelSerializer):
