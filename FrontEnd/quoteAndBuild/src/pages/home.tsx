@@ -29,6 +29,13 @@ export default function Home() {
         >
           Proyectos
         </button>
+
+        <button
+          onClick={() => navigate("/NewRegistry")}
+          className="px-8 py-4 bg-violet-700 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-violet-900 transition transform hover:scale-105 hover:rotate-3"
+        >
+          Gestionar base de datos
+        </button>
       </div>
     </div>
   );

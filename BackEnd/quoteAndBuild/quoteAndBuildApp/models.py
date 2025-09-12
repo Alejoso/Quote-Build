@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError #Allows us to treat exceptions
 
 #Client model with cedula as pk
 class Client(models.Model):
@@ -27,10 +28,15 @@ class ClientPhone(models.Model):
     
 #Project table
 class Project(models.Model):
+    STATUS_CHOICES = [
+        ("inprogress", "InProgress"),
+        ("completed", "Completed"),
+    ]
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=160)
     total = models.DecimalField(max_digits=30, decimal_places=2, blank=True, null=True)
     clients = models.ManyToManyField(Client , through='ClientProject')
+    state = models.CharField(max_length=20, choices=STATUS_CHOICES, default="inprogress")
 
     def __str__(self):
         return f"{self.name} ({self.location})"
@@ -60,11 +66,19 @@ class PhaseInterval(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
     reason = models.TextField(blank=True, null=True)
-    is_planning_phase = models.BooleanField(default=False) # Allows Us to know the type of interval we are working with 
+    is_planning_phase = models.BooleanField(default=False, help_text="Indicates if this error is for the planning Phase") # Allows Us to know the type of interval we are working with 
+    def save(self, *args, **kwargs):
+        # Allows to validate if it has an end date when is_planning_ṕhase == True 
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Interval of {self.phase} that started on {self.start_date} "
     
+    def clean(self): 
+        if self.is_planning_phase and self.end_date is None:
+            raise ValidationError("Planning phases must have an end date.")
+
 #Supplier table with nit as pk
 class Supplier(models.Model):
     nit = models.CharField(primary_key=True , max_length=32)

@@ -11,6 +11,7 @@ export interface Project {
   name: string,
   location: string,
   total: number,
+  state: string,
   projectDurationExecuted?: number | null; // <-- campo calculado por backend
   projectDurationPlanning?: number | null;
   projectCostExecuted?: number | null;

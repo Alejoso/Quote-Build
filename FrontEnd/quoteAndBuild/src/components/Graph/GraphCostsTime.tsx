@@ -51,7 +51,7 @@ const BarChartCostTime: React.FC<BarChartProps> = ({ data }) => {
         color: "#0C0A09",    // color del número dentro de la barra
         anchor: "center",
         align: "center",
-        font: { size: 14 , weight: "bold"},
+        font: { size: 18 , weight: "bold"},
       },
     },
     scales: {

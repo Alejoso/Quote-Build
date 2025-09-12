@@ -8,7 +8,11 @@ import NavBar from './components/shared/NavBar';
 import Quotes from './pages/Quotes';
 import SaveQuote from './pages/SaveQuote';
 import SpecificGraph from './pages/SpecificGraph';
-
+import NewRegistry from './pages/NewRegistry';
+import AddMaterial from './pages/AddMaterial';
+import AddSupplier from './pages/AddSupplier';
+import MaterialsList from "./pages/MaterialsList";
+import EditMaterial from "./pages/EditMaterial";
 
 function App() {
 
@@ -24,7 +28,11 @@ function App() {
         <Route path="/saveProject/quotes" element={<Quotes />} />
         <Route path="/saveProject/quotes/saveQuote" element={<SaveQuote />} />
         <Route path="/ProjectGraph" element={<SpecificGraph />} />
-
+        <Route path="/NewRegistry" element={<NewRegistry />} />
+        <Route path="/AddMaterial" element={<AddMaterial />} />
+        <Route path="/AddSupplier" element={<AddSupplier />} />
+        <Route path="/materials" element={<MaterialsList />} />
+        <Route path="/materials/:id/edit" element={<EditMaterial />} />
       </Routes>
 
 
