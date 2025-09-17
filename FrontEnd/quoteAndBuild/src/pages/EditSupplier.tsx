@@ -1,8 +1,15 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
-import React, { useState } from "react";
-import { createSupplier, createSupplierPhone } from "../api/calls";
+import axios from "axios";
+import { createSupplierPhone } from "../api/calls";
+import type { Supplier } from "../types/interfaces";
 
-function AddSupplier() {
+function EditSupplier() {
+    const { nit } = useParams<{ nit: string }>();
+    const navigate = useNavigate();
+    const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
     const [formData, setFormData] = useState({
         nit: "",
         name: "",
@@ -12,6 +19,35 @@ function AddSupplier() {
         phones: [""]
     });
     const [loading, setLoading] = useState(false);
+
+    // 🔹 Cargar datos del proveedor al montar el componente
+    useEffect(() => {
+        const fetchSupplier = async () => {
+            try {
+                // Datos del supplier
+                const supplierResp = await axios.get(`${API_URL}/suppliers/${nit}/`);
+                const supplier: Supplier = supplierResp.data;
+
+                // Teléfonos del supplier
+                const phonesResp = await axios.get(`${API_URL}/supplier-phones/?supplier=${nit}`);
+                const phones = phonesResp.data.map((p: any) => p.phone);
+
+                setFormData({
+                    nit: supplier.nit,
+                    name: supplier.name,
+                    location: supplier.location,
+                    type: supplier.type,
+                    bank_account: supplier.bank_account,
+                    phones: phones.length > 0 ? phones : [""]
+                });
+            } catch (err) {
+                toast.error("Error al cargar proveedor");
+                navigate("/ViewSuppliers");
+            }
+        };
+
+        fetchSupplier();
+    }, [nit, API_URL, navigate]);
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
@@ -45,32 +81,38 @@ function AddSupplier() {
             toast.error("Debes llenar todos los campos y al menos un teléfono");
             return;
         }
+
         setLoading(true);
         try {
-            await createSupplier(formData);
-            // Crear los teléfonos asociados
+            // Actualizar proveedor
+            await axios.put(`${API_URL}/suppliers/${nit}/`, {
+                nit: formData.nit,
+                name: formData.name,
+                location: formData.location,
+                type: formData.type,
+                bank_account: formData.bank_account
+            });
+
+            // Obtener los teléfonos actuales
+            const resp = await axios.get(`${API_URL}/supplier-phones/?supplier=${nit}`);
+            const phoneIds = resp.data.map((p: any) => p.id);
+
+            // Eliminar teléfonos viejos
+            await Promise.all(
+                phoneIds.map((id: number) => axios.delete(`${API_URL}/supplier-phones/${id}/`))
+            );
+
+            // Crear los nuevos
             await Promise.all(
                 formData.phones.map(phone =>
                     createSupplierPhone({ supplier: formData.nit, phone })
                 )
             );
-            toast.success("Proveedor creado correctamente");
 
-            // Resetear formulario
-            setFormData({
-                nit: "",
-                name: "",
-                location: "",
-                type: "",
-                bank_account: "",
-                phones: [""]
-            });
+            toast.success("Proveedor actualizado correctamente");
+            navigate("/ViewSuppliers");
         } catch (err: any) {
-            if (err?.response?.status === 400 && err?.response?.data?.nit) {
-                toast.error("El NIT ya está en uso. Por favor ingresa uno diferente.");
-            } else {
-                toast.error(err?.message || "Error al crear el proveedor");
-            }
+            toast.error(err?.message || "Error al actualizar proveedor");
         } finally {
             setLoading(false);
         }
@@ -84,13 +126,13 @@ function AddSupplier() {
                 className="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md space-y-4 mt-4"
             >
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-700">Crear nuevo proveedor</h2>
+                    <h2 className="text-xl font-bold text-gray-700">Editar proveedor</h2>
                     <button
                         type="button"
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate("/ViewSuppliers")}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-3 rounded-lg transition-colors"
                     >
-                        Volver
+                        Cancelar
                     </button>
                 </div>
                 <div>
@@ -174,14 +216,14 @@ function AddSupplier() {
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                     disabled={loading}
                 >
-                    {loading ? "Creando..." : "Crear proveedor"}
+                    {loading ? "Guardando..." : "Guardar cambios"}
                 </button>
             </form>
         </div>
     );
 }
 
-export default AddSupplier;
+export default EditSupplier;

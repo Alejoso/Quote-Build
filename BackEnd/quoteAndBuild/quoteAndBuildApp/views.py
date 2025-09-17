@@ -277,6 +277,14 @@ class SupplierPhoneViewSet(viewsets.ModelViewSet):
     queryset = SupplierPhone.objects.all()
     serializer_class = SupplierPhoneSerializer
 
+    
+    def get_queryset(self):
+        supplier_nit = self.request.query_params.get('supplier')
+        qs = super().get_queryset()
+        if supplier_nit:
+            qs = qs.filter(supplier__nit=supplier_nit)
+        return qs
+
 # --- PhaseMaterial (link Material to Phase)
 class PhaseMaterialSerializer(serializers.ModelSerializer):
     class Meta:

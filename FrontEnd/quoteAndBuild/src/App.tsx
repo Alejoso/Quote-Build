@@ -13,6 +13,8 @@ import AddMaterial from './pages/AddMaterial';
 import AddSupplier from './pages/AddSupplier';
 import MaterialsList from "./pages/MaterialsList";
 import EditMaterial from "./pages/EditMaterial";
+import ViewSuppliers from './pages/ViewSuppliers';
+import EditSupplier from './pages/EditSupplier';
 
 function App() {
 
@@ -31,6 +33,8 @@ function App() {
         <Route path="/NewRegistry" element={<NewRegistry />} />
         <Route path="/AddMaterial" element={<AddMaterial />} />
         <Route path="/AddSupplier" element={<AddSupplier />} />
+        <Route path="/ViewSuppliers" element={<ViewSuppliers />} />
+        <Route path="/ViewSuppliers/:nit/edit" element={<EditSupplier />} />
         <Route path="/materials" element={<MaterialsList />} />
         <Route path="/materials/:id/edit" element={<EditMaterial />} />
       </Routes>

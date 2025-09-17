@@ -83,10 +83,10 @@ const SpecificGraph: React.FC = () => {
                   <div><span className="font-semibold">Descripción:</span> {project.description}</div>
                 )}
                 {project.projectDurationPlanning !== null && (
-                  <div><span className="font-semibold">Duracion planeada total: </span>{project.projectDurationPlanning} dias</div>
+                  <div><span className="font-semibold">Duración planeada total: </span>{project.projectDurationPlanning} días</div>
                 )}
                 {project.projectDurationExecuted !== null && (
-                  <div><span className="font-semibold">Duracion ejecutada total: </span>{project.projectDurationExecuted} dias</div>
+                  <div><span className="font-semibold">Duración ejecutada total: </span>{project.projectDurationExecuted} días</div>
                 )}
               </div>
             ) : (
