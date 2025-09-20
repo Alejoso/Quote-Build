@@ -29,7 +29,7 @@ function NewRegistry()
                     </button>
                     <button
                     onClick={() => navigate("/AddSupplier")}
-                    className="px-8 py-4 bg-indigo-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition transform hover:scale-105 hover:rotate-3"
+                    className="px-8 py-4 bg-gray-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-gray-700 transition transform hover:scale-105 hover:rotate-3"
                     >
                     Añadir Proveedor
                     </button>
