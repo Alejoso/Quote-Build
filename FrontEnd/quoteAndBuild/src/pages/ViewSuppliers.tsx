@@ -49,6 +49,11 @@ function ViewSuppliers() {
 
     return (
         <div className="max-w-4xl mx-auto mt-6">
+            
+            <Toaster />
+            <center>
+                <h1 className="text-xl font-bold text-gray-700 mb-4">Proveedores Registrados</h1>
+            </center>
             <form>
                 <input 
                     type="text"
@@ -61,10 +66,6 @@ function ViewSuppliers() {
 
                 </input>
             </form>
-            <Toaster />
-            <center>
-                <h1 className="text-xl font-bold text-gray-700 mb-4">Proveedores Registrados</h1>
-            </center>
             <table className="w-full border rounded-xl bg-white shadow text-sm">
                 <thead>
                     <tr className="bg-gray-100">
