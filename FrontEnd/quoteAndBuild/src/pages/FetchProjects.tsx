@@ -128,10 +128,10 @@ const FetchProjects: React.FC = () => {
                       : "—"}
                   </p>
                   <p className="mt-2 text-sm text-gray-500">
-                    Duracion total planeada: {p.projectDurationPlanning != null ? p.projectDurationPlanning : <span className="italic text-gray-400">—</span>} dias
+                    Duración total planeada: {p.projectDurationPlanning != null ? p.projectDurationPlanning : <span className="italic text-gray-400">—</span>} días
                   </p>
                   <p className="mt-2 text-sm text-gray-500">
-                    Duracion total ejecutada: {p.projectDurationExecuted != null ? p.projectDurationExecuted : <span className="italic text-gray-400">—</span>} dias
+                    Duración total ejecutada: {p.projectDurationExecuted != null ? p.projectDurationExecuted : <span className="italic text-gray-400">—</span>} días
                   </p>
                 </button>
                 <div className="flex gap-2 items-center h-full">
