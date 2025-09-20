@@ -5,13 +5,13 @@ import toast from "react-hot-toast";
 
 interface PhaseIntervalFormProps {
   phaseId: number;
-  onCreated: (interval: PhaseInterval) => void;
+  onCreate: (interval: PhaseInterval) => void;
   onClose: () => void;
 }
 
 export default function PhaseGetIntervals({
   phaseId,
-  onCreated,
+  onCreate,
   onClose,
 }: PhaseIntervalFormProps) {
   const [intervals, setIntervals] = useState<PhaseInterval[]>([]);

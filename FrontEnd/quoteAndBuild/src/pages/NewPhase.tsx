@@ -19,6 +19,9 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
 
   // Estado para mostrar u ocultar el formulario de intervalos
   const [showIntervalsId, setShowIntervalsId] = useState<number | null>(null);
+  // Estado para cambiar entre el modo agregar y editar
+  const [actionMode, setActionMode] = useState<"create" | "edit" | null>(null);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -284,7 +287,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-black"
                       type="button"
                     >
-                      Editar
+                      Editar Fase
                     </button>
 
                     <button
@@ -299,19 +302,34 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       onClick={() => {
                         setCreatedPhase(p); // save selected phase
                         setShowIntervalsId(p.id!); // show form 
+                        setActionMode("create"); 
                       }}
                       className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                       type="button"
                     >
-                      Agregar/Editar 
+                      Crear
                       <br/>
                       intervalos
                     </button>
+                    <button
+                      onClick={() => {
+                        setCreatedPhase(p);
+                        setShowIntervalsId(p.id!); // show form 
+                        setActionMode("edit"); 
+                      }}
+                      className="inline-flex items-center justify-center rounded-xl bg-slate-600 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+                      type="button"
+                    >
+                      Editar 
+                      <br/>
+                      intervalos
+                    </button>
+                    
                   </div>
                 </div>
               )}
               {/* Form with intervals below */}
-              {showIntervalsId ===p.id && createdPhase && createdPhase.id === p.id && (
+              {showIntervalsId ===p.id && createdPhase && createdPhase.id === p.id && actionMode === "create" && (
                 <div className="mt-4 space-y-3">
                   <label className="flex items-center gap-2">
                     <input
@@ -335,11 +353,10 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                   />
                 </div>
               )}
-              {showIntervalsId === p.id && createdPhase && (
+              {showIntervalsId === p.id && createdPhase && actionMode === "edit" && (
                 <PhaseGetIntervals
                   phaseId={createdPhase.id!}
-                  onCreated={async (interval) => {
-                    toast.success("Intervalo agregado con éxito. Duración actualizada.");
+                  onCreate={async (interval) => {
                     await reloadPhases();
                     setShowIntervalsId(null);
                   }}
