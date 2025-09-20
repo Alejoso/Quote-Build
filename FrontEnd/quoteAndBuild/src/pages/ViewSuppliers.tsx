@@ -6,13 +6,14 @@ import type { Supplier } from "../types/interfaces";
 import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { nav } from "framer-motion/client";
+import { useMemo } from "react";
 
 function ViewSuppliers() {
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [phonesBySupplier, setPhonesBySupplier] = useState<Record<string, string[]>>({});
     const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
     const navigate = useNavigate();
-
+    const [query, setQuery] = useState<string>("");
     const fetchSuppliers = async () => {
         try {
             const { data } = await fecthAllSuppliers();
@@ -35,13 +36,31 @@ function ViewSuppliers() {
             toast.error("Error al cargar proveedores");
         }
     };
-
-    useEffect(() => {
-        fetchSuppliers();
-    }, []);
+    const filteredSuppliers = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q) return suppliers;
+        return suppliers.filter((s) =>
+            (s.location ?? "").toLowerCase().includes(q) || (s.name ?? "").toLocaleLowerCase().includes(q) || (s.type ?? "").toLocaleLowerCase().includes(q) || (s.nit ?? "").toLocaleLowerCase().includes(q)
+        );
+    }, [suppliers, query]);
+        useEffect(() => {
+            fetchSuppliers();
+        }, []);
 
     return (
         <div className="max-w-4xl mx-auto mt-6">
+            <form>
+                <input 
+                    type="text"
+                    placeholder="Escriba el criterio por el que quiere buscar" 
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                    >
+                    
+
+                </input>
+            </form>
             <Toaster />
             <center>
                 <h1 className="text-xl font-bold text-gray-700 mb-4">Proveedores Registrados</h1>
@@ -59,7 +78,7 @@ function ViewSuppliers() {
                     </tr>
                 </thead>
                 <tbody>
-                    {suppliers.map((s) => (
+                    {filteredSuppliers.map((s) => (
                         <tr key={s.nit} className="border-t text-center">
                             <td className="p-2">{s.nit}</td>
                             <td className="p-2">{s.name}</td>
