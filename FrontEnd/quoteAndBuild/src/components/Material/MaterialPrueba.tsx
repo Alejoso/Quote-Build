@@ -3,6 +3,26 @@ import toast, { Toaster } from "react-hot-toast";
 import type { SupplierMaterial } from "../../types/interfaces";
 import { fetchAllSupplierMaterials } from "../../api/calls";
 import QuoteTable from "../Quote/QuoteTable"; // Asegúrate de tener la ruta correcta
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 interface DisplayMaterialTableProps {
     onSelectionChange?: (selectedMaterials: SupplierMaterial[]) => void;
@@ -111,6 +131,69 @@ export default function DisplayMaterialTable({ onSelectionChange, currentSelecte
                     style={{ maxWidth: "300px" }}
                 />
             </div>
+
+            {/* Mini Bar Chart - only show when there's a name filter applied */}
+            {nameFilter.trim() && filteredMaterials.length > 0 && (
+                <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Precios por Proveedor</h3>
+                    <div style={{ height: '300px', width: '100%' }}>
+                        <Bar
+                            data={{
+                                labels: filteredMaterials.map(m => m.supplier_name || 'Sin nombre'),
+                                datasets: [
+                                    {
+                                        label: 'Precio Unitario ($)',
+                                        data: filteredMaterials.map(m => m.actual_price),
+                                        backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                                        borderColor: 'rgba(79, 70, 229, 1)',
+                                        borderWidth: 1,
+                                    },
+                                ],
+                            }}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top' as const,
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: `Comparación de Precios - ${nameFilter}`,
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            afterLabel: (context) => {
+                                                const material = filteredMaterials[context.dataIndex];
+                                                return [
+                                                    `Material: ${material.material_name}`,
+                                                    `Categoría: ${material.material_category}`,
+                                                    `Unidad: ${material.unit_of_measure}`
+                                                ];
+                                            },
+                                        },
+                                    },
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Precio Unitario ($)'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Proveedor'
+                                        }
+                                    }
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
             <p className="mb-2 text-xs text-gray-500">
                 {filteredMaterials.length} material{filteredMaterials.length === 1 ? "" : "es"}
