@@ -110,34 +110,16 @@ const FetchProjects: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
           {filtered.map((p) => (
-            <div key={p.id} className="group rounded-2xl border border-gray-200 bg-white p-4 text-left shadow transition hover:-translate-y-0.5 hover:shadow-md flex flex-col gap-2">
-              <div className="flex items-start justify-between">
-                <button
-                  onClick={() => goToProject(p)}
-                  className="w-full text-left mt-2 rounded-xl bg-white px-4 py-2 font-semibold text-gray-900 transition"
-                  aria-label="Ver proyecto"
-                >
-                  <h2 className="text-lg font-semibold group-hover:text-indigo-600">
-                    {p.name}
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-600">{p.location}</p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Total: $ {" "}
-                    {p.total !== null && p.total !== undefined && p.total !== 0
-                      ? p.total
-                      : "—"}
-                  </p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Duración total planeada: {p.projectDurationPlanning != null ? p.projectDurationPlanning : <span className="italic text-gray-400">—</span>} días
-                  </p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Duración total ejecutada: {p.projectDurationExecuted != null ? p.projectDurationExecuted : <span className="italic text-gray-400">—</span>} días
-                  </p>
-                </button>
-                <div className="flex gap-2 items-center h-full">
+            <div key={p.id} className="group rounded-2xl border border-gray-200 bg-white p-4 text-left shadow transition hover:-translate-y-0.5 hover:shadow-md">
+              {/* Title and buttons on the same level */}
+              <div className="flex items-start justify-between mb-2">
+                <h2 className="text-lg font-semibold group-hover:text-indigo-600">
+                  {p.name}
+                </h2>
+                <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => goToProject(p)}
-                    className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
+                    className="rounded-full p-2 hover:bg-gray-100 text-verde"
                     aria-label="Editar proyecto"
                   >
                     <i className="bi bi-pencil text-xl"></i>
@@ -152,6 +134,22 @@ const FetchProjects: React.FC = () => {
                 </div>
               </div>
 
+              {/* Project information directly below title */}
+              <div className="cursor-pointer" onClick={() => goToProject(p)}>
+                <p className="text-sm text-gray-600">{p.location}</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Total: $ {" "}
+                  {p.total !== null && p.total !== undefined && p.total !== 0
+                    ? p.total
+                    : "—"}
+                </p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Duración total planeada: {p.projectDurationPlanning != null ? p.projectDurationPlanning : <span className="italic text-gray-400">—</span>} días
+                </p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Duración total ejecutada: {p.projectDurationExecuted != null ? p.projectDurationExecuted : <span className="italic text-gray-400">—</span>} días
+                </p>
+              </div>
             </div>
           ))}
         </div>
