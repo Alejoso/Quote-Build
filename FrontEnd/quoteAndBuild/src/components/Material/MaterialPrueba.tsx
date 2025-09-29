@@ -144,8 +144,36 @@ export default function DisplayMaterialTable({ onSelectionChange, currentSelecte
                                     {
                                         label: 'Precio Unitario ($)',
                                         data: filteredMaterials.map(m => m.actual_price),
-                                        backgroundColor: 'rgba(79, 70, 229, 0.6)',
-                                        borderColor: 'rgba(79, 70, 229, 1)',
+                                        backgroundColor: filteredMaterials.map((_, index) => {
+                                            const softColors = [
+                                                'rgba(99, 102, 241, 0.6)',   // Soft indigo
+                                                'rgba(236, 72, 153, 0.6)',   // Soft pink
+                                                'rgba(34, 197, 94, 0.6)',    // Soft green
+                                                'rgba(251, 146, 60, 0.6)',   // Soft orange
+                                                'rgba(168, 85, 247, 0.6)',   // Soft purple
+                                                'rgba(14, 165, 233, 0.6)',   // Soft sky blue
+                                                'rgba(245, 101, 101, 0.6)',  // Soft red
+                                                'rgba(52, 211, 153, 0.6)',   // Soft emerald
+                                                'rgba(251, 191, 36, 0.6)',   // Soft amber
+                                                'rgba(139, 92, 246, 0.6)',   // Soft violet
+                                            ];
+                                            return softColors[index % softColors.length];
+                                        }),
+                                        borderColor: filteredMaterials.map((_, index) => {
+                                            const borderColors = [
+                                                'rgba(99, 102, 241, 1)',     // Indigo
+                                                'rgba(236, 72, 153, 1)',     // Pink
+                                                'rgba(34, 197, 94, 1)',      // Green
+                                                'rgba(251, 146, 60, 1)',     // Orange
+                                                'rgba(168, 85, 247, 1)',     // Purple
+                                                'rgba(14, 165, 233, 1)',     // Sky blue
+                                                'rgba(245, 101, 101, 1)',    // Red
+                                                'rgba(52, 211, 153, 1)',     // Emerald
+                                                'rgba(251, 191, 36, 1)',     // Amber
+                                                'rgba(139, 92, 246, 1)',     // Violet
+                                            ];
+                                            return borderColors[index % borderColors.length];
+                                        }),
                                         borderWidth: 1,
                                     },
                                 ],
