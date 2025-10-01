@@ -186,3 +186,9 @@ export function fetchSupplierMaterialsForMaterial(materialId: number) {
 export function updateSupplierMaterial(id: number, payload: Partial<SupplierMaterial>) {
   return axios.patch<SupplierMaterial>(`${BASE_URL}/supplier-materials/${id}/`, payload);
 }
+
+export function fetchMaterialsFromSpecificProvider(supplierNit: string) {
+  return axios.get<Material[]>(`${BASE_URL}/materials/`, {
+    params: { nit: supplierNit }
+  });
+}
