@@ -10,25 +10,25 @@ const NavBar = () => {
             <div className="flex items-center gap-2">
 
                 <img src="/QandBNavBar.png" alt="Logo" className="w-20 h-20 object-contain mr-2" />
-                <button onClick={() => navigate("/")} className="bg-negroClaro rounded-full w-9 h-9 flex items-center justify-center hover:bg-blue-500 ml-4">
-                    <img src="/HomeButton.png" alt="Home" className="w-8 h-8 rounded-full object-contain"/>
+                <button onClick={() => navigate("/")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ffce91] ml-4 ${location.pathname === '/' ? 'bg-[#ffb354]' : 'bg-gray-100'}`}>
+                    <i className="bi bi-house-door text-xl"></i>
                 </button>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => navigate("/projects")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-blue-500 ${location.pathname === '/projects' ? 'bg-blue-500' : 'bg-gray-100'}`}>
-                        <img src="/RepoButton.png" alt="Repo" className="w-10 h-10 rounded-full object-contain" />
+                    <button onClick={() => navigate("/projects")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ffce91] ${location.pathname === '/projects' ? 'bg-[#ffb354]' : 'bg-gray-100'}`}>
+                        <i className="bi bi-book text-xl"></i>
                     </button>
-                    <button onClick={() => navigate("/saveProject")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-blue-500 ${location.pathname === '/saveProject' ? 'bg-blue-500' : 'bg-gray-100'}`}>
-                        <img src="/AddProjectButton.png" alt="Add" className="w-10 h-10 rounded-full object-contain" />
+                    <button onClick={() => navigate("/saveProject")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ffce91] ${location.pathname === '/saveProject' ? 'bg-[#ffb354]' : 'bg-gray-100'}`}>
+                        <i className="bi bi-plus-lg text-xl"></i>
                     </button>
                 </div>
 
-                <button onClick={() => navigate("/newRegistry")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-blue-500 ${location.pathname === '/newRegistry' ? 'bg-blue-500' : 'bg-gray-100'}`}>
-                    <img src="/DataBaseButton.png" alt="DB" className="w-10 h-10 rounded-full object-contain" />
+                <button onClick={() => navigate("/newRegistry")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ffce91] ${location.pathname === '/newRegistry' ? 'bg-[#ffb354]' : 'bg-gray-100'}`}>
+                    <i className="bi bi-database text-xl"></i>
                 </button>
             </div>
             <div className="flex items-center ml-auto">
-                <button onClick={() => navigate("/")} className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center hover:bg-blue-500">
-                    <img src="/Profile.png" alt="Perfil" className="w-8 h-8 rounded-full object-contain" />
+                <button onClick={() => navigate("/")} className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center hover:bg-[#ffce91]">
+                    <i className="bi bi-person-fill text-lg"></i>
                 </button>
             </div>
         </nav>
