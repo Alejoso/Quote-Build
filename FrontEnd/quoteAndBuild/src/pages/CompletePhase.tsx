@@ -48,6 +48,7 @@ export default function PhaseIntervalForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4 p-4 bg-gray-100 rounded-xl">
+      <h2 className="text-lg font-bold">Crear intervalos</h2>
       <div>
         <label className="block text-sm font-medium">Fecha inicio</label>
         <input

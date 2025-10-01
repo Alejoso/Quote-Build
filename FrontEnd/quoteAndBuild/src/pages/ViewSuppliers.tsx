@@ -6,6 +6,7 @@ import type { Supplier } from "../types/interfaces";
 import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { nav } from "framer-motion/client";
+
 import { useMemo } from "react";
 
 function ViewSuppliers() {
@@ -13,6 +14,7 @@ function ViewSuppliers() {
     const [phonesBySupplier, setPhonesBySupplier] = useState<Record<string, string[]>>({});
     const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
     const navigate = useNavigate();
+
     const [query, setQuery] = useState<string>("");
     const fetchSuppliers = async () => {
         try {
@@ -54,6 +56,7 @@ function ViewSuppliers() {
             <center>
                 <h1 className="text-xl font-bold text-gray-700 mb-4">Proveedores Registrados</h1>
             </center>
+
             <form>
                 <input 
                     type="text"
@@ -66,6 +69,7 @@ function ViewSuppliers() {
 
                 </input>
             </form>
+
             <table className="w-full border rounded-xl bg-white shadow text-sm">
                 <thead>
                     <tr className="bg-gray-100">
@@ -79,7 +83,9 @@ function ViewSuppliers() {
                     </tr>
                 </thead>
                 <tbody>
+
                     {filteredSuppliers.map((s) => (
+
                         <tr key={s.nit} className="border-t text-center">
                             <td className="p-2">{s.nit}</td>
                             <td className="p-2">{s.name}</td>
