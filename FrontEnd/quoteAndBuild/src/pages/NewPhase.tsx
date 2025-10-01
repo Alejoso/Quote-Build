@@ -19,6 +19,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
 
   // Estado para mostrar u ocultar el formulario de intervalos
   const [showIntervalsId, setShowIntervalsId] = useState<number | null>(null);
+
   // Estado para cambiar entre el modo agregar y editar
   const [actionMode, setActionMode] = useState<"create" | "edit" | null>(null);
 
