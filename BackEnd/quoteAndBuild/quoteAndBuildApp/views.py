@@ -26,6 +26,13 @@ class MaterialSerializer(serializers.ModelSerializer):
 class MaterialViewSet (viewsets.ModelViewSet):
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        nit = self.request.query_params.get('nit')
+        if nit:
+            qs = qs.filter(providers__nit=nit)
+        return qs
     
 
 # Project

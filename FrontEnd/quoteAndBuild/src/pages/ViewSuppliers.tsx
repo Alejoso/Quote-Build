@@ -70,7 +70,7 @@ function ViewSuppliers() {
                 </input>
             </form>
 
-            <table className="w-full border rounded-xl bg-white shadow text-sm">
+            <table className="w-full border rounded-xl bg-white shadow text-sm mt-5">
                 <thead>
                     <tr className="bg-gray-100">
                         <th className="p-2">NIT</th>
@@ -79,7 +79,8 @@ function ViewSuppliers() {
                         <th className="p-2">Tipo</th>
                         <th className="p-2">Cuenta bancaria</th>
                         <th className="p-2">Teléfonos</th>
-                        <th className="p-2">Acciones</th>
+                        <th className="p-2">Ver materiales</th>
+                        <th className="p-2">Editar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -100,6 +101,15 @@ function ViewSuppliers() {
                                         <div key={idx}>{phone}</div>
                                     ))
                                 )}
+                            </td>
+                            <td className="p-2">
+                                <button
+                                    onClick={() => navigate(`/ViewMaterialsOfProvider` , { state: {supplierNit: s.nit , supplierName: s.name}})}
+                                    className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
+                                    aria-label="Editar proveedor"
+                                >
+                                    <i className="bi bi-basket2"></i>
+                                </button>
                             </td>
                             <td className="p-2">
                                 <button

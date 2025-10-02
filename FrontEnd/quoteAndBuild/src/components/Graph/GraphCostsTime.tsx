@@ -11,7 +11,7 @@ import {
   Legend,
 } from "chart.js";
 
-import type {ChartOptions} from "chart.js"; 
+import type { ChartOptions } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, ChartDataLabels);
 
@@ -51,11 +51,23 @@ const BarChartCostTime: React.FC<BarChartProps> = ({ data }) => {
         color: "#0C0A09",    // color del número dentro de la barra
         anchor: "center",
         align: "center",
-        font: { size: 18 , weight: "bold"},
+        font: { size: 18, weight: "bold" },
       },
     },
     scales: {
-      y: { beginAtZero: true },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Costo/Tiempo'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Fases'
+        }
+      }
     },
   };
 

@@ -15,6 +15,7 @@ import MaterialsList from "./pages/MaterialsList";
 import EditMaterial from "./pages/EditMaterial";
 import ViewSuppliers from './pages/ViewSuppliers';
 import EditSupplier from './pages/EditSupplier';
+import ViewMAterialsOfProvider from './pages/ViewMaterialsOfProvider';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/ViewSuppliers/:nit/edit" element={<EditSupplier />} />
         <Route path="/materials" element={<MaterialsList />} />
         <Route path="/materials/:id/edit" element={<EditMaterial />} />
+        <Route path="/ViewMaterialsOfProvider" element={<ViewMAterialsOfProvider />} />
       </Routes>
 
 

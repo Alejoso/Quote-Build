@@ -2,13 +2,16 @@ import React from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
   ArcElement,
   Tooltip,
   Legend
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 
-ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend, ChartDataLabels);
 
 interface Cost {
   name: string;
@@ -30,12 +33,12 @@ const BarChartTimes: React.FC<PieChartProps> = ({ data }) => {
         label: "Días",
         data: values,
         backgroundColor: [
-          "#FF5733", 
-          "#51A2FF",   
+          "#FF5733",
+          "#51A2FF",
         ],
         borderColor: [
-          "#FF5733",   
-          "#51A2FF",     
+          "#FF5733",
+          "#51A2FF",
         ],
         borderWidth: 1
       }
@@ -58,6 +61,21 @@ const BarChartTimes: React.FC<PieChartProps> = ({ data }) => {
           const total = data.reduce((a, b) => a + b, 0);
           const percentage = ((value / total) * 100).toFixed(1);
           return `${percentage}%`;
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Tiempo'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Fases'
         }
       }
     }
