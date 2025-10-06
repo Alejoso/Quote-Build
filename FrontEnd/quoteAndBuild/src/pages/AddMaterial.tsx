@@ -1,39 +1,39 @@
 import React, { useEffect, useState } from "react"
-import { createMaterial , createSupplierMaterial  , fecthAllSuppliers} from "../api/calls"
+import { createMaterial, createSupplierMaterial, fecthAllSuppliers } from "../api/calls"
 import type { Supplier } from "../types/interfaces"
-import toast , {Toaster} from "react-hot-toast"
+import toast, { Toaster } from "react-hot-toast"
 function AddMaterial() {
 
-    const [suppliers , SetSuppliers] = useState<Supplier[]>([]); 
-    const [nitSupplierSelected , setnitSupplierSelected] = useState("");
+    const [suppliers, SetSuppliers] = useState<Supplier[]>([]);
+    const [nitSupplierSelected, setnitSupplierSelected] = useState("");
 
-    const [formData , SetFormData] = useState({
+    const [formData, SetFormData] = useState({
         name: "",
         description: "",
         category: "",
         actual_price: "",
-        unit_of_measure: "", 
+        unit_of_measure: "",
     })
 
     useEffect(() => {
         async function getSuppliers() {
             try {
-                const {data} = await fecthAllSuppliers();
-                SetSuppliers(data); 
-            } catch (err : any) {
+                const { data } = await fecthAllSuppliers();
+                SetSuppliers(data);
+            } catch (err: any) {
                 console.log(err)
-                toast.error(err || "Hubo un error cargando los provedores disponibles")
+                toast.error(err || "Hubo un error cargando los proveedores disponibles")
             }
         }
 
-        getSuppliers(); 
-    } , [])
+        getSuppliers();
+    }, [])
 
-    function handleSubmit( e: React.FormEvent<HTMLFormElement>){
-        e.preventDefault(); 
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
 
-        async function AddMaterialToDabaBase(){
-            try {     
+        async function AddMaterialToDabaBase() {
+            try {
 
                 const materialToAdd = {
                     name: formData.name,
@@ -41,9 +41,9 @@ function AddMaterial() {
                     category: formData.category,
                 }
 
-                const {data} = await createMaterial(materialToAdd);
+                const { data } = await createMaterial(materialToAdd);
 
-                
+
                 const payload = {
                     supplier: nitSupplierSelected,
                     material: data.id,
@@ -51,21 +51,21 @@ function AddMaterial() {
                     unit_of_measure: formData.unit_of_measure,
                 }
 
-                if(payload.supplier && payload.material !== 0){
+                if (payload.supplier && payload.material !== 0) {
                     await createSupplierMaterial(payload)
-                    toast.success("El material se creo con exito")
+                    toast.success("El material se creo con éxito")
                 }
 
-            } catch (err:any){
+            } catch (err: any) {
                 console.log(err);
                 toast.error(err || "Hubo un error creando el nuevo material")
             }
         }
-        
-        if(nitSupplierSelected === "" || formData.name === "" || formData.category === "" || formData.actual_price === "" || Number(formData.actual_price) === 0 || formData.unit_of_measure === "") {
-            toast.error("Debes de llenar todos los campos")
+
+        if (nitSupplierSelected === "" || formData.name === "" || formData.category === "" || formData.actual_price === "" || Number(formData.actual_price) === 0 || formData.unit_of_measure === "") {
+            toast.error("Debes llenar todos los campos")
         } else {
-            AddMaterialToDabaBase();  
+            AddMaterialToDabaBase();
 
             SetFormData({
                 name: "",
@@ -74,130 +74,130 @@ function AddMaterial() {
                 unit_of_measure: "",
                 actual_price: "",
             })
-            setnitSupplierSelected("");  
+            setnitSupplierSelected("");
         }
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        
-        const {name , value} = e.target;
+
+        const { name, value } = e.target;
 
         SetFormData((prev) => ({
-        ...prev , [name]: value,
-        })); 
-    
+            ...prev, [name]: value,
+        }));
+
     };
 
     return (
         <div>
-            <Toaster/>
+            <Toaster />
             <form
                 onSubmit={handleSubmit}
                 className="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md space-y-4 mt-4"
-                >
+            >
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-700">
-                    Crear nuevo material
+                        Crear nuevo material
                     </h2>
                     <button
-                    type="button"
-                    onClick={() => window.history.back()} // o router.back() si usas Next.js
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-3 rounded-lg transition-colors"
+                        type="button"
+                        onClick={() => window.history.back()} // o router.back() si usas Next.js
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-3 rounded-lg transition-colors"
                     >
-                    Volver
+                        Volver
                     </button>
                 </div>
 
                 {/* Proveedor */}
                 <div>
                     <label
-                    htmlFor="proveedor"
-                    className="block text-sm font-medium text-gray-600 mb-1"
+                        htmlFor="proveedor"
+                        className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                    Proveedor del nuevo material
+                        Proveedor del nuevo material
                     </label>
                     <select
-                    id="proveedor"
-                    value={nitSupplierSelected}
-                    onChange={(e) => setnitSupplierSelected(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        id="proveedor"
+                        value={nitSupplierSelected}
+                        onChange={(e) => setnitSupplierSelected(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
-                    <option value="">-- Selecciona un proveedor --</option>
-                    {suppliers.map((prov) => (
-                        <option key={prov.nit} value={prov.nit}>
-                        {prov.name} - {prov.location}
-                        </option>
-                    ))}
+                        <option value="">-- Selecciona un proveedor --</option>
+                        {suppliers.map((prov) => (
+                            <option key={prov.nit} value={prov.nit}>
+                                {prov.name} - {prov.location}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
                 {/* Nombre */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Nombre del material
+                        Nombre del material
                     </label>
                     <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
                 {/* Descripción */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Descripción (opcional)
+                        Descripción (opcional)
                     </label>
                     <input
-                    type="text"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        type="text"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
                 {/* Categoría */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Categoría
+                        Categoría
                     </label>
                     <input
-                    type="text"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        type="text"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
                 {/* Precio */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Precio
+                        Precio
                     </label>
                     <input
-                    type="number"
-                    value={formData.actual_price}
-                    name="actual_price"
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        type="number"
+                        value={formData.actual_price}
+                        name="actual_price"
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
                 {/* Unidad de medida */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Unidad de medida
+                        Unidad de medida
                     </label>
                     <input
-                    type="text"
-                    value={formData.unit_of_measure}
-                    name="unit_of_measure"
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        type="text"
+                        value={formData.unit_of_measure}
+                        name="unit_of_measure"
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
