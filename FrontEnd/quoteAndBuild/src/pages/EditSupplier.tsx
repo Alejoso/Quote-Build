@@ -18,6 +18,7 @@ function EditSupplier() {
         bank_account: "",
         phones: [""]
     });
+    const [originalNit, setOriginalNit] = useState<string>("");
     const [loading, setLoading] = useState(false);
 
     // 🔹 Cargar datos del proveedor al montar el componente
@@ -40,6 +41,7 @@ function EditSupplier() {
                     bank_account: supplier.bank_account,
                     phones: phones.length > 0 ? phones : [""]
                 });
+                setOriginalNit(supplier.nit);
             } catch (err) {
                 toast.error("Error al cargar proveedor");
                 navigate("/ViewSuppliers");
@@ -84,35 +86,82 @@ function EditSupplier() {
 
         setLoading(true);
         try {
-            // Actualizar proveedor
-            await axios.put(`${API_URL}/suppliers/${nit}/`, {
-                nit: formData.nit,
-                name: formData.name,
-                location: formData.location,
-                type: formData.type,
-                bank_account: formData.bank_account
-            });
+            const nitHasChanged = formData.nit !== originalNit;
 
-            // Obtener los teléfonos actuales
-            const resp = await axios.get(`${API_URL}/supplier-phones/?supplier=${nit}`);
-            const phoneIds = resp.data.map((p: any) => p.id);
+            if (nitHasChanged) {
+                // Si el NIT cambió, necesitamos crear un nuevo proveedor y eliminar el anterior
 
-            // Eliminar teléfonos viejos
-            await Promise.all(
-                phoneIds.map((id: number) => axios.delete(`${API_URL}/supplier-phones/${id}/`))
-            );
+                // 1. Verificar que el nuevo NIT no exista ya
+                try {
+                    await axios.get(`${API_URL}/suppliers/${formData.nit}/`);
+                    toast.error("Ya existe un proveedor con ese NIT");
+                    return;
+                } catch (checkErr: any) {
+                    // Si da error 404, significa que no existe y podemos continuar
+                    if (checkErr.response?.status !== 404) {
+                        throw checkErr;
+                    }
+                }
 
-            // Crear los nuevos
-            await Promise.all(
-                formData.phones.map(phone =>
-                    createSupplierPhone({ supplier: formData.nit, phone })
-                )
-            );
+                // 2. Eliminar los teléfonos del proveedor anterior PRIMERO
+                const oldPhonesResp = await axios.get(`${API_URL}/supplier-phones/?supplier=${originalNit}`);
+                const oldPhoneIds = oldPhonesResp.data.map((p: any) => p.id);
+                await Promise.all(
+                    oldPhoneIds.map((id: number) => axios.delete(`${API_URL}/supplier-phones/${id}/`))
+                );
 
-            toast.success("Proveedor actualizado correctamente");
+                // 3. Eliminar el proveedor anterior
+                await axios.delete(`${API_URL}/suppliers/${originalNit}/`);
+
+                // 4. Crear el nuevo proveedor
+                await axios.post(`${API_URL}/suppliers/`, {
+                    nit: formData.nit,
+                    name: formData.name,
+                    location: formData.location,
+                    type: formData.type,
+                    bank_account: formData.bank_account
+                });
+
+                // 5. Crear los teléfonos para el nuevo proveedor
+                await Promise.all(
+                    formData.phones.map(phone =>
+                        createSupplierPhone({ supplier: formData.nit, phone })
+                    )
+                );
+
+                toast.success("Proveedor actualizado correctamente");
+            } else {
+                // Si el NIT no cambió, solo actualizar normalmente
+                await axios.put(`${API_URL}/suppliers/${originalNit}/`, {
+                    nit: formData.nit,
+                    name: formData.name,
+                    location: formData.location,
+                    type: formData.type,
+                    bank_account: formData.bank_account
+                });
+
+                // Obtener los teléfonos actuales
+                const resp = await axios.get(`${API_URL}/supplier-phones/?supplier=${originalNit}`);
+                const phoneIds = resp.data.map((p: any) => p.id);
+
+                // Eliminar teléfonos viejos
+                await Promise.all(
+                    phoneIds.map((id: number) => axios.delete(`${API_URL}/supplier-phones/${id}/`))
+                );
+
+                // Crear los nuevos
+                await Promise.all(
+                    formData.phones.map(phone =>
+                        createSupplierPhone({ supplier: formData.nit, phone })
+                    )
+                );
+
+                toast.success("Proveedor actualizado correctamente");
+            }
+
             navigate("/ViewSuppliers");
         } catch (err: any) {
-            toast.error(err?.message || "Error al actualizar proveedor");
+            toast.error(err?.response?.data?.detail || err?.message || "Error al actualizar proveedor");
         } finally {
             setLoading(false);
         }
