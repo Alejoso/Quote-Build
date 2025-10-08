@@ -65,7 +65,7 @@ const EditMaterial: React.FC = () => {
           setSmId(null);
         }
       } catch (e: any) {
-        setErr(e.message ?? "No se pudo cargar el material.");
+        setErr(e.message ?? "No se pudo cargar el material");
       } finally {
         setLoading(false);
       }
