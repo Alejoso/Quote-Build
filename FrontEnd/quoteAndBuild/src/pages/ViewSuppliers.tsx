@@ -4,8 +4,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { fecthAllSuppliers } from "../api/calls";
 import type { Supplier } from "../types/interfaces";
 import { useNavigate } from "react-router-dom";
-import { Navigate } from "react-router-dom";
-import { nav } from "framer-motion/client";
 
 import { useMemo } from "react";
 
