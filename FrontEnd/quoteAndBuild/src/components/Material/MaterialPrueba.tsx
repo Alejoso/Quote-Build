@@ -35,11 +35,13 @@ export default function DisplayMaterialTable({ onSelectionChange, currentSelecte
     const [loading, setLoading] = useState(true);
     const [nameFilter, setNameFilter] = useState<string>("");
     const [locationFilter, setLocationFilter] = useState<string>("");
+    const [providerFilter, setProviderFilter] = useState<string>("");
 
     // Filter materials based on name and location
     const filteredMaterials = useMemo(() => {
         const nameQuery = nameFilter.trim().toLowerCase();
         const locationQuery = locationFilter.trim().toLowerCase();
+        const providerQuery = providerFilter.trim().toLowerCase();
 
         let filtered = allMaterials;
 
@@ -55,8 +57,14 @@ export default function DisplayMaterialTable({ onSelectionChange, currentSelecte
             );
         }
 
+        if (providerQuery) {
+            filtered = filtered.filter(m =>
+                (m.supplier_name ?? "").toLowerCase().includes(providerQuery)
+            );
+        }
+
         return filtered;
-    }, [allMaterials, nameFilter, locationFilter]);
+    }, [allMaterials, nameFilter, locationFilter, providerFilter]);
 
     //Mostrar todos los materiales en la tabla
     useEffect(() => {
@@ -128,6 +136,14 @@ export default function DisplayMaterialTable({ onSelectionChange, currentSelecte
                     onChange={(e) => setLocationFilter(e.target.value)}
                     placeholder="Filtrar por ciudad..."
                     className="block w-full rounded-xl border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                    style={{ maxWidth: "300px" }}
+                />
+                <input
+                    type="text"
+                    value={providerFilter}
+                    onChange={(e) => setProviderFilter(e.target.value)}
+                    placeholder="Filtrar por proveedor..."
+                    className="block w-full rounded-xl border border-gray-300 px-3 py-2"
                     style={{ maxWidth: "300px" }}
                 />
             </div>
