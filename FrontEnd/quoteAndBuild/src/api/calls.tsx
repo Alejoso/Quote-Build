@@ -16,32 +16,32 @@ import type {
 
 // ---- Projects ----
 export const fetchAllProjects = () => {
-  return axios.get('http://127.0.0.1:8000/projects/')
+  return axios.get(`${BASE_URL}/projects/`)
 };
 
 export const createProject = (project: any) => {
-  return axios.post('http://127.0.0.1:8000/projects/', project)
+  return axios.post(`${BASE_URL}/projects/`, project)
 };
 
 export const updateProject = (id: number, fieldsUpdate: any) => {
-  return axios.patch(`http://127.0.0.1:8000/projects/${id}/`, fieldsUpdate);
+  return axios.patch(`${BASE_URL}/projects/${id}/`, fieldsUpdate);
 };
 
 export const fetchProjectById = (id: number) => {
-  return axios.get(`http://127.0.0.1:8000/projects/${id}/`);
+  return axios.get(`${BASE_URL}/projects/${id}/`);
 };
 
 // ---- Phases ----
 export const fetchPhasesByProject = (projectId: number) => {
-  return axios.get(`http://127.0.0.1:8000/phases/?project=${projectId}`); //Get info from a specific Project given a Id 
+  return axios.get(`${BASE_URL}/phases/?project=${projectId}`); //Get info from a specific Project given a Id 
 };
 
 export const createPhase = (phase: any) => {
-  return axios.post('http://127.0.0.1:8000/phases/', phase);
+  return axios.post(`${BASE_URL}/phases/`, phase);
 };
 
 export const updatePhase = (id: number, fieldsUpdate: any) => {
-  return axios.patch(`http://127.0.0.1:8000/phases/${id}/`, fieldsUpdate);
+  return axios.patch(`${BASE_URL}/phases/${id}/`, fieldsUpdate);
 };
 
 export const deletePhase = (id: number) => {
@@ -49,24 +49,24 @@ export const deletePhase = (id: number) => {
 }
 
 export function fetchPhaseById(id: number) {
-  return axios.get<Phase>(`${BASE_URL}/phases/${id}/`); 
+  return axios.get<Phase>(`${BASE_URL}/phases/${id}/`);
 }
 // ----- PhasesInterval --- 
 
 export async function createPhaseInterval(payload: PhaseInterval) { // Create an interval
-  const { data } = await axios.post("http://127.0.0.1:8000/phase-intervals/", payload);
+  const { data } = await axios.post("${BASE_URL}/phase-intervals/", payload);
   return data;
 }
 
 
 export async function fetchPhaseIntervals(phaseId: number) {  // List an interval phase
-  const { data } = await axios.get(`http://127.0.0.1:8000/phase-intervals/?phase=${phaseId}`);
+  const { data } = await axios.get(`${BASE_URL}/phase-intervals/?phase=${phaseId}`);
   return data;
 }
 
 export async function updatePhaseInterval(phaseIntervalId: number, fieldsUpdate: any) {
   return axios.patch(
-    `http://127.0.0.1:8000/phase-intervals/${phaseIntervalId}/`,  
+    `${BASE_URL}/phase-intervals/${phaseIntervalId}/`,
     fieldsUpdate
   );
 }// Allow us to edit a PhaseInterval
