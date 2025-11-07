@@ -102,7 +102,7 @@ function ViewSuppliers() {
                             </td>
                             <td className="p-2">
                                 <button
-                                    onClick={() => navigate(`/ViewMaterialsOfProvider` , { state: {supplierNit: s.nit , supplierName: s.name}})}
+                                    onClick={() => navigate(`/NewRegistry/ViewSuppliers/ViewMaterialsOfProvider` , { state: {supplierNit: s.nit , supplierName: s.name}})}
                                     className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
                                     aria-label="Editar proveedor"
                                 >
@@ -111,7 +111,7 @@ function ViewSuppliers() {
                             </td>
                             <td className="p-2">
                                 <button
-                                    onClick={() => navigate(`/ViewSuppliers/${s.nit}/edit`)}
+                                    onClick={() => navigate(`/NewRegistry/ViewSuppliers/${s.nit}/edit`)}
                                     className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
                                     aria-label="Editar proveedor"
                                 >

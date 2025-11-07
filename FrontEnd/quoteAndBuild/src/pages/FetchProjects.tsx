@@ -55,7 +55,7 @@ const FetchProjects: React.FC = () => {
 
   const goToProjectGraphs = (p: ProjectRow) => {
     // Send user to SpecificGraph.tsx (route: /specificGraph/:id) with the chosen project id
-    navigate("/ProjectGraph/", { state: { projectId: p.id } });
+    navigate("/projects/ProjectGraph", { state: { projectId: p.id } });
   }
 
   return (
