@@ -16,6 +16,7 @@ import EditMaterial from "./pages/EditMaterial";
 import ViewSuppliers from './pages/ViewSuppliers';
 import EditSupplier from './pages/EditSupplier';
 import ViewMAterialsOfProvider from './pages/ViewMaterialsOfProvider';
+import MaterialGrahps from './pages/materialGraphs';
 
 function App() {
 
@@ -39,6 +40,8 @@ function App() {
         <Route path="/NewRegistry/materials" element={<MaterialsList />} />
         <Route path="/NewRegistry/materials/:id/edit" element={<EditMaterial />} />
         <Route path="/NewRegistry/ViewSuppliers/ViewMaterialsOfProvider" element={<ViewMAterialsOfProvider />} />
+        <Route path="/MaterialGraphs" element={<MaterialGrahps />} />
+
       </Routes>
 
 

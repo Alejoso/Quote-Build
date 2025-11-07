@@ -27,6 +27,10 @@ const NavBar = () => {
                     <button onClick={() => navigate("/NewRegistry")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ffce91] ${location.pathname === '/newRegistry' ? 'bg-[#ffb354]' : 'bg-gray-100'}`}>
                         <i className="bi bi-database text-xl"></i>
                     </button>
+
+                    <button onClick={() => navigate("/MaterialGraphs")} className={`rounded-full w-12 h-12 flex items-center justify-center hover:bg-[#ffce91] ${location.pathname === '/MaterialGraphs' ? 'bg-[#ffb354]' : 'bg-gray-100'}`}>
+                        <i className="bi bi-bar-chart-line"></i>
+                    </button>
                 </div>
                 <div className="flex items-center ml-auto">
                     <button onClick={() => navigate("/")} className="rounded-full bg-gray-200 w-8 h-8 flex items-center justify-center hover:bg-[#ffce91]">
