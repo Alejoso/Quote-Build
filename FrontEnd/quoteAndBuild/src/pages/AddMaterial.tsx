@@ -122,7 +122,7 @@ function AddMaterial() {
                         onChange={(e) => setnitSupplierSelected(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     >
-                        <option value="">-- Selecciona un proveedor --</option>
+                        <option value="">-- Selecciona un proveedor * -- </option>
                         {suppliers.map((prov) => (
                             <option key={prov.nit} value={prov.nit}>
                                 {prov.name} - {prov.location}
@@ -134,7 +134,7 @@ function AddMaterial() {
                 {/* Nombre */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Nombre del material
+                        Nombre del material *
                     </label>
                     <input
                         type="text"
@@ -148,7 +148,7 @@ function AddMaterial() {
                 {/* Descripción */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Descripción (opcional)
+                        Descripción 
                     </label>
                     <input
                         type="text"
@@ -162,7 +162,7 @@ function AddMaterial() {
                 {/* Categoría */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Categoría
+                        Categoría *
                     </label>
                     <input
                         type="text"
@@ -176,7 +176,7 @@ function AddMaterial() {
                 {/* Precio */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Precio
+                        Precio *
                     </label>
                     <input
                         type="number"
@@ -190,7 +190,7 @@ function AddMaterial() {
                 {/* Unidad de medida */}
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">
-                        Unidad de medida
+                        Unidad de medida *
                     </label>
                     <input
                         type="text"

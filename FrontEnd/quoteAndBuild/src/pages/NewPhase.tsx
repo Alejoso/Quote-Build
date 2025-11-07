@@ -339,7 +339,7 @@ const NewPhase: React.FC<Props> = ({ projectId }) => {
                       onChange={(e) => setIsPlanningPhase(e.target.checked)}
                       className="h-4 w-4"
                     />
-                    <span className="block text-sm font-medium">¿Es una fase de planeo?</span>
+                    <span className="block text-sm font-medium">¿Es una fase de planeo? *</span>
                   </label>
 
                   <PhaseIntervalForm
