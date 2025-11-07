@@ -94,7 +94,7 @@ function AddSupplier() {
                     </button>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">NIT</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">NIT *</label>
                     <input
                         type="text"
                         name="nit"
@@ -104,7 +104,7 @@ function AddSupplier() {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Nombre</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Nombre *</label>
                     <input
                         type="text"
                         name="name"
@@ -114,7 +114,7 @@ function AddSupplier() {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Ubicación</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Ubicación *</label>
                     <input
                         type="text"
                         name="location"
@@ -124,7 +124,7 @@ function AddSupplier() {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Tipo</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Tipo *</label>
                     <input
                         type="text"
                         name="type"
@@ -134,7 +134,7 @@ function AddSupplier() {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Cuenta bancaria</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Cuenta bancaria *</label>
                     <input
                         type="text"
                         name="bank_account"
@@ -144,7 +144,7 @@ function AddSupplier() {
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Teléfonos</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Teléfono *</label>
                     {formData.phones.map((phone, idx) => (
                         <div key={idx} className="flex gap-2 mb-2">
                             <input
