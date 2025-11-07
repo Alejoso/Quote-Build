@@ -260,7 +260,7 @@ export default function Quotes() {
                             checked={!!newForm.is_first_quote}
                             onChange={(e) => setNewForm((f) => ({ ...f, is_first_quote: e.target.checked }))}
                         />
-                        ¿Primera cotización? *
+                        ¿Cotización de planeo? 
                     </label>
 
                     <button
@@ -323,7 +323,7 @@ export default function Quotes() {
                                                 setEditForm((f) => (f ? { ...f, is_first_quote: e.target.checked } : f))
                                             }
                                         />
-                                        ¿Primera cotización?
+                                        ¿Cotización de planeo?
                                     </label>
                                     
                                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
