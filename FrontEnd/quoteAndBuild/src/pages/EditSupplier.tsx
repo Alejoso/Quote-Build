@@ -129,7 +129,7 @@ function EditSupplier() {
                     <h2 className="text-xl font-bold text-gray-700">Editar proveedor</h2>
                     <button
                         type="button"
-                        onClick={() => navigate("/ViewSuppliers")}
+                        onClick={() => navigate("/NewRegistry/ViewSuppliers")}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-3 rounded-lg transition-colors"
                     >
                         Cancelar

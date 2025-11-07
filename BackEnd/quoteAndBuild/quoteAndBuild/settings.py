@@ -44,26 +44,27 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 
 CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_EXPOSE_HEADERS = ["Content-Disposition"]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://179.14.61.158",
+    "http://107.20.54.181:80",
+    "http://107.20.54.181:81",
+        "http://34.201.100.5",
 ]
 
 ROOT_URLCONF = 'quoteAndBuild.urls'
