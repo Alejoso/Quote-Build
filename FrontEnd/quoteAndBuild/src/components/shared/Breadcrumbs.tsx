@@ -24,6 +24,7 @@ const Breadcrumbs = () => {
         "/NewRegistry/ViewSuppliers": "Ver Proveedores",
         "/NewRegistry/ViewSuppliers/ViewMaterialsOfProvider": "Ver Materiales de Proveedor",
         "edit": "Editar",
+        "MaterialGraphs": "Gráficas de Materiales",
 
     };
 
