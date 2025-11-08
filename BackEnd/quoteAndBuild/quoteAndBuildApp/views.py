@@ -332,8 +332,42 @@ class QuoteViewSet(viewsets.ModelViewSet):
                 },
                 status=drf_status.HTTP_409_CONFLICT,
             )
-        # If it is draft, delete as normal
-        return super().destroy(request, *args, **kwargs)
+
+        # Guardar materiales involucrados para recalcular PhaseMaterial tras el borrado
+        items = list(QuoteSupplierMaterial.objects.filter(quote=quote).select_related('supplierMaterial'))
+        supplier_materials = {}
+        for it in items:
+            # conservar el último unit_price conocido como fallback si queda total_qty 0
+            supplier_materials[it.supplierMaterial_id] = {
+                'supplierMaterial': it.supplierMaterial,
+                'unit_price': it.unit_price,
+                'quantity': it.quantity,
+            }
+
+        response = super().destroy(request, *args, **kwargs)
+
+        # Recalcular PhaseMaterial para cada material afectado
+        try:
+            class DummyQSM:
+                pass
+            for data in supplier_materials.values():
+                dummy = DummyQSM()
+                dummy.quote = quote
+                dummy.supplierMaterial = data['supplierMaterial']
+                dummy.unit_price = data.get('unit_price')
+                dummy.quantity = data.get('quantity')
+                _manage_pm_qsm_(dummy)
+        except Exception:
+            pass
+
+        # Recalcular totales de fase y proyecto
+        try:
+            _recalc_phase_total(quote.phase)
+            _recalc_project_total(quote.phase.project)
+        except Exception:
+            pass
+
+        return response
     
     @action(detail=True, methods=["post"], url_path="set-status") # This allow us to access to set - status path ( This is call a decorator)
     def set_status(self, request, pk=None):
@@ -389,6 +423,43 @@ def _recalc_chain(quote):
     _recalc_phase_total(quote.phase)
     _recalc_project_total(quote.phase.project)
 
+
+# --- Helpers to keep PhaseMaterial in sync with QuoteSupplierMaterial
+def _manage_pm_qsm_(qsm):
+    """Add qsm values into the PhaseMaterial for the quote's phase.
+    If PhaseMaterial exists, update quantity_estimated and unit_price_estimated (weighted avg).
+    If not, create it."""
+    try:
+        phase = qsm.quote.phase
+        material = qsm.supplierMaterial.material
+    except Exception:
+        return
+
+    pm, created = PhaseMaterial.objects.get_or_create(
+        phase=phase,
+        material=material,
+        defaults={
+            'unit_price_estimated': qsm.unit_price or Decimal('0'),
+            'quantity_estimated': qsm.quantity or Decimal('0'),
+        }
+    )
+    # Calcular la suma real de cantidades y el promedio ponderado de precios
+    qsms = QuoteSupplierMaterial.objects.filter(
+        quote__phase=phase,
+        supplierMaterial__material=material
+    )
+    total_qty = sum(qsm_.quantity or Decimal('0') for qsm_ in qsms)
+    # Si la cantidad total es 0, eliminar el PhaseMaterial asociado
+    if total_qty == 0:
+        pm.delete()
+        return
+    # Promedio ponderado de precios
+    total_price = sum((qsm_.unit_price or Decimal('0')) * (qsm_.quantity or Decimal('0')) for qsm_ in qsms)
+    avg_price = total_price / total_qty
+    pm.quantity_estimated = total_qty
+    pm.unit_price_estimated = avg_price
+    pm.save()
+
 # --- Quote items (QuoteSupplierMaterial) ---
 class QuoteItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -420,15 +491,41 @@ class QuoteItemViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def perform_create(self, serializer):
         item = serializer.save()
+        # Sync PhaseMaterial: add this item's contribution
+        try:
+            _manage_pm_qsm_(item)
+        except Exception:
+            # avoid breaking quote creation on sync issues
+            pass
         _recalc_chain(item.quote)
 
     @transaction.atomic
     def perform_update(self, serializer):
         item = serializer.save()
+        try:
+            _manage_pm_qsm_(item)
+        except Exception:
+            pass
         _recalc_chain(item.quote)
 
     @transaction.atomic
     def perform_destroy(self, instance):
+        # Guardar los datos antes de eliminar el objeto
         quote = instance.quote
+        supplier_material = instance.supplierMaterial
+        unit_price = instance.unit_price
+        quantity = instance.quantity
         super().perform_destroy(instance)
+        # Recalcular PhaseMaterial después de eliminar el item
+        try:
+            class DummyQSM:
+                pass
+            dummy = DummyQSM()
+            dummy.quote = quote
+            dummy.supplierMaterial = supplier_material
+            dummy.unit_price = unit_price
+            dummy.quantity = quantity
+            _manage_pm_qsm_(dummy)
+        except Exception:
+            pass
         _recalc_chain(quote)
