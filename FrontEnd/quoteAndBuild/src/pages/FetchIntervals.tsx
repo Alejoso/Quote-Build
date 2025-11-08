@@ -97,7 +97,7 @@ export default function PhaseGetIntervals({
                   ¿Es una fase de planeación?
                 </span>
               </label>
-              <label className="block text-sm font-medium">Fecha inicio</label>
+              <label className="block text-sm font-medium">Fecha inicio *</label>
               <input
                 type="date"
                 value={interval.start_date || ""}
@@ -107,7 +107,7 @@ export default function PhaseGetIntervals({
                 className="border p-1 rounded w-full"
               />
 
-              <label className="block text-sm font-medium">Fecha fin</label>
+              <label className="block text-sm font-medium">Fecha fin *</label>
               <input
                 type="date"
                 value={interval.end_date || ""}
