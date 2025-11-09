@@ -4,15 +4,13 @@
 echo "🚀 Iniciando Quote&Build con Docker Compose..."
 
 # Construir imágenes si no existen
-if [[ "$(docker images -q quote-build-backend 2> /dev/null)" == "" ]]; then
-    echo "📦 Construyendo Backend..."
-    docker build -t quote-build-backend ./BackEnd
-fi
 
-if [[ "$(docker images -q quote-build-frontend 2> /dev/null)" == "" ]]; then
-    echo "🎨 Construyendo Frontend..."
-    docker build -t quote-build-frontend ./FrontEnd
-fi
+docker build -t quote-build-backend ./BackEnd
+
+
+
+docker build -t quote-build-frontend ./FrontEnd
+
 
 # Iniciar servicios
 echo "▶️  Iniciando servicios..."
