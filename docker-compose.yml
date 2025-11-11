@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./BackEnd/quoteAndBuild/db.sqlite3:/app/db.sqlite3
+      - db-data:/app
     env_file:
       - .env
     environment:
@@ -36,10 +36,9 @@ services:
       - quote-build-network
     env_file:
       - .env
-    volumes:
-      - ./FrontEnd/quoteAndBuild/src:/app/src
-      - ./FrontEnd/quoteAndBuild/public:/app/public
 
+volumes:
+  db-data:
 
 networks:
   quote-build-network:

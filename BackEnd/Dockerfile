@@ -16,8 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código del proyecto
 COPY quoteAndBuild/ ./
 
-# Crear directorio para archivos estáticos
-RUN mkdir -p /app/staticfiles
+# Crear directorio para archivos estáticos y base de datos
+RUN mkdir -p /app/staticfiles /app/data && \
+    chmod -R 777 /app/data
 
 # Exponer puerto
 EXPOSE 8000
