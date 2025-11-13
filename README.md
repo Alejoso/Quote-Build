@@ -91,6 +91,8 @@ git --version
 For Linux:
 
 Docker
+
+
 In the root directory, there is a file called start.sh. Make sure to have Docker and Docker Compose installed. 
 
 ```bash
