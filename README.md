@@ -87,26 +87,17 @@ git --version
 ```
 
 
-
 ## LINUX (Ubuntu/Debian)
 For Linux:
 
-Backend
+Docker
+In the root directory, there is a file called start.sh. Make sure to have Docker and Docker Compose installed. 
+
 ```bash
-python3 -m venv venv
-source ./venv/bin/activate
-pip install -r requirements.txt
-cd BackEnd/quoteAndBuild
-python manage.py migrate
-python3 manage.py runserver
+sudo bash start.sh
 ```
 
-Frontend
-```bash
-cd FrontEnd/quoteAndBuild
-npm install
-npm run dev
-```
+This should build the volumes and start the app. If an error occurs, it might be related to `docker compose` directive. Use `docker-compose` instead. 
 
 ## WINDOWS
 For Windows:
@@ -127,6 +118,24 @@ cd FrontEnd/quoteAndBuild
 npm install
 npm run dev
 ```
+
+## .env
+
+Make sure to have the .env in the root of your project and put your IP as an allowed host. 
+
+```
+#Configuración para desarrollo
+DEBUG=True
+#Put your IP down here
+ALLOWED_HOSTS=*,localhost,127.0.0.1,backend,98.89.26.33
+
+#Backend URL para el frontend
+VITE_API_URL=http://localhost:8000
+
+#Django Secret Key (cambiar en producción)
+SECRET_KEY=django-insecure-_6oo^4d_r&gwuf7fe41g=u8c13g)7-u^(gaiyui9^ti)!lh+
+```
+
 
 
 
