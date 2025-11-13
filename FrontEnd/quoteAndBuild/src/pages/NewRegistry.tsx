@@ -16,25 +16,25 @@ function NewRegistry()
                 {/*Botones*/}
                 <div className="flex flex-col space-y-6">
                     <button
-                    onClick={() => navigate("/AddMaterial")}
+                    onClick={() => navigate("/NewRegistry/AddMaterial")}
                     className="px-8 py-4 bg-naranja text-white text-xl font-semibold rounded-lg hover:bg-naranjaHover transition transform hover:scale-105 hover:rotate-3  shadow-md"
                     >
                     Añadir material
                     </button>
                     <button 
-                    onClick={() => navigate("/materials")}
+                    onClick={() => navigate("/NewRegistry/materials")}
                     className="px-8 py-4 bg-green-600 text-white text-xl font-semibold rounded-lg hover:bg-greenHover transition transform hover:scale-105 hover:rotate-3  shadow-md"
                     >
                     Ver materiales
                     </button>
                     <button
-                    onClick={() => navigate("/AddSupplier")}
+                    onClick={() => navigate("/NewRegistry/AddSupplier")}
                     className="px-8 py-4 bg-gray-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-gray-700 transition transform hover:scale-105 hover:rotate-3"
                     >
                     Añadir Proveedor
                     </button>
                     <button
-                    onClick={() => navigate("/ViewSuppliers")}
+                    onClick={() => navigate("/NewRegistry/ViewSuppliers")}
                     className="px-8 py-4 bg-gray-600 text-white text-xl font-semibold rounded-lg shadow-md hover:bg-gray-700 transition transform hover:scale-105 hover:rotate-3"
                     >
 

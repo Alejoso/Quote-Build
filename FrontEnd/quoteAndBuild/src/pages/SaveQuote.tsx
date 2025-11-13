@@ -1,69 +1,70 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import toast , { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import DisplayMaterialTable from '../components/Material/MaterialPrueba';
 import type { SupplierMaterial, QuoteItemPayload } from '../types/interfaces';
-import { createQuoteItem, fetchQuoteItems , fetchAllSupplierMaterials , deleteQuoteItem} from '../api/calls';
+import { createQuoteItem, fetchQuoteItems, fetchAllSupplierMaterials, deleteQuoteItem, updateSupplierMaterial } from '../api/calls';
 
 // Extender la interfaz para incluir cantidad
 interface MaterialWithQuantity extends SupplierMaterial {
-  quantity: number;
+    quantity: number;
 }
 
 const SaveQuote: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation() as { 
-        state?: { 
-            quoteId?: number; 
-            phaseId?: number; 
-            projectId?: number 
-        } 
+    const location = useLocation() as {
+        state?: {
+            quoteId?: number;
+            phaseId?: number;
+            projectId?: number
+        }
     };
 
     function transformQuoteItems(
         items: QuoteItemPayload[],
         supplierMaterials: SupplierMaterial[]
-      ): MaterialWithQuantity[] {
+    ): MaterialWithQuantity[] {
         return items
-          .map(item => {
-            const supplierMaterial = supplierMaterials.find(sm => sm.id === item.supplierMaterial);
-            if (!supplierMaterial) {
-              return null; // lo marcamos como null temporalmente
-            }
-            return {
-              ...supplierMaterial,
-              quantity: item.quantity,
-            };
-          })
-          .filter((m): m is MaterialWithQuantity => m !== null); // quitamos los nulos
-      }
+            .map(item => {
+                const supplierMaterial = supplierMaterials.find(sm => sm.id === item.supplierMaterial);
+                if (!supplierMaterial) {
+                    return null; // lo marcamos como null temporalmente
+                }
+                return {
+                    ...supplierMaterial,
+                    quantity: item.quantity,
+                };
+            })
+            .filter((m): m is MaterialWithQuantity => m !== null); // quitamos los nulos
+    }
 
-      function transformQuoteItemsToSupplierMaterial(
+    function transformQuoteItemsToSupplierMaterial(
         items: QuoteItemPayload[],
         supplierMaterials: SupplierMaterial[]
-      ): SupplierMaterial[] {
+    ): SupplierMaterial[] {
         return items
-          .map(item => {
-            const supplierMaterial = supplierMaterials.find(sm => sm.id === item.supplierMaterial);
-            if (!supplierMaterial) {
-              return null; // lo marcamos como null temporalmente
-            }
-            return {
-              ...supplierMaterial,
-            };
-          })
-          .filter((m): m is MaterialWithQuantity => m !== null); // quitamos los nulos
-      }
-      
-    
+            .map(item => {
+                const supplierMaterial = supplierMaterials.find(sm => sm.id === item.supplierMaterial);
+                if (!supplierMaterial) {
+                    return null; // lo marcamos como null temporalmente
+                }
+                return {
+                    ...supplierMaterial,
+                };
+            })
+            .filter((m): m is MaterialWithQuantity => m !== null); // quitamos los nulos
+    }
+
+
     const quoteId = location?.state?.quoteId ?? -1;
     const phaseId = location?.state?.phaseId ?? -1;
     const projectId = location?.state?.projectId ?? -1;
-    
-    const [materials , SetMaterials] = useState<QuoteItemPayload[]>([]); 
+
+    const [materials, SetMaterials] = useState<QuoteItemPayload[]>([]);
     const [materialsWithQuantities, setMaterialsWithQuantities] = useState<MaterialWithQuantity[]>([]);
-    const [materialsInSupplierMaterialStructure , setMaterialsInStrcuture] = useState<SupplierMaterial[]>([]); 
-    const [supplierMaterials , setAllMaterials] = useState<SupplierMaterial[]>([]);
+    const [materialsInSupplierMaterialStructure, setMaterialsInStrcuture] = useState<SupplierMaterial[]>([]);
+    const [supplierMaterials, setAllMaterials] = useState<SupplierMaterial[]>([]);
+    const [originalPrices, setOriginalPrices] = useState<Map<number, number>>(new Map());
     const [isSaving, setIsSaving] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -81,32 +82,39 @@ const SaveQuote: React.FC = () => {
             }
         }
 
-        getMaterials(); 
+        getMaterials();
     }, [quoteId]);
 
     //Get materials loaded
     useEffect(() => {
-        if(quoteId === -1)
+        if (quoteId === -1)
             return
 
-        const getMaterials = async() => {
+        const getMaterials = async () => {
             try {
-                const {data} = await fetchQuoteItems(quoteId); 
+                const { data } = await fetchQuoteItems(quoteId);
                 SetMaterials(data);
                 const materialsLoaded = transformQuoteItems(data, supplierMaterials);
                 const supplierMaterialsIn = transformQuoteItemsToSupplierMaterial(data, supplierMaterials)
-                setMaterialsWithQuantities(materialsLoaded); 
-                setMaterialsInStrcuture(supplierMaterialsIn)
-            } catch (error:any){
+                setMaterialsWithQuantities(materialsLoaded);
+                setMaterialsInStrcuture(supplierMaterialsIn);
+
+                // Guardar los precios originales
+                const pricesMap = new Map<number, number>();
+                materialsLoaded.forEach(material => {
+                    pricesMap.set(material.id, material.actual_price);
+                });
+                setOriginalPrices(pricesMap);
+            } catch (error: any) {
                 console.log(error)
-                toast.error(error ||"No se pudo cargar los materiales")
+                toast.error(error || "No se pudo cargar los materiales")
             }
         }
 
 
-        getMaterials(); 
-        
-    } , [quoteId, supplierMaterials]);
+        getMaterials();
+
+    }, [quoteId, supplierMaterials]);
 
     const handleSelectionChange = (materials: SupplierMaterial[]) => {
         // Inicializar cada material con cantidad 1
@@ -115,74 +123,137 @@ const SaveQuote: React.FC = () => {
             quantity: 1
         }));
         setMaterialsWithQuantities(materialsWithQty);
+
+        // Guardar los precios originales
+        const pricesMap = new Map<number, number>();
+        materials.forEach(material => {
+            pricesMap.set(material.id, material.actual_price);
+        });
+        setOriginalPrices(pricesMap);
     };
 
     const handleQuantityChange = (materialId: number, newQuantity: number) => {
         if (newQuantity < 1) return; // No permitir cantidades menores a 1
-        
-        setMaterialsWithQuantities(prev => 
-            prev.map(material => 
-                material.id === materialId 
-                    ? { ...material, quantity: newQuantity } 
+
+        setMaterialsWithQuantities(prev =>
+            prev.map(material =>
+                material.id === materialId
+                    ? { ...material, quantity: newQuantity }
                     : material
             )
         );
     };
 
+    const handlePriceInputChange = (materialId: number, newPrice: number) => {
+        // Solo actualizar el estado local mientras el usuario escribe
+        setMaterialsWithQuantities(prev =>
+            prev.map(material =>
+                material.id === materialId
+                    ? { ...material, actual_price: newPrice }
+                    : material
+            )
+        );
+    };
+
+    const handlePriceBlur = async (materialId: number, newPrice: number, originalPrice: number) => {
+        if (newPrice < 0) {
+            toast.error('El precio no puede ser negativo');
+            // Revertir al precio original
+            setMaterialsWithQuantities(prev =>
+                prev.map(material =>
+                    material.id === materialId
+                        ? { ...material, actual_price: originalPrice }
+                        : material
+                )
+            );
+            return;
+        }
+
+        // Si el precio no cambió, no hacer nada
+        if (newPrice === originalPrice) return;
+
+        try {
+            // Actualizar el precio en la base de datos (SupplierMaterial)
+            await updateSupplierMaterial(materialId, {
+                actual_price: newPrice
+            });
+
+            // Actualizar el precio original en el Map
+            setOriginalPrices(prev => {
+                const newMap = new Map(prev);
+                newMap.set(materialId, newPrice);
+                return newMap;
+            });
+
+            toast.success('Precio actualizado permanentemente');
+        } catch (error) {
+            console.error('Error al actualizar precio:', error);
+            toast.error('Error al actualizar el precio');
+            // Revertir al precio original en caso de error
+            setMaterialsWithQuantities(prev =>
+                prev.map(material =>
+                    material.id === materialId
+                        ? { ...material, actual_price: originalPrice }
+                        : material
+                )
+            );
+        }
+    };
+
     const handleSaveQuote = async () => {
         if (materialsWithQuantities.length === 0) {
-          toast.error('Debe seleccionar al menos un material para la cotización');
-          return;
+            toast.error('Debe seleccionar al menos un material para la cotización');
+            return;
         }
-      
+
         setIsSaving(true);
         try {
-          // 1️⃣ Borrar todos los registros antiguos
-          if (materials.length > 0) {
-            await Promise.all(
-              materials
-                .filter(item => item.id !== undefined) // por seguridad
-                .map(item => deleteQuoteItem(item.id!))
-            );
-          }
-      
-          // 2️⃣ Crear los nuevos registros
-          const quoteItemsPromises = materialsWithQuantities.map(material => {
-            const itemPayload: QuoteItemPayload = {
-              quote: quoteId,
-              supplierMaterial: material.id,
-              quantity: material.quantity,
-              unit_price: material.actual_price,
-              subtotal: material.actual_price * material.quantity,
-            };
-            return createQuoteItem(itemPayload);
-          });
-      
-          await Promise.all(quoteItemsPromises);
-      
-          toast.success('Cotización guardada exitosamente!');
-          navigate('/saveProject/quotes', { 
-            state: { phaseId, projectId } 
-          });
+            // 1️⃣ Borrar todos los registros antiguos
+            if (materials.length > 0) {
+                await Promise.all(
+                    materials
+                        .filter(item => item.id !== undefined) // por seguridad
+                        .map(item => deleteQuoteItem(item.id!))
+                );
+            }
+
+            // 2️⃣ Crear los nuevos registros
+            const quoteItemsPromises = materialsWithQuantities.map(material => {
+                const itemPayload: QuoteItemPayload = {
+                    quote: quoteId,
+                    supplierMaterial: material.id,
+                    quantity: material.quantity,
+                    unit_price: material.actual_price,
+                    subtotal: material.actual_price * material.quantity,
+                };
+                return createQuoteItem(itemPayload);
+            });
+
+            await Promise.all(quoteItemsPromises);
+
+            toast.success('Cotización guardada exitosamente!');
+            navigate('/saveProject/quotes', {
+                state: { phaseId, projectId }
+            });
         } catch (error: any) {
-          console.error('Error al guardar la cotización:', error);
-          toast.error('Error al guardar la cotización');
+            console.error('Error al guardar la cotización:', error);
+            toast.error('Error al guardar la cotización');
         } finally {
-          setIsSaving(false);
+            setIsSaving(false);
         }
-      };
+    };
 
     const goBack = () => {
-        navigate('/saveProject/quotes', { 
-            state: { 
+        navigate('/saveProject/quotes', {
+            state: {
                 phaseId: phaseId,
-                projectId: projectId 
-            } 
+                projectId: projectId
+            }
         });
     };
 
     const total = materialsWithQuantities.reduce(
-        (sum, material) => sum + (material.actual_price * material.quantity), 
+        (sum, material) => sum + (material.actual_price * material.quantity),
         0
     );
 
@@ -192,7 +263,7 @@ const SaveQuote: React.FC = () => {
 
     return (
         <div className="p-4 max-w-6xl mx-auto">
-            <Toaster/>
+            <Toaster />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Editar Cotización #{quoteId}</h1>
                 <button
@@ -207,8 +278,8 @@ const SaveQuote: React.FC = () => {
                 Fase ID: {phaseId} | Proyecto ID: {projectId}
             </p>
 
-            <DisplayMaterialTable onSelectionChange={handleSelectionChange} currentSelectedMaterials={materialsInSupplierMaterialStructure}/>
-            
+            <DisplayMaterialTable onSelectionChange={handleSelectionChange} currentSelectedMaterials={materialsInSupplierMaterialStructure} />
+
             {/* Tabla de materiales seleccionados con cantidades */}
             {materialsWithQuantities.length > 0 && (
                 <div className="mt-6">
@@ -229,7 +300,23 @@ const SaveQuote: React.FC = () => {
                                     <tr key={material.id} className="hover:bg-gray-50">
                                         <td className="border px-2 py-1">{material.material_name}</td>
                                         <td className="border px-2 py-1">{material.supplier_name}</td>
-                                        <td className="border px-2 py-1">${material.actual_price}</td>
+                                        <td className="border px-2 py-1">
+                                            <div className="flex items-center justify-center">
+                                                <span className="mr-1">$</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={material.actual_price}
+                                                    onChange={(e) => handlePriceInputChange(material.id, parseFloat(e.target.value) || 0)}
+                                                    onBlur={(e) => {
+                                                        const originalPrice = originalPrices.get(material.id) || material.actual_price;
+                                                        handlePriceBlur(material.id, parseFloat(e.target.value) || 0, originalPrice);
+                                                    }}
+                                                    className="w-24 p-1 border rounded text-center"
+                                                />
+                                            </div>
+                                        </td>
                                         <td className="border px-2 py-1">
                                             <input
                                                 type="number"
@@ -240,7 +327,7 @@ const SaveQuote: React.FC = () => {
                                             />
                                         </td>
                                         <td className="border px-2 py-1">
-                                            ${material.actual_price * material.quantity}
+                                            ${(material.actual_price * material.quantity).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))}
@@ -248,31 +335,30 @@ const SaveQuote: React.FC = () => {
                             <tfoot>
                                 <tr className="bg-gray-50">
                                     <td colSpan={4} className="border px-2 py-1 text-right font-semibold">Total:</td>
-                                    <td className="border px-2 py-1 font-semibold">${total}</td>
+                                    <td className="border px-2 py-1 font-semibold">${total.toFixed(2)}</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
             )}
-            
+
             {/* Botón de guardar */}
             <div className="mt-6 p-4 bg-blue-50 rounded">
                 <div className="flex justify-between items-center">
                     <div>
                         <h3 className="text-lg font-semibold mb-2">Resumen de Cotización</h3>
                         <p className="mb-2">Materiales seleccionados: {materialsWithQuantities.length}</p>
-                        <p className="font-bold">Total: ${total}</p>
+                        <p className="font-bold">Total: ${total.toFixed(2)}</p>
                     </div>
-                    
+
                     <button
                         onClick={handleSaveQuote}
                         disabled={isSaving || materialsWithQuantities.length === 0}
-                        className={`px-4 py-2 rounded text-white font-medium ${
-                            isSaving || materialsWithQuantities.length === 0
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-green-500 hover:bg-green-600'
-                        }`}
+                        className={`px-4 py-2 rounded text-white font-medium ${isSaving || materialsWithQuantities.length === 0
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-green-500 hover:bg-green-600'
+                            }`}
                     >
                         {isSaving ? 'Guardando...' : 'Guardar Cotización'}
                     </button>
@@ -286,11 +372,11 @@ const SaveQuote: React.FC = () => {
                     <div className="bg-yellow-50 p-4 rounded">
                         <p>Esta cotización ya tiene {materials.length} material(es) asociado(s).</p>
                         <p className="mt-2">
-                        {materialsWithQuantities.length - materials.length < 0 ? (
-                            <>Al guardar, se eliminarán {materials.length - materialsWithQuantities.length} material(es).</>
-                        ) : (
-                            <>Al guardar, se añadirán {materialsWithQuantities.length - materials.length} material(es) adicional(es).</>
-                        )}
+                            {materialsWithQuantities.length - materials.length < 0 ? (
+                                <>Al guardar, se eliminarán {materials.length - materialsWithQuantities.length} material(es).</>
+                            ) : (
+                                <>Al guardar, se añadirán {materialsWithQuantities.length - materials.length} material(es) adicional(es).</>
+                            )}
                         </p>
                     </div>
                 </div>

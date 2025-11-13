@@ -97,7 +97,7 @@ const EditMaterial: React.FC = () => {
       }
       // If there was no SupplierMaterial link, you could create one with createSupplierMaterial()
 
-      navigate("/materials", { replace: true });
+      navigate("/NewRegistry/materials", { replace: true });
     } catch (e: any) {
       // handle uniqueness errors (supplier+material must be unique)
       setErr(
@@ -122,19 +122,19 @@ const EditMaterial: React.FC = () => {
         <div>
           <label className="block text-sm font-medium">Nombre del material</label>
           <input className="mt-1 w-full border rounded px-3 py-2" value={name}
-                 onChange={e => setName(e.target.value)} required />
+            onChange={e => setName(e.target.value)} required />
         </div>
 
         <div>
           <label className="block text-sm font-medium">Descripción (opcional)</label>
           <input className="mt-1 w-full border rounded px-3 py-2" value={description}
-                 onChange={e => setDescription(e.target.value)} />
+            onChange={e => setDescription(e.target.value)} />
         </div>
 
         <div>
           <label className="block text-sm font-medium">Categoría</label>
           <input className="mt-1 w-full border rounded px-3 py-2" value={category}
-                 onChange={e => setCategory(e.target.value)} required />
+            onChange={e => setCategory(e.target.value)} required />
         </div>
 
         {/* SupplierMaterial */}

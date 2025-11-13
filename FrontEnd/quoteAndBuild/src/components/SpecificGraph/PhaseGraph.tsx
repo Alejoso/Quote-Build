@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Phase } from '../../types/interfaces';
 import BarChartCosts from '../Graph/GraphCosts';
@@ -17,8 +17,8 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
     time: number,
   }
 
-  const [plannedCosts , SetPlannedCosts] = useState<cost[]>()
-  const [executedCosts , SetExecutedCosts] = useState<cost[]>()
+  const [plannedCosts, SetPlannedCosts] = useState<cost[]>()
+  const [executedCosts, SetExecutedCosts] = useState<cost[]>()
 
   interface cost {
     name: string,
@@ -26,8 +26,8 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
   }
 
 
-  const [initialPoint , SetInitialPoint] = useState<point>(); 
-  const [finalPoint , SetFinalPoint] = useState<point>()
+  const [initialPoint, SetInitialPoint] = useState<point>();
+  const [finalPoint, SetFinalPoint] = useState<point>()
 
   // Helper para mostrar los diccionarios de materiales
   const renderMaterialsCost = (costDict?: { [key: string]: number }) => {
@@ -63,21 +63,21 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
     };
 
     SetInitialPoint(point1);
-    SetFinalPoint(point2); 
+    SetFinalPoint(point2);
 
     const planned: cost[] = phase.materialsCostPlanned
-    ? Object.entries(phase.materialsCostPlanned).map(([name, cost]) => ({
+      ? Object.entries(phase.materialsCostPlanned).map(([name, cost]) => ({
         name,
         cost,
       }))
-    : [];
-  
+      : [];
+
     const initial: cost[] = phase.materialsCostExecuted
-    ? Object.entries(phase.materialsCostExecuted).map(([name, cost]) => ({
+      ? Object.entries(phase.materialsCostExecuted).map(([name, cost]) => ({
         name,
         cost,
       }))
-    : [];
+      : [];
 
     SetPlannedCosts(planned);
     SetExecutedCosts(initial);
@@ -95,26 +95,26 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
             {renderMaterialsCost(phase.materialsCostPlanned)}
 
             <div>
-            <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
-              Gráfico de costos
-            </h1>
-            {plannedCosts && <BarChartCosts data={plannedCosts} />}
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+                Gráfico de costos
+              </h1>
+              {plannedCosts && <BarChartCosts data={plannedCosts} />}
             </div>
           </div>
 
           <div>
             <h4 className="text-lg font-semibold mb-2">Cuota final</h4>
             {renderMaterialsCost(phase.materialsCostExecuted)}
-            
+
             <div>
-            <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
-              Gráfico de costos
-            </h1>
-            {executedCosts && <BarChartCosts data={executedCosts} />}
-          </div>
+              <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
+                Gráfico de costos
+              </h1>
+              {executedCosts && <BarChartCosts data={executedCosts} />}
+            </div>
           </div>
 
-          
+
         </div>
       </div>
       <div className="mt-6 text-center">
@@ -122,18 +122,13 @@ const PhaseGraph: React.FC<PhaseGraphProps> = ({ phase }) => {
         <center>
           <div>
             <h1 className="text-3xl font-extrabold text-center mb-6 mt-3">
-                Gráfico costo vs tiempo
+              Gráfico costo vs tiempo
             </h1>
-              {finalPoint && initialPoint && <LineChart data={[finalPoint , initialPoint]} />}
+            {finalPoint && initialPoint && <LineChart data={[finalPoint, initialPoint]} />}
           </div>
         </center>
 
-        <button
-          onClick={() => navigate('/SpecificGraph', { state: { projectId: phase.project } })}
-          className="rounded-xl bg-gray-900 px-4 py-2 font-semibold text-white transition hover:bg-black"
-        >
-          Volver a Fases del Proyecto
-        </button>
+
       </div>
     </div>
   );

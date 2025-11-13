@@ -4,8 +4,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { fecthAllSuppliers } from "../api/calls";
 import type { Supplier } from "../types/interfaces";
 import { useNavigate } from "react-router-dom";
-import { Navigate } from "react-router-dom";
-import { nav } from "framer-motion/client";
 
 import { useMemo } from "react";
 
@@ -104,7 +102,7 @@ function ViewSuppliers() {
                             </td>
                             <td className="p-2">
                                 <button
-                                    onClick={() => navigate(`/ViewMaterialsOfProvider` , { state: {supplierNit: s.nit , supplierName: s.name}})}
+                                    onClick={() => navigate(`/NewRegistry/ViewSuppliers/ViewMaterialsOfProvider` , { state: {supplierNit: s.nit , supplierName: s.name}})}
                                     className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
                                     aria-label="Editar proveedor"
                                 >
@@ -113,7 +111,7 @@ function ViewSuppliers() {
                             </td>
                             <td className="p-2">
                                 <button
-                                    onClick={() => navigate(`/ViewSuppliers/${s.nit}/edit`)}
+                                    onClick={() => navigate(`/NewRegistry/ViewSuppliers/${s.nit}/edit`)}
                                     className="rounded-full p-2 hover:bg-gray-100 ml-4 text-verde"
                                     aria-label="Editar proveedor"
                                 >

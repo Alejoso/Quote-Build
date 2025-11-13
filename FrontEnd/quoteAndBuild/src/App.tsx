@@ -16,6 +16,7 @@ import EditMaterial from "./pages/EditMaterial";
 import ViewSuppliers from './pages/ViewSuppliers';
 import EditSupplier from './pages/EditSupplier';
 import ViewMAterialsOfProvider from './pages/ViewMaterialsOfProvider';
+import MaterialGrahps from './pages/materialGraphs';
 
 function App() {
 
@@ -30,15 +31,17 @@ function App() {
         <Route path="/projects" element={<FetchProjects />} />
         <Route path="/saveProject/quotes" element={<Quotes />} />
         <Route path="/saveProject/quotes/saveQuote" element={<SaveQuote />} />
-        <Route path="/ProjectGraph" element={<SpecificGraph />} />
+        <Route path="/projects/ProjectGraph" element={<SpecificGraph />} />
         <Route path="/NewRegistry" element={<NewRegistry />} />
-        <Route path="/AddMaterial" element={<AddMaterial />} />
-        <Route path="/AddSupplier" element={<AddSupplier />} />
-        <Route path="/ViewSuppliers" element={<ViewSuppliers />} />
-        <Route path="/ViewSuppliers/:nit/edit" element={<EditSupplier />} />
-        <Route path="/materials" element={<MaterialsList />} />
-        <Route path="/materials/:id/edit" element={<EditMaterial />} />
-        <Route path="/ViewMaterialsOfProvider" element={<ViewMAterialsOfProvider />} />
+        <Route path="/NewRegistry/AddMaterial" element={<AddMaterial />} />
+        <Route path="/NewRegistry/AddSupplier" element={<AddSupplier />} />
+        <Route path="/NewRegistry/ViewSuppliers" element={<ViewSuppliers />} />
+        <Route path="NewRegistry/ViewSuppliers/:nit/edit" element={<EditSupplier />} />
+        <Route path="/NewRegistry/materials" element={<MaterialsList />} />
+        <Route path="/NewRegistry/materials/:id/edit" element={<EditMaterial />} />
+        <Route path="/NewRegistry/ViewSuppliers/ViewMaterialsOfProvider" element={<ViewMAterialsOfProvider />} />
+        <Route path="/MaterialGraphs" element={<MaterialGrahps />} />
+
       </Routes>
 
 

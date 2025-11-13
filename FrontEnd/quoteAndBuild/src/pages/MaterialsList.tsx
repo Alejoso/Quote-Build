@@ -72,7 +72,7 @@ const MaterialsList: React.FC = () => {
               <td className="py-2 px-3 text-right">
                 <button
                   className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                  onClick={() => navigate(`/materials/${m.id}/edit`)}
+                  onClick={() => navigate(`/NewRegistry/materials/${m.id}/edit`)}
                 >
                   Editar
                 </button>

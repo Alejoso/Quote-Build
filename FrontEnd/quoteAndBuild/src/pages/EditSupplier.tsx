@@ -44,7 +44,7 @@ function EditSupplier() {
                 setOriginalNit(supplier.nit);
             } catch (err) {
                 toast.error("Error al cargar proveedor");
-                navigate("/ViewSuppliers");
+                navigate("/NewRegistry/ViewSuppliers");
             }
         };
 
@@ -159,7 +159,7 @@ function EditSupplier() {
                 toast.success("Proveedor actualizado correctamente");
             }
 
-            navigate("/ViewSuppliers");
+            navigate("/NewRegistry/ViewSuppliers");
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || err?.message || "Error al actualizar proveedor");
         } finally {
@@ -178,7 +178,7 @@ function EditSupplier() {
                     <h2 className="text-xl font-bold text-gray-700">Editar proveedor</h2>
                     <button
                         type="button"
-                        onClick={() => navigate("/ViewSuppliers")}
+                        onClick={() => navigate("/NewRegistry/ViewSuppliers")}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-1 px-3 rounded-lg transition-colors"
                     >
                         Cancelar

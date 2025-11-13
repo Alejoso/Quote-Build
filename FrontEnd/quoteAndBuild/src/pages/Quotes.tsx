@@ -260,7 +260,7 @@ export default function Quotes() {
                             checked={!!newForm.is_first_quote}
                             onChange={(e) => setNewForm((f) => ({ ...f, is_first_quote: e.target.checked }))}
                         />
-                        ¿Primera cotización?
+                        ¿Cotización de planeo? 
                     </label>
 
                     <button
@@ -291,7 +291,7 @@ export default function Quotes() {
                             {editingId === q.id ? (
                                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                                     <div>
-                                        <label className="mb-1 block text-xs font-medium text-gray-600">Fecha</label>
+                                        <label className="mb-1 block text-xs font-medium text-gray-600">Fecha *</label>
                                         <input
                                             type="date"
                                             value={editForm?.quote_date ?? ""}
@@ -323,7 +323,7 @@ export default function Quotes() {
                                                 setEditForm((f) => (f ? { ...f, is_first_quote: e.target.checked } : f))
                                             }
                                         />
-                                        ¿Primera cotización?
+                                        ¿Cotización de planeo?
                                     </label>
                                     
                                     <label className="inline-flex items-center gap-2 text-sm text-gray-700">
