@@ -44,7 +44,7 @@ function EditSupplier() {
                 setOriginalNit(supplier.nit);
             } catch (err) {
                 toast.error("Error al cargar proveedor");
-                navigate("/ViewSuppliers");
+                navigate("/NewRegistry/ViewSuppliers");
             }
         };
 
@@ -159,7 +159,7 @@ function EditSupplier() {
                 toast.success("Proveedor actualizado correctamente");
             }
 
-            navigate("/ViewSuppliers");
+            navigate("/NewRegistry/ViewSuppliers");
         } catch (err: any) {
             toast.error(err?.response?.data?.detail || err?.message || "Error al actualizar proveedor");
         } finally {
